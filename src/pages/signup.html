@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Sign Up</title>
+		<link rel="stylesheet" href="/src/style.css" />
+		<script src="/src/js/auth.js"></script>
+	</head>
+
+	<body class="bg-forest-50 min-h-screen flex items-center justify-center">
+		<!-- Card -->
+		<div
+			class="w-full max-w-md bg-white rounded-sm shadow-lg shadow-forest-900/10 p-8">
+			<!-- Heading -->
+			<h2 class="text-2xl font-bold text-forest-900 text-center mb-2">
+				Create Account
+			</h2>
+			<p class="text-sm text-forest-600 text-center mb-6">
+				Join us and get started
+			</p>
+
+			<!-- Form -->
+			<form class="space-y-4">
+				<!-- Name -->
+				<input
+					type="text"
+					placeholder="Full Name"
+					class="w-full px-4 py-3 border border-forest-200 rounded-sm focus:outline-none focus:ring-2 focus:ring-saffron-300" />
+
+				<!-- Email -->
+				<input
+					type="email"
+					placeholder="Email Address"
+					class="w-full px-4 py-3 border border-forest-200 rounded-sm focus:outline-none focus:ring-2 focus:ring-saffron-300" />
+
+				<!-- Password -->
+				<input
+					type="password"
+					placeholder="Password"
+					class="w-full px-4 py-3 border border-forest-200 rounded-sm focus:outline-none focus:ring-2 focus:ring-saffron-300" />
+
+				<!-- Confirm Password -->
+				<input
+					type="password"
+					placeholder="Confirm Password"
+					class="w-full px-4 py-3 border border-forest-200 rounded-sm focus:outline-none focus:ring-2 focus:ring-saffron-300" />
+
+				<!-- Signup Button (Primary) -->
+				<button
+					class="w-full bg-saffron-400 hover:bg-saffron-300 text-forest-900 font-bold text-sm px-5 py-3 rounded-sm transition-all hover:-translate-y-0.5 shadow-md shadow-saffron-400/30">
+					Sign Up
+				</button>
+			</form>
+
+			<!-- Divider -->
+			<div class="flex items-center my-6">
+				<div class="flex-1 h-px bg-forest-200"></div>
+				<span class="px-3 text-xs text-forest-500">OR</span>
+				<div class="flex-1 h-px bg-forest-200"></div>
+			</div>
+
+			<!-- Login Link (Secondary style matching earlier) -->
+			<a
+				href="/src/pages/login.html"
+				class="inline-block w-full text-center bg-white/80 backdrop-blur-sm text-forest-900 font-semibold text-sm px-5 py-3 rounded-sm border border-forest-200 shadow-md shadow-forest-900/5 hover:bg-white hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+				Already have an account?
+			</a>
+		</div>
+	</body>
+</html>

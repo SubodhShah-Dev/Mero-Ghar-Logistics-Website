@@ -49,3 +49,8 @@ document.getElementById('loginForm').addEventListener('submit', function (e) {
 	// ✅ Redirect based on role
 	window.location.href = ROLE_ROUTES[matchedUser.role];
 });
+
+//=== SIGNUP HANDLER (optional, can be removed if not needed) ===
+document.getElementById('signupForm')?.addEventListener('submit', function (e) {
+	e.preventDefault();
+});
