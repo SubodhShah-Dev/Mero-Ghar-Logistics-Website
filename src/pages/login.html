@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Login – Mero Ghar</title>
+		<link rel="stylesheet" href="/src/style.css" />
+	</head>
+	<body class="min-h-screen bg-gray-50 flex items-center justify-center">
+		<section
+			class="min-h-screen flex items-center justify-center bg-cream-50 px-6 py-12">
+			<div class="max-w-md w-full bg-white shadow-lg rounded-lg p-8">
+				<h2 class="text-2xl font-bold text-forest-900 text-center mb-6">
+					Login to Your Account
+				</h2>
+
+				<form id="loginForm" class="space-y-5">
+					<!-- Email -->
+					<div>
+						<label
+							for="email"
+							class="block text-sm font-medium text-forest-700">
+							Email
+						</label>
+						<input
+							type="email"
+							id="email"
+							required
+							class="mt-1 block w-full px-4 py-3 border border-forest-300 rounded-sm text-forest-900 focus:ring-saffron-400 focus:border-saffron-400 transition"
+							placeholder="you@example.com" />
+					</div>
+
+					<!-- Password -->
+					<div>
+						<label
+							for="password"
+							class="block text-sm font-medium text-forest-700">
+							Password
+						</label>
+						<input
+							type="password"
+							id="password"
+							required
+							class="mt-1 block w-full px-4 py-3 border border-forest-300 rounded-sm text-forest-900 focus:ring-saffron-400 focus:border-saffron-400 transition"
+							placeholder="••••••••" />
+					</div>
+
+					<!-- Role -->
+					<div>
+						<label
+							for="role"
+							class="block text-sm font-medium text-forest-700">
+							Login As
+						</label>
+						<select
+							id="role"
+							required
+							class="mt-1 block w-full px-3 py-3 border border-forest-300 rounded-sm text-forest-900 focus:ring-saffron-400 focus:border-saffron-400 transition">
+							<option value="">Select Role</option>
+							<option value="user">User</option>
+							<option value="admin">Admin</option>
+							<option value="vendor">Vendor</option>
+							<option value="manager">Manager</option>
+						</select>
+					</div>
+
+					<!-- Submit -->
+					<div>
+						<button
+							type="submit"
+							id="loginBtn"
+							class="w-full bg-saffron-400 hover:bg-saffron-300 text-forest-900 font-bold text-sm px-5 py-3 rounded-sm transition-all hover:-translate-y-0.5 shadow-md shadow-saffron-600/20">
+							Login →
+						</button>
+					</div>
+					<!-- Signup Link/Button -->
+					<div class="mt-6 text-center">
+						<p class="text-sm text-forest-600 mb-3">
+							Don't have an account?
+						</p>
+
+						<a
+							href="/signup.html"
+							class="inline-block w-full bg-white/80 backdrop-blur-sm text-forest-900 font-bold text-sm px-5 py-3 rounded-sm border border-forest-200 shadow-md shadow-forest-900/5 hover:bg-white hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+							Create New Account
+						</a>
+					</div>
+				</form>
+			</div>
+		</section>
+
+		<script src="/src/js/auth.js"></script>
+	</body>
+</html>

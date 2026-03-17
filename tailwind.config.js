@@ -1,6 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-	content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+	content: [
+		'./*.html',
+		'./**/*.html', // This ensures subfolders like /auth/login.html are caught
+		'./src/**/*.{js,ts,jsx,tsx}',
+	],
 	theme: {
 		extend: {
 			colors: {
