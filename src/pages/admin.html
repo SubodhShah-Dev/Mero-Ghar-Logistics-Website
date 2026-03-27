@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Admin Panel — Mero Ghar</title>
+		<link rel="stylesheet" href="/src/styles/admin.css" />
+	</head>
+	<body>
+		<div class="shell">
+			<!-- SIDEBAR -->
+			<aside class="sb">
+				<div class="sb-brand">
+					<div class="sb-logo">
+						<div class="sb-icon">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="#0b1510"
+								stroke-width="2.5"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<path d="M1 3h15v13H1z" />
+								<path d="M16 8h4l3 3v5h-7V8z" />
+								<circle cx="5.5" cy="18.5" r="2.5" />
+								<circle cx="18.5" cy="18.5" r="2.5" />
+							</svg>
+						</div>
+						<div>
+							<div class="sb-name">Mero Ghar</div>
+							<div class="sb-sub">Admin Portal</div>
+						</div>
+					</div>
+				</div>
+
+				<nav class="sb-nav">
+					<div class="nav-grp">
+						<div class="nav-grp-lbl">Overview</div>
+						<a class="nav-a on" data-page="dash" href="#">
+							<svg
+								class="nav-ic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<rect x="3" y="3" width="7" height="7" />
+								<rect x="14" y="3" width="7" height="7" />
+								<rect x="3" y="14" width="7" height="7" />
+								<rect x="14" y="14" width="7" height="7" />
+							</svg>
+							Dashboard
+						</a>
+						<a class="nav-a" data-page="bookings" href="#">
+							<svg
+								class="nav-ic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<path d="M1 3h15v13H1z" />
+								<path d="M16 8h4l3 3v5h-7V8z" />
+								<circle cx="5.5" cy="18.5" r="2.5" />
+								<circle cx="18.5" cy="18.5" r="2.5" />
+							</svg>
+							Bookings
+							<span class="nav-badge" id="pending-count">3</span>
+						</a>
+						<a class="nav-a" data-page="customers" href="#">
+							<svg
+								class="nav-ic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<path
+									d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+								<circle cx="9" cy="7" r="4" />
+								<path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+								<path d="M16 3.13a4 4 0 0 1 0 7.75" />
+							</svg>
+							Customers
+						</a>
+					</div>
+
+					<div class="nav-grp">
+						<div class="nav-grp-lbl">Management</div>
+						<a class="nav-a" data-page="vendors" href="#">
+							<svg
+								class="nav-ic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<rect
+									x="2"
+									y="7"
+									width="20"
+									height="14"
+									rx="2" />
+								<path
+									d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+							</svg>
+							Vendors
+						</a>
+						<a class="nav-a" data-page="revenue" href="#">
+							<svg
+								class="nav-ic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<line x1="12" y1="1" x2="12" y2="23" />
+								<path
+									d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+							</svg>
+							Revenue
+						</a>
+					</div>
+
+					<div class="nav-grp">
+						<div class="nav-grp-lbl">System</div>
+						<a class="nav-a" data-page="settings" href="#">
+							<svg
+								class="nav-ic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<circle cx="12" cy="12" r="3" />
+								<path
+									d="M19.07 4.93A10 10 0 0 0 4.93 19.07M4.93 4.93A10 10 0 0 1 19.07 19.07" />
+							</svg>
+							Settings
+						</a>
+					</div>
+				</nav>
+
+				<div class="sb-foot">
+					<div class="user-row">
+						<div class="av">AS</div>
+						<div class="user-info">
+							<div class="u-name">Arun Shrestha</div>
+							<div class="u-role">Super Admin</div>
+						</div>
+						<svg
+							width="14"
+							height="14"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							opacity=".35">
+							<polyline points="9 18 15 12 9 6" />
+						</svg>
+					</div>
+				</div>
+			</aside>
+
+			<!-- MAIN -->
+			<div class="main">
+				<header class="top">
+					<div class="top-left">
+						<div class="top-title" id="page-title">Dashboard</div>
+						<div class="top-sub">Friday, 27 March 2026</div>
+					</div>
+					<div class="search">
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2">
+							<circle cx="11" cy="11" r="8" />
+							<line x1="21" y1="21" x2="16.65" y2="16.65" />
+						</svg>
+						<input
+							id="global-search"
+							placeholder="Search bookings, customers…" />
+					</div>
+					<div class="ic-btn" id="notif-btn" title="Notifications">
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2">
+							<path
+								d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+							<path d="M13.73 21a2 2 0 0 1-3.46 0" />
+						</svg>
+						<span class="notif-dot" id="notif-dot"></span>
+					</div>
+				</header>
+
+				<!-- ═══ DASHBOARD PAGE ═══ -->
+				<div class="page active" id="page-dash">
+					<div class="stats">
+						<div class="sc" onclick="goPage('bookings')">
+							<div class="si sg">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<path d="M1 3h15v13H1z" />
+									<path d="M16 8h4l3 3v5h-7V8z" />
+									<circle cx="5.5" cy="18.5" r="2.5" />
+									<circle cx="18.5" cy="18.5" r="2.5" />
+								</svg>
+							</div>
+							<div class="s-lbl">Total Bookings</div>
+							<div class="s-val" id="sv1">0</div>
+							<div class="s-dl up">
+								<svg
+									width="13"
+									height="13"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5">
+									<polyline points="18 15 12 9 6 15" /></svg
+								>+8.4% <span>vs last month</span>
+							</div>
+						</div>
+						<div class="sc vg" onclick="goPage('bookings')">
+							<div class="si sG">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<polyline points="20 6 9 17 4 12" />
+								</svg>
+							</div>
+							<div class="s-lbl">Delivered</div>
+							<div class="s-val" id="sv2">0</div>
+							<div class="s-dl up">
+								<svg
+									width="13"
+									height="13"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5">
+									<polyline points="18 15 12 9 6 15" /></svg
+								>+12.1% <span>vs last month</span>
+							</div>
+						</div>
+						<div class="sc vb" onclick="goPage('bookings')">
+							<div class="si sb2">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<circle cx="12" cy="12" r="10" />
+									<polyline points="12 6 12 12 16 14" />
+								</svg>
+							</div>
+							<div class="s-lbl">In Transit</div>
+							<div class="s-val" id="sv3">0</div>
+							<div class="s-dl dn">
+								<svg
+									width="13"
+									height="13"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5">
+									<polyline points="6 9 12 15 18 9" /></svg
+								>-2.3% <span>vs last month</span>
+							</div>
+						</div>
+						<div class="sc vr" onclick="goPage('revenue')">
+							<div class="si sr">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<line x1="12" y1="1" x2="12" y2="23" />
+									<path
+										d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+								</svg>
+							</div>
+							<div class="s-lbl">Revenue (NPR)</div>
+							<div class="s-val" id="sv4">0</div>
+							<div class="s-dl up">
+								<svg
+									width="13"
+									height="13"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5">
+									<polyline points="18 15 12 9 6 15" /></svg
+								>+5.7% <span>vs last month</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="grid2">
+						<!-- BOOKINGS PANEL -->
+						<div class="panel">
+							<div class="ph">
+								<span class="p-title">Recent Bookings</span>
+								<div class="ph-right">
+									<div class="chips" id="dash-chips">
+										<span class="chip on" data-filter="all"
+											>All</span
+										>
+										<span
+											class="chip"
+											data-filter="In Transit"
+											>In Transit</span
+										>
+										<span class="chip" data-filter="Pending"
+											>Pending</span
+										>
+										<span
+											class="chip"
+											data-filter="Delivered"
+											>Delivered</span
+										>
+									</div>
+									<button
+										class="btn btn-sm"
+										onclick="openNewBooking()">
+										+ New Booking
+									</button>
+								</div>
+							</div>
+							<div class="tw">
+								<table id="dash-table">
+									<thead>
+										<tr>
+											<th data-col="id">
+												Order ID
+												<span class="sort-ic">↕</span>
+											</th>
+											<th data-col="customer">
+												Customer
+												<span class="sort-ic">↕</span>
+											</th>
+											<th data-col="route">Route</th>
+											<th data-col="date">
+												Date
+												<span class="sort-ic">↕</span>
+											</th>
+											<th data-col="status">Status</th>
+											<th data-col="amount">
+												Amount
+												<span class="sort-ic">↕</span>
+											</th>
+										</tr>
+									</thead>
+									<tbody id="dash-tbody"></tbody>
+								</table>
+							</div>
+						</div>
+
+						<div class="rcol">
+							<!-- CHART -->
+							<div class="panel">
+								<div class="ph">
+									<span class="p-title">Weekly Bookings</span>
+									<div class="chips" id="chart-range">
+										<span class="chip on" data-range="7"
+											>7d</span
+										>
+										<span class="chip" data-range="14"
+											>14d</span
+										>
+										<span class="chip" data-range="30"
+											>30d</span
+										>
+									</div>
+								</div>
+								<div class="chart-wrap">
+									<canvas
+										id="spark-chart"
+										class="spark"></canvas>
+									<div
+										class="chart-labels"
+										id="chart-labels"></div>
+								</div>
+							</div>
+
+							<!-- ACTIVITY -->
+							<div class="panel" style="flex: 1">
+								<div class="ph">
+									<span class="p-title">Recent Activity</span>
+								</div>
+								<div class="feed" id="activity-feed">
+									<div class="fi">
+										<div
+											class="fd"
+											style="
+												background: var(--green);
+											"></div>
+										<div>
+											<div class="ft">
+												<strong>#MG-4820</strong>
+												delivered to Bhaktapur
+											</div>
+											<div class="ft-time">2 min ago</div>
+										</div>
+									</div>
+									<div class="fi">
+										<div
+											class="fd"
+											style="
+												background: var(--gold);
+											"></div>
+										<div>
+											<div class="ft">
+												New booking by
+												<strong>Sita Rai</strong> —
+												Pokhara route
+											</div>
+											<div class="ft-time">
+												14 min ago
+											</div>
+										</div>
+									</div>
+									<div class="fi">
+										<div
+											class="fd"
+											style="
+												background: var(--blue);
+											"></div>
+										<div>
+											<div class="ft">
+												Vendor
+												<strong>Ram Logistics</strong>
+												assigned to #MG-4819
+											</div>
+											<div class="ft-time">
+												31 min ago
+											</div>
+										</div>
+									</div>
+									<div class="fi">
+										<div
+											class="fd"
+											style="
+												background: var(--red);
+											"></div>
+										<div>
+											<div class="ft">
+												<strong>#MG-4817</strong>
+												cancelled by customer
+											</div>
+											<div class="ft-time">1 hr ago</div>
+										</div>
+									</div>
+									<div class="fi">
+										<div
+											class="fd"
+											style="
+												background: var(--green);
+											"></div>
+										<div>
+											<div class="ft">
+												<strong>Arjun Tamang</strong>
+												rated delivery 5★
+											</div>
+											<div class="ft-time">2 hr ago</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="brow">
+						<div class="mc">
+							<div class="m-lbl">Avg. Delivery Time</div>
+							<div class="m-val">2.4 days</div>
+							<div class="m-bar">
+								<div
+									class="m-fill"
+									style="width: 0%; background: var(--blue)"
+									data-w="62"></div>
+							</div>
+						</div>
+						<div class="mc">
+							<div class="m-lbl">Customer Satisfaction</div>
+							<div class="m-val">94.2%</div>
+							<div class="m-bar">
+								<div
+									class="m-fill"
+									style="width: 0%; background: var(--green)"
+									data-w="94"></div>
+							</div>
+						</div>
+						<div class="mc">
+							<div class="m-lbl">Fleet Utilisation</div>
+							<div class="m-val">78%</div>
+							<div class="m-bar">
+								<div
+									class="m-fill"
+									style="width: 0%; background: var(--gold)"
+									data-w="78"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- ═══ BOOKINGS PAGE ═══ -->
+				<div class="page" id="page-bookings">
+					<div class="panel">
+						<div class="ph">
+							<span class="p-title">All Bookings</span>
+							<div class="ph-right">
+								<div class="search" style="width: 200px">
+									<svg
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2">
+										<circle cx="11" cy="11" r="8" />
+										<line
+											x1="21"
+											y1="21"
+											x2="16.65"
+											y2="16.65" />
+									</svg>
+									<input
+										id="book-search"
+										placeholder="Filter by customer, ID…" />
+								</div>
+								<div class="chips" id="book-chips">
+									<span class="chip on" data-filter="all"
+										>All</span
+									>
+									<span class="chip" data-filter="In Transit"
+										>In Transit</span
+									>
+									<span class="chip" data-filter="Pending"
+										>Pending</span
+									>
+									<span class="chip" data-filter="Delivered"
+										>Delivered</span
+									>
+									<span class="chip" data-filter="Cancelled"
+										>Cancelled</span
+									>
+								</div>
+								<button
+									class="btn btn-sm"
+									onclick="openNewBooking()">
+									+ New Booking
+								</button>
+							</div>
+						</div>
+						<div class="tw">
+							<table id="book-table">
+								<thead>
+									<tr>
+										<th data-col="id">
+											Order ID
+											<span class="sort-ic">↕</span>
+										</th>
+										<th data-col="customer">
+											Customer
+											<span class="sort-ic">↕</span>
+										</th>
+										<th data-col="route">Route</th>
+										<th data-col="date">
+											Date <span class="sort-ic">↕</span>
+										</th>
+										<th data-col="status">Status</th>
+										<th data-col="amount">
+											Amount
+											<span class="sort-ic">↕</span>
+										</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody id="book-tbody"></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<!-- ═══ CUSTOMERS PAGE ═══ -->
+				<div class="page" id="page-customers">
+					<div class="panel">
+						<div class="ph">
+							<span class="p-title">Customers</span>
+							<div class="ph-right">
+								<div class="search" style="width: 200px">
+									<svg
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2">
+										<circle cx="11" cy="11" r="8" />
+										<line
+											x1="21"
+											y1="21"
+											x2="16.65"
+											y2="16.65" />
+									</svg>
+									<input
+										id="cust-search"
+										placeholder="Search by name…" />
+								</div>
+								<button
+									class="btn btn-sm"
+									onclick="
+										toast('Feature coming soon', 'blue')
+									">
+									+ Add Customer
+								</button>
+							</div>
+						</div>
+						<div class="tw">
+							<table>
+								<thead>
+									<tr>
+										<th>Name</th>
+										<th>Email</th>
+										<th>Phone</th>
+										<th>Total Bookings</th>
+										<th>Joined</th>
+										<th>Status</th>
+									</tr>
+								</thead>
+								<tbody id="cust-tbody"></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<!-- ═══ VENDORS PAGE ═══ -->
+				<div class="page" id="page-vendors">
+					<div class="panel">
+						<div class="ph">
+							<span class="p-title">Vendors</span>
+							<button
+								class="btn btn-sm"
+								onclick="toast('Feature coming soon', 'blue')">
+								+ Add Vendor
+							</button>
+						</div>
+						<div class="tw">
+							<table>
+								<thead>
+									<tr>
+										<th>Vendor</th>
+										<th>Contact</th>
+										<th>Region</th>
+										<th>Active Routes</th>
+										<th>Rating</th>
+										<th>Status</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td class="b">Ram Logistics</td>
+										<td>+977-9841-123456</td>
+										<td>Kathmandu Valley</td>
+										<td>8</td>
+										<td>⭐ 4.7</td>
+										<td>
+											<span class="pill pd">Active</span>
+										</td>
+									</tr>
+									<tr>
+										<td class="b">Sita Transport</td>
+										<td>+977-9851-654321</td>
+										<td>Pokhara – Chitwan</td>
+										<td>5</td>
+										<td>⭐ 4.5</td>
+										<td>
+											<span class="pill pd">Active</span>
+										</td>
+									</tr>
+									<tr>
+										<td class="b">Himalayan Movers</td>
+										<td>+977-9801-987654</td>
+										<td>Eastern Nepal</td>
+										<td>3</td>
+										<td>⭐ 4.2</td>
+										<td>
+											<span class="pill pp">Pending</span>
+										</td>
+									</tr>
+									<tr>
+										<td class="b">Terai Carriers</td>
+										<td>+977-9811-112233</td>
+										<td>Terai Belt</td>
+										<td>6</td>
+										<td>⭐ 4.6</td>
+										<td>
+											<span class="pill pd">Active</span>
+										</td>
+									</tr>
+									<tr>
+										<td class="b">Summit Freight</td>
+										<td>+977-9821-445566</td>
+										<td>Mid-hills</td>
+										<td>2</td>
+										<td>⭐ 3.9</td>
+										<td>
+											<span class="pill pc"
+												>Inactive</span
+											>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<!-- ═══ REVENUE PAGE ═══ -->
+				<div class="page" id="page-revenue">
+					<div class="stats">
+						<div class="sc">
+							<div class="si sg">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<line x1="12" y1="1" x2="12" y2="23" />
+									<path
+										d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+								</svg>
+							</div>
+							<div class="s-lbl">This Month</div>
+							<div class="s-val">4.2L</div>
+							<div class="s-dl up">
+								<svg
+									width="13"
+									height="13"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5">
+									<polyline points="18 15 12 9 6 15" /></svg
+								>+5.7% <span>vs last</span>
+							</div>
+						</div>
+						<div class="sc vg">
+							<div class="si sG">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<polyline
+										points="23 6 13.5 15.5 8.5 10.5 1 18" />
+									<polyline points="17 6 23 6 23 12" />
+								</svg>
+							</div>
+							<div class="s-lbl">Q1 Total</div>
+							<div class="s-val">11.8L</div>
+							<div class="s-dl up">
+								<svg
+									width="13"
+									height="13"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5">
+									<polyline points="18 15 12 9 6 15" /></svg
+								>+18.3% <span>vs Q1 last yr</span>
+							</div>
+						</div>
+						<div class="sc vb">
+							<div class="si sb2">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<rect
+										x="1"
+										y="4"
+										width="22"
+										height="16"
+										rx="2" />
+									<line x1="1" y1="10" x2="23" y2="10" />
+								</svg>
+							</div>
+							<div class="s-lbl">Avg Per Booking</div>
+							<div class="s-val">Rs 3.4k</div>
+							<div class="s-dl dn">
+								<svg
+									width="13"
+									height="13"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5">
+									<polyline points="6 9 12 15 18 9" /></svg
+								>-1.2% <span>vs last month</span>
+							</div>
+						</div>
+						<div class="sc vr">
+							<div class="si sr">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<circle cx="12" cy="12" r="10" />
+									<path
+										d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+									<line x1="12" y1="17" x2="12.01" y2="17" />
+								</svg>
+							</div>
+							<div class="s-lbl">Pending Payouts</div>
+							<div class="s-val">Rs 68k</div>
+							<div class="s-dl">
+								<span>Awaiting clearance</span>
+							</div>
+						</div>
+					</div>
+					<div class="panel">
+						<div class="ph">
+							<span class="p-title">Revenue by Month</span>
+						</div>
+						<div class="chart-wrap">
+							<canvas
+								id="rev-chart"
+								style="
+									width: 100% !important;
+									height: 180px !important;
+								"></canvas>
+						</div>
+					</div>
+				</div>
+
+				<!-- ═══ SETTINGS PAGE ═══ -->
+				<div class="page" id="page-settings">
+					<div class="panel">
+						<div class="ph">
+							<span class="p-title">General Settings</span>
+						</div>
+						<div
+							style="
+								padding: 28px 24px;
+								display: flex;
+								flex-direction: column;
+								gap: 22px;
+								max-width: 560px;
+							">
+							<div>
+								<label
+									style="
+										font-family: var(--mono);
+										font-size: 11px;
+										letter-spacing: 0.5px;
+										text-transform: uppercase;
+										color: var(--muted);
+										display: block;
+										margin-bottom: 8px;
+									"
+									>Company Name</label
+								>
+								<input
+									style="
+										width: 100%;
+										background: var(--dark3);
+										border: 1px solid var(--border-dim);
+										border-radius: 8px;
+										padding: 11px 14px;
+										color: var(--text);
+										font-size: 14px;
+										font-family: var(--sans);
+										outline: none;
+									"
+									value="Mero Ghar Logistics" />
+							</div>
+							<div>
+								<label
+									style="
+										font-family: var(--mono);
+										font-size: 11px;
+										letter-spacing: 0.5px;
+										text-transform: uppercase;
+										color: var(--muted);
+										display: block;
+										margin-bottom: 8px;
+									"
+									>Support Email</label
+								>
+								<input
+									style="
+										width: 100%;
+										background: var(--dark3);
+										border: 1px solid var(--border-dim);
+										border-radius: 8px;
+										padding: 11px 14px;
+										color: var(--text);
+										font-size: 14px;
+										font-family: var(--sans);
+										outline: none;
+									"
+									value="support@meroghar.com" />
+							</div>
+							<div>
+								<label
+									style="
+										font-family: var(--mono);
+										font-size: 11px;
+										letter-spacing: 0.5px;
+										text-transform: uppercase;
+										color: var(--muted);
+										display: block;
+										margin-bottom: 8px;
+									"
+									>Default Currency</label
+								>
+								<select
+									style="
+										width: 100%;
+										background: var(--dark3);
+										border: 1px solid var(--border-dim);
+										border-radius: 8px;
+										padding: 11px 14px;
+										color: var(--text);
+										font-size: 14px;
+										font-family: var(--sans);
+										outline: none;
+									">
+									<option>NPR — Nepali Rupee</option>
+									<option>USD — US Dollar</option>
+								</select>
+							</div>
+							<button
+								class="btn"
+								style="align-self: flex-start"
+								onclick="toast('Settings saved', 'green')">
+								Save Changes
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /main -->
+		</div>
+		<!-- /shell -->
+
+		<!-- NEW BOOKING MODAL -->
+		<div class="overlay" id="modal-new">
+			<div class="modal">
+				<div class="mh">
+					<span class="mh-title">New Booking</span>
+					<div class="m-close" onclick="closeModal('modal-new')">
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2">
+							<line x1="18" y1="6" x2="6" y2="18" />
+							<line x1="6" y1="6" x2="18" y2="18" />
+						</svg>
+					</div>
+				</div>
+				<div class="mb">
+					<div class="mf">
+						<div class="mf-row">
+							<div>
+								<label>Customer Name</label
+								><input
+									placeholder="e.g. Sita Rai"
+									id="nb-name" />
+							</div>
+							<div>
+								<label>Phone</label
+								><input placeholder="+977-98…" id="nb-phone" />
+							</div>
+						</div>
+						<label>Pickup Address</label>
+						<input placeholder="From city / area" id="nb-from" />
+						<label>Drop-off Address</label>
+						<input placeholder="To city / area" id="nb-to" />
+						<div class="mf-row">
+							<div>
+								<label>Move Type</label>
+								<select id="nb-type">
+									<option>Household</option>
+									<option>Office</option>
+									<option>Single Item</option>
+								</select>
+							</div>
+							<div>
+								<label>Amount (NPR)</label
+								><input
+									type="number"
+									placeholder="3500"
+									id="nb-amount" />
+							</div>
+						</div>
+						<label>Special Instructions</label>
+						<textarea
+							placeholder="Fragile items, floor number, etc."
+							id="nb-notes"></textarea>
+					</div>
+				</div>
+				<div class="mfoot">
+					<button class="btn-ghost" onclick="closeModal('modal-new')">
+						Cancel
+					</button>
+					<button class="btn" onclick="submitBooking()">
+						Create Booking
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- TOAST CONTAINER -->
+		<div class="toast-wrap" id="toast-wrap"></div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+		<script src="/src/js/admin.js"></script>
+	</body>
+</html>

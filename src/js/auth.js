@@ -13,44 +13,79 @@ const ROLE_ROUTES = {
 	user: '/src/pages/user.html',
 	admin: '/src/pages/admin.html',
 	vendor: '/src/pages/vendor.html',
-	manager: '/src/pages/manager.html',
 };
 
 // ─────────────────────────────────────────────
 // LOGIN HANDLER
 // ─────────────────────────────────────────────
-document.getElementById('loginForm').addEventListener('submit', function (e) {
-	e.preventDefault();
+if (window.location.pathname.endsWith('login.html')) {
+	document
+		.getElementById('loginForm')
+		.addEventListener('submit', function (e) {
+			e.preventDefault();
 
-	const email = document.getElementById('email').value.trim();
-	const password = document.getElementById('password').value;
-	const role = document.getElementById('role').value;
+			const email = document.getElementById('email').value.trim();
+			const password = document.getElementById('password').value;
+			const role = document.getElementById('role').value;
 
-	// Find matching user
-	const matchedUser = USERS.find(
-		(u) => u.email === email && u.password === password && u.role === role,
-	);
+			// Find matching user
+			const matchedUser = USERS.find(
+				(u) =>
+					u.email === email &&
+					u.password === password &&
+					u.role === role,
+			);
 
-	if (!matchedUser) {
-		alert('Invalid email or password or role.');
-		return;
-	}
+			if (!matchedUser) {
+				alert('Invalid email or password or role.');
+				return;
+			}
 
-	// ✅ Store session in localStorage
-	localStorage.setItem(
-		'meroGharUser',
-		JSON.stringify({
-			email: matchedUser.email,
-			role: matchedUser.role,
-			loggedIn: true,
-		}),
-	);
+			// ✅ Store session in localStorage
+			localStorage.setItem(
+				'meroGharUser',
+				JSON.stringify({
+					email: matchedUser.email,
+					role: matchedUser.role,
+					loggedIn: true,
+				}),
+			);
 
-	// ✅ Redirect based on role
-	window.location.href = ROLE_ROUTES[matchedUser.role];
-});
+			// ✅ Redirect based on role
+			window.location.href = ROLE_ROUTES[matchedUser.role];
+		});
+}
 
 //=== SIGNUP HANDLER (optional, can be removed if not needed) ===
-document.getElementById('signupForm')?.addEventListener('submit', function (e) {
-	e.preventDefault();
-});
+if (window.location.pathname.endsWith('signup.html')) {
+	document
+		.getElementById('signupForm')
+		?.addEventListener('submit', function (e) {
+			e.preventDefault();
+			const username = document.getElementById('signupName').value.trim();
+			const email = document.getElementById('signupEmail').value.trim();
+			const password = document.getElementById('signupPassword').value;
+			const confirmPassword = document.getElementById(
+				'signupConfirmPassword',
+			).value;
+			const role = document.querySelector(
+				'input[name="role"]:checked',
+			)?.value;
+
+			if (!username || !email || !password || !confirmPassword) {
+				alert('Please fill in all fields.');
+				return;
+			}
+
+			if (password !== confirmPassword) {
+				alert('Passwords do not match.');
+				return;
+			}
+
+			USERS.push({ email, password, role: role || 'user' });
+
+			// Here you would typically send a request to your backend to create the user
+			// For now, we'll just redirect to the login page
+			window.location.href = '/src/pages/login.html';
+		});
+}
