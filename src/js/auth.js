@@ -58,6 +58,7 @@ if (window.location.pathname.endsWith('login.html')) {
 
 //=== SIGNUP HANDLER (optional, can be removed if not needed) ===
 if (window.location.pathname.endsWith('signup.html')) {
+	console.log('running');
 	document
 		.getElementById('signupForm')
 		?.addEventListener('submit', function (e) {
@@ -73,11 +74,13 @@ if (window.location.pathname.endsWith('signup.html')) {
 			)?.value;
 
 			if (!username || !email || !password || !confirmPassword) {
+				console.log('this is running');
 				alert('Please fill in all fields.');
 				return;
 			}
 
 			if (password !== confirmPassword) {
+				console.log('no this is running');
 				alert('Passwords do not match.');
 				return;
 			}
@@ -88,4 +91,5 @@ if (window.location.pathname.endsWith('signup.html')) {
 			// For now, we'll just redirect to the login page
 			window.location.href = '/src/pages/login.html';
 		});
+	console.log('still running then y not going to login page');
 }

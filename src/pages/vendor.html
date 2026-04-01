@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Vendor Portal — Mero Ghar</title>
+		<link rel="stylesheet" href="/src/styles/vendor.css" />
+	</head>
+	<body>
+		<div class="shell">
+			<!-- SIDEBAR -->
+			<aside class="sb">
+				<div class="sb-head">
+					<div class="brand">
+						<div class="b-ico">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="#0b1510"
+								stroke-width="2.5"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<path d="M1 3h15v13H1z" />
+								<path d="M16 8h4l3 3v5h-7V8z" />
+								<circle cx="5.5" cy="18.5" r="2.5" />
+								<circle cx="18.5" cy="18.5" r="2.5" />
+							</svg>
+						</div>
+						<div>
+							<a href="/index.html">
+								<div class="b-name">Mero Ghar</div>
+								<div class="b-tag">Vendor Portal</div>
+							</a>
+						</div>
+					</div>
+
+					<div class="v-id">
+						<div class="v-id-top">
+							<div class="v-av">SL</div>
+							<div>
+								<div class="v-nm">Subodh Logistics</div>
+								<div class="v-loc">Kathmandu Valley</div>
+							</div>n
+						</div>
+						<div class="v-stats">
+							<div class="vst">
+								<div class="vst-n">4.7★</div>
+								<div class="vst-l">Rating</div>
+							</div>
+							<div class="vst">
+								<div class="vst-n" id="sb-fleet">5</div>
+								<div class="vst-l">Vehicles</div>
+							</div>
+							<div class="vst">
+								<div class="vst-n" id="sb-done">48</div>
+								<div class="vst-l">Jobs Done</div>
+							</div>
+						</div>
+						<div class="online-row">
+							<span class="ol-label">
+								<span class="ol-dot on" id="ol-dot"></span>
+								<span id="ol-txt">Online &amp; Available</span>
+							</span>
+							<div
+								class="sw-track on"
+								id="sw"
+								onclick="toggleOnline()">
+								<div class="sw-thumb"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<nav class="sb-nav">
+					<div class="ngrp">
+						<div class="ngrp-lbl">Workspace</div>
+						<a class="na on" data-page="overview" href="#">
+							<svg
+								class="nic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<rect x="3" y="3" width="7" height="7" />
+								<rect x="14" y="3" width="7" height="7" />
+								<rect x="3" y="14" width="7" height="7" />
+								<rect x="14" y="14" width="7" height="7" />
+							</svg>
+							Overview
+						</a>
+						<a class="na" data-page="jobs" href="#">
+							<svg
+								class="nic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<path d="M9 11l3 3L22 4" />
+								<path
+									d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+							</svg>
+							Assigned Jobs
+							<span class="nbadge" id="new-badge">2</span>
+						</a>
+						<a class="na" data-page="fleet" href="#">
+							<svg
+								class="nic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<rect x="1" y="3" width="15" height="13" />
+								<polygon
+									points="16 8 20 8 23 11 23 16 16 16 16 8" />
+								<circle cx="5.5" cy="18.5" r="2.5" />
+								<circle cx="18.5" cy="18.5" r="2.5" />
+							</svg>
+							My Fleet
+						</a>
+						<a class="na" data-page="earnings" href="#">
+							<svg
+								class="nic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<line x1="12" y1="1" x2="12" y2="23" />
+								<path
+									d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+							</svg>
+							Earnings
+						</a>
+					</div>
+					<div class="ngrp">
+						<div class="ngrp-lbl">Account</div>
+						<a class="na" data-page="profile" href="#">
+							<svg
+								class="nic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<path
+									d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+								<circle cx="12" cy="7" r="4" />
+							</svg>
+							Profile &amp; Docs
+						</a>
+						<a class="na" data-page="support" href="#">
+							<svg
+								class="nic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round">
+								<circle cx="12" cy="12" r="10" />
+								<path
+									d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+								<line x1="12" y1="17" x2="12.01" y2="17" />
+							</svg>
+							Help &amp; Support
+						</a>
+					</div>
+				</nav>
+
+				<div class="sb-foot">
+					<button
+						class="fbt"
+						onclick="
+							goPage('jobs');
+							toast('Check new job requests', 'gold');
+						">
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2">
+							<path
+								d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+							<path d="M13.73 21a2 2 0 0 1-3.46 0" />
+						</svg>
+						Alerts
+					</button>
+					<button class="fbt" onclick="toast('Signed out', 'red')">
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2">
+							<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+							<polyline points="16 17 21 12 16 7" />
+							<line x1="21" y1="12" x2="9" y2="12" />
+						</svg>
+						Sign Out
+					</button>
+				</div>
+			</aside>
+
+			<!-- MAIN -->
+			<div class="main">
+				<header class="topbar">
+					<div class="tl">
+						<div class="t-title" id="pg-title">Overview</div>
+						<div class="t-sub" id="pg-sub">
+							Welcome back, Ram Logistics · Friday 27 Mar 2026
+						</div>
+					</div>
+					<div class="tr">
+						<div
+							class="icb"
+							id="notif-btn"
+							onclick="goPage('jobs')"
+							title="New job requests">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2">
+								<path
+									d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+								<path d="M13.73 21a2 2 0 0 1-3.46 0" />
+							</svg>
+							<span class="dot" id="notif-dot"></span>
+						</div>
+						<button class="btn btn-sm" onclick="openAddVehicle()">
+							+ Add Vehicle
+						</button>
+					</div>
+				</header>
+
+				<!-- OVERVIEW -->
+				<div class="pg on" id="pg-overview">
+					<div class="kpis">
+						<div class="kpi cg" onclick="goPage('earnings')">
+							<div class="ki kg">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<line x1="12" y1="1" x2="12" y2="23" />
+									<path
+										d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+								</svg>
+							</div>
+							<div class="k-lbl">This Month</div>
+							<div class="k-val" id="kv-earn">Rs 0</div>
+							<div class="k-note ku">
+								<svg
+									width="12"
+									height="12"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5">
+									<polyline points="18 15 12 9 6 15" /></svg
+								>+11.2% vs last month
+							</div>
+						</div>
+						<div class="kpi cv" onclick="goPage('jobs')">
+							<div class="ki kv">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<path d="M9 11l3 3L22 4" />
+									<path
+										d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+								</svg>
+							</div>
+							<div class="k-lbl">Active Jobs</div>
+							<div class="k-val" id="kv-active">0</div>
+							<div
+								class="k-note"
+								id="kv-active-sub"
+								style="color: var(--dim)">
+								—
+							</div>
+						</div>
+						<div class="kpi cb" onclick="goPage('fleet')">
+							<div class="ki kb">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<rect x="1" y="3" width="15" height="13" />
+									<polygon
+										points="16 8 20 8 23 11 23 16 16 16 16 8" />
+									<circle cx="5.5" cy="18.5" r="2.5" />
+									<circle cx="18.5" cy="18.5" r="2.5" />
+								</svg>
+							</div>
+							<div class="k-lbl">Fleet Size</div>
+							<div class="k-val" id="kv-fleet">0</div>
+							<div
+								class="k-note"
+								id="kv-fleet-sub"
+								style="color: var(--dim)">
+								—
+							</div>
+						</div>
+						<div class="kpi co">
+							<div class="ki ko">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<polygon
+										points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+								</svg>
+							</div>
+							<div class="k-lbl">Rating</div>
+							<div class="k-val">4.7</div>
+							<div class="k-note" style="color: var(--dim)">
+								Based on 48 reviews
+							</div>
+						</div>
+					</div>
+
+					<div
+						style="
+							display: grid;
+							grid-template-columns: 1fr 1fr;
+							gap: 18px;
+						">
+						<!-- incoming -->
+						<div class="panel">
+							<div class="ph">
+								<span class="ph-t">New Job Requests</span>
+								<span
+									class="chip on"
+									id="incoming-badge"
+									style="pointer-events: none"
+									>2 new</span
+								>
+							</div>
+							<div id="incoming-list"></div>
+						</div>
+						<!-- recent completions -->
+						<div class="panel">
+							<div class="ph">
+								<span class="ph-t">Recent Completions</span>
+							</div>
+							<div class="tw">
+								<table>
+									<thead>
+										<tr>
+											<th>Job ID</th>
+											<th>Route</th>
+											<th>Earned</th>
+											<th>Date</th>
+										</tr>
+									</thead>
+									<tbody id="completions-tb"></tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<!-- fleet strip -->
+					<div class="panel">
+						<div class="ph">
+							<span class="ph-t">Fleet Status</span>
+							<button
+								class="btn btn-sm"
+								onclick="goPage('fleet')">
+								Manage Fleet →
+							</button>
+						</div>
+						<div class="tw">
+							<table>
+								<thead>
+									<tr>
+										<th>Vehicle</th>
+										<th>Plate</th>
+										<th>Type</th>
+										<th>Driver</th>
+										<th>Status</th>
+										<th>Last Job</th>
+									</tr>
+								</thead>
+								<tbody id="fleet-strip"></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<!-- JOBS -->
+				<div class="pg" id="pg-jobs">
+					<div class="panel">
+						<div class="ph">
+							<span class="ph-t">Assigned Jobs</span>
+							<div class="chips" id="job-chips">
+								<span class="chip on" data-f="all">All</span>
+								<span class="chip" data-f="New">New</span>
+								<span class="chip" data-f="Accepted"
+									>Accepted</span
+								>
+								<span class="chip" data-f="In Transit"
+									>In Transit</span
+								>
+								<span class="chip" data-f="Completed"
+									>Completed</span
+								>
+							</div>
+						</div>
+						<div class="jgrid" id="jobs-grid"></div>
+					</div>
+				</div>
+
+				<!-- FLEET -->
+				<div class="pg" id="pg-fleet">
+					<div class="panel">
+						<div class="ph">
+							<span class="ph-t">My Fleet</span>
+							<div class="ph-r">
+								<div class="chips" id="fleet-chips">
+									<span class="chip on" data-f="all"
+										>All</span
+									>
+									<span class="chip" data-f="Available"
+										>Available</span
+									>
+									<span class="chip" data-f="On Route"
+										>On Route</span
+									>
+									<span class="chip" data-f="Maintenance"
+										>Maintenance</span
+									>
+								</div>
+								<button
+									class="btn btn-sm"
+									onclick="openAddVehicle()">
+									+ Add Vehicle
+								</button>
+							</div>
+						</div>
+						<div class="fgrid" id="fleet-grid"></div>
+					</div>
+				</div>
+
+				<!-- EARNINGS -->
+				<div class="pg" id="pg-earnings">
+					<div class="kpis">
+						<div class="kpi cg">
+							<div class="ki kg">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<line x1="12" y1="1" x2="12" y2="23" />
+									<path
+										d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+								</svg>
+							</div>
+							<div class="k-lbl">This Month</div>
+							<div class="k-val">Rs 68,500</div>
+							<div class="k-note ku">
+								<svg
+									width="12"
+									height="12"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5">
+									<polyline points="18 15 12 9 6 15" /></svg
+								>+11.2%
+							</div>
+						</div>
+						<div class="kpi cv">
+							<div class="ki kv">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<rect
+										x="2"
+										y="3"
+										width="20"
+										height="14"
+										rx="2" />
+									<line x1="8" y1="21" x2="16" y2="21" />
+									<line x1="12" y1="17" x2="12" y2="21" />
+								</svg>
+							</div>
+							<div class="k-lbl">Pending Payout</div>
+							<div class="k-val">Rs 18,400</div>
+							<div class="k-note" style="color: var(--dim)">
+								Expected 29 Mar
+							</div>
+						</div>
+						<div class="kpi cb">
+							<div class="ki kb">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<polyline
+										points="23 6 13.5 15.5 8.5 10.5 1 18" />
+									<polyline points="17 6 23 6 23 12" />
+								</svg>
+							</div>
+							<div class="k-lbl">Total Earned</div>
+							<div class="k-val">Rs 3.8L</div>
+							<div class="k-note ku">
+								<svg
+									width="12"
+									height="12"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2.5">
+									<polyline points="18 15 12 9 6 15" /></svg
+								>All time
+							</div>
+						</div>
+						<div class="kpi co">
+							<div class="ki ko">
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2">
+									<path
+										d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+									<polyline points="22 4 12 14.01 9 11.01" />
+								</svg>
+							</div>
+							<div class="k-lbl">Jobs Completed</div>
+							<div class="k-val" id="kv-done">48</div>
+							<div class="k-note" style="color: var(--dim)">
+								100% acceptance rate
+							</div>
+						</div>
+					</div>
+					<div class="earn-2col">
+						<div class="panel">
+							<div class="ph">
+								<span class="ph-t">Monthly Earnings</span>
+								<div class="chips" id="earn-chips">
+									<span class="chip on" data-r="6"
+										>6 months</span
+									>
+									<span class="chip" data-r="12"
+										>12 months</span
+									>
+								</div>
+							</div>
+							<div class="chart-wrap">
+								<canvas id="earn-chart" class="ec"></canvas>
+							</div>
+						</div>
+						<div class="panel">
+							<div class="ph">
+								<span class="ph-t">Payout History</span>
+							</div>
+							<div class="plist" id="plist"></div>
+						</div>
+					</div>
+				</div>
+
+				<!-- PROFILE -->
+				<div class="pg" id="pg-profile">
+					<div class="p2col">
+						<div class="panel">
+							<div class="ph">
+								<span class="ph-t">Business Information</span>
+							</div>
+							<form action="" id="profileForm">
+								<div class="fs">
+									<div class="fg">
+										<label for="businessName"
+											>Business Name</label
+										><input
+											id="businessName"
+											value="Ram Logistics" />
+									</div>
+									<div class="fg">
+										<label for="ownerName">Owner Name</label
+										><input
+											id="ownerName"
+											value="Ram Bahadur Thapa" />
+									</div>
+									<div class="fg">
+										<label for="phone">Phone</label
+										><input
+											id="phone"
+											value="+977-9841-123456" />
+									</div>
+									<div class="fg">
+										<label for="serviceRegion"
+											>Service Region</label
+										>
+										<select id="serviceRegion">
+											<option>Kathmandu Valley</option>
+											<option>Pokhara – Chitwan</option>
+											<option>Eastern Nepal</option>
+											<option>Terai Belt</option>
+										</select>
+									</div>
+									<div class="fg">
+										<label>Address</label
+										><textarea>
+Balaju, Kathmandu, Bagmati Province</textarea
+										>
+									</div>
+									<button
+										id="changeBtn"
+										class="btn"
+										onclick="
+											toast(
+												'Profile saved successfully',
+												'green',
+											)
+										">
+										Save Changes
+									</button>
+								</div>
+							</form>
+						</div>
+						<div class="panel">
+							<div class="ph">
+								<span class="ph-t"
+									>Documents &amp; Verification</span
+								>
+							</div>
+							<div class="fs">
+								<div class="doc-row">
+									<div class="doc-ico">
+										<svg
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2">
+											<path
+												d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+											<polyline points="14 2 14 8 20 8" />
+										</svg>
+									</div>
+									<div class="doc-info">
+										<div class="doc-name">
+											Business Registration
+										</div>
+										<div
+											class="doc-stat"
+											style="color: var(--green)">
+											✓ Verified
+										</div>
+									</div>
+									<button
+										class="btn-ghost bgsm"
+										onclick="
+											toast('Opening document…', 'blue')
+										">
+										View
+									</button>
+								</div>
+								<div class="doc-row">
+									<div class="doc-ico">
+										<svg
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2">
+											<rect
+												x="3"
+												y="3"
+												width="18"
+												height="18"
+												rx="2" />
+											<path d="M9 9h6M9 13h6M9 17h4" />
+										</svg>
+									</div>
+									<div class="doc-info">
+										<div class="doc-name">
+											PAN Certificate
+										</div>
+										<div
+											class="doc-stat"
+											style="color: var(--green)">
+											✓ Verified
+										</div>
+									</div>
+									<button
+										class="btn-ghost bgsm"
+										onclick="
+											toast('Opening document…', 'blue')
+										">
+										View
+									</button>
+								</div>
+								<div class="doc-row">
+									<div class="doc-ico">
+										<svg
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2">
+											<path
+												d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+										</svg>
+									</div>
+									<div class="doc-info">
+										<div class="doc-name">
+											Vehicle Insurance
+										</div>
+										<div
+											class="doc-stat"
+											style="color: var(--orange)">
+											⚠ Expiring soon
+										</div>
+									</div>
+									<button
+										class="btn btn-sm"
+										onclick="
+											toast(
+												'Renewal request submitted',
+												'green',
+											)
+										">
+										Renew
+									</button>
+								</div>
+								<div class="doc-row">
+									<div class="doc-ico">
+										<svg
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2">
+											<rect
+												x="1"
+												y="3"
+												width="15"
+												height="13" />
+											<polygon
+												points="16 8 20 8 23 11 23 16 16 16 16 8" />
+											<circle
+												cx="5.5"
+												cy="18.5"
+												r="2.5" />
+											<circle
+												cx="18.5"
+												cy="18.5"
+												r="2.5" />
+										</svg>
+									</div>
+									<div class="doc-info">
+										<div class="doc-name">Route Permit</div>
+										<div
+											class="doc-stat"
+											style="color: var(--green)">
+											✓ Verified
+										</div>
+									</div>
+									<button
+										class="btn-ghost bgsm"
+										onclick="
+											toast('Opening document…', 'blue')
+										">
+										View
+									</button>
+								</div>
+								<button
+									class="btn-ghost"
+									style="
+										width: 100%;
+										margin-top: 6px;
+										justify-content: center;
+										display: flex;
+									"
+									onclick="
+										toast('Select a file to upload', 'blue')
+									">
+									+ Upload New Document
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- SUPPORT -->
+				<div class="pg" id="pg-support">
+					<div class="panel" style="max-width: 620px">
+						<div class="ph">
+							<span class="ph-t">Help &amp; Support</span>
+						</div>
+						<div class="fs">
+							<div class="fg">
+								<label>Issue Category</label>
+								<select>
+									<option>Payment Issue</option>
+									<option>Job Assignment</option>
+									<option>Vehicle / Documents</option>
+									<option>Technical Problem</option>
+									<option>Other</option>
+								</select>
+							</div>
+							<div class="fg">
+								<label>Subject</label
+								><input
+									placeholder="Brief description of your issue" />
+							</div>
+							<div class="fg">
+								<label>Message</label
+								><textarea
+									placeholder="Describe your issue in detail…"></textarea>
+							</div>
+							<button
+								class="btn"
+								onclick="
+									toast(
+										'Ticket submitted — we\'ll respond within 24 hours',
+										'green',
+									)
+								">
+								Submit Ticket
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ADD VEHICLE MODAL -->
+		<div class="overlay" id="modal-v">
+			<div class="modal">
+				<div class="mh">
+					<span>Add Vehicle</span>
+					<div class="mx" onclick="closeModal('modal-v')">
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2">
+							<line x1="18" y1="6" x2="6" y2="18" />
+							<line x1="6" y1="6" x2="18" y2="18" />
+						</svg>
+					</div>
+				</div>
+				<div class="mb">
+					<div class="mr2">
+						<div>
+							<label>Vehicle Name / Model</label
+							><input placeholder="e.g. Tata 407" id="v-nm" />
+						</div>
+						<div>
+							<label>Plate Number</label
+							><input placeholder="BA 1 KHA 1234" id="v-pl" />
+						</div>
+					</div>
+					<div class="mr2">
+						<div>
+							<label>Vehicle Type</label>
+							<select id="v-ty">
+								<option>Mini Truck</option>
+								<option>Large Truck</option>
+								<option>Pickup Van</option>
+								<option>Container</option>
+								<option>Tempo</option>
+							</select>
+						</div>
+						<div>
+							<label>Capacity (tonnes)</label
+							><input type="number" placeholder="1.5" id="v-cp" />
+						</div>
+					</div>
+					<div class="mr2">
+						<div>
+							<label>Driver Name</label
+							><input placeholder="Full name" id="v-dr" />
+						</div>
+						<div>
+							<label>Driver Phone</label
+							><input placeholder="+977-98…" id="v-dp" />
+						</div>
+					</div>
+				</div>
+				<div class="mfoot">
+					<button class="btn-ghost" onclick="closeModal('modal-v')">
+						Cancel
+					</button>
+					<button class="btn" onclick="submitVehicle()">
+						Add to Fleet
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="toast-wrap" id="tw"></div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+		<script src="/src/js/vendor.js"></script>
+	</body>
+</html>
