@@ -1,6 +1,6 @@
-// ─────────────────────────────────────────────
+// ==================================================
 // MOCK USER DATABASE (replace with real API later)
-// ─────────────────────────────────────────────
+// ==================================================
 const USERS = [
 	{ email: 'user@meroghar.com', password: 'user123', role: 'user' },
 	{ email: 'admin@meroghar.com', password: 'admin123', role: 'admin' },
@@ -15,9 +15,9 @@ const ROLE_ROUTES = {
 	vendor: '/src/pages/vendor.html',
 };
 
-// ─────────────────────────────────────────────
+// ================
 // LOGIN HANDLER
-// ─────────────────────────────────────────────
+// ================
 if (window.location.pathname.endsWith('login.html')) {
 	document
 		.getElementById('loginForm')
@@ -59,37 +59,37 @@ if (window.location.pathname.endsWith('login.html')) {
 //=== SIGNUP HANDLER (optional, can be removed if not needed) ===
 if (window.location.pathname.endsWith('signup.html')) {
 	console.log('running');
-	document
-		.getElementById('signupForm')
-		?.addEventListener('submit', function (e) {
-			e.preventDefault();
-			const username = document.getElementById('signupName').value.trim();
-			const email = document.getElementById('signupEmail').value.trim();
-			const password = document.getElementById('signupPassword').value;
-			const confirmPassword = document.getElementById(
-				'signupConfirmPassword',
-			).value;
-			const role = document.querySelector(
-				'input[name="role"]:checked',
-			)?.value;
+	const signupForm = document.getElementById('signupForm');
+	signupForm.addEventListener('submit', function (e) {
+		console.log('y not running');
+		e.preventDefault();
+		const username = document.getElementById('signupName').value.trim();
+		const email = document.getElementById('signupEmail').value.trim();
+		const password = document.getElementById('signupPassword').value;
+		const confirmPassword = document.getElementById(
+			'signupConfirmPassword',
+		).value;
+		const role = document.querySelector(
+			'input[name="role"]:checked',
+		)?.value;
 
-			if (!username || !email || !password || !confirmPassword) {
-				console.log('this is running');
-				alert('Please fill in all fields.');
-				return;
-			}
+		if (!username || !email || !password || !confirmPassword) {
+			console.log('this is running');
+			alert('Please fill in all fields.');
+			return;
+		}
 
-			if (password !== confirmPassword) {
-				console.log('no this is running');
-				alert('Passwords do not match.');
-				return;
-			}
+		if (password !== confirmPassword) {
+			console.log('no this is running');
+			alert('Passwords do not match.');
+			return;
+		}
 
-			USERS.push({ email, password, role: role || 'user' });
+		USERS.push({ email, password, role: role || 'user' });
 
-			// Here you would typically send a request to your backend to create the user
-			// For now, we'll just redirect to the login page
-			window.location.href = '/src/pages/login.html';
-		});
+		// Here you would typically send a request to your backend to create the user
+		// For now, we'll just redirect to the login page
+		window.location.href = '/src/pages/login.html';
+	});
 	console.log('still running then y not going to login page');
 }
