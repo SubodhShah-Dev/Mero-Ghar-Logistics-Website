@@ -1,12 +1,9 @@
 // ==================================================
-// MOCK USER DATABASE (replace with real API later)
+// MeroGhar Authentication System
 // ==================================================
-const USERS = [
-	{ email: 'user@meroghar.com', password: 'user123', role: 'user' },
-	{ email: 'admin@meroghar.com', password: 'admin123', role: 'admin' },
-	{ email: 'vendor@meroghar.com', password: 'vendor123', role: 'vendor' },
-	{ email: 'manager@meroghar.com', password: 'manager123', role: 'manager' },
-];
+
+console.log('MeroGhar Auth System Loaded');
+const BASEURL = 'http://localhost:5000';
 
 // Role → redirect path mapping
 const ROLE_ROUTES = {
@@ -15,81 +12,216 @@ const ROLE_ROUTES = {
 	vendor: '/src/pages/vendor.html',
 };
 
-// ================
+//==================
+// For Fetching Data
+//==================
+async function fetchData(url, req, httpMethod, contentType) {
+	console.log(`Fetching: ${BASEURL}${url}`);
+	console.log('Request data:', req);
+
+	try {
+		const response = await fetch(`${BASEURL}${url}`, {
+			method: httpMethod,
+			headers: {
+				'Content-Type': contentType,
+			},
+			body: JSON.stringify(req),
+		});
+
+		const data = await response.json();
+		console.log('Response from server:', data);
+		console.log('Response OK:', response.ok);
+
+		return { ok: response.ok, ...data };
+	} catch (error) {
+		console.error('Fetch error:', error);
+		return { ok: false, message: error.message };
+	}
+}
+
+// ==================================================
 // LOGIN HANDLER
-// ================
-if (window.location.pathname.endsWith('login.html')) {
-	document
-		.getElementById('loginForm')
-		.addEventListener('submit', function (e) {
+// ==================================================
+document.addEventListener('DOMContentLoaded', function () {
+	console.log('DOM loaded, checking for login form...');
+	const loginForm = document.getElementById('loginForm');
+
+	if (loginForm) {
+		console.log('Login page detected, setting up handler');
+
+		loginForm.addEventListener('submit', async function (e) {
 			e.preventDefault();
 
-			const email = document.getElementById('email').value.trim();
-			const password = document.getElementById('password').value;
-			const role = document.getElementById('role').value;
+			const email = document.getElementById('email')?.value.trim();
+			const password = document.getElementById('password')?.value;
+			const role = document.getElementById('role')?.value;
 
-			// Find matching user
-			const matchedUser = USERS.find(
-				(u) =>
-					u.email === email &&
-					u.password === password &&
-					u.role === role,
-			);
+			console.log('Login attempt with:', { email, role });
 
-			if (!matchedUser) {
-				alert('Invalid email or password or role.');
+			if (!email || !password) {
+				alert('Please enter email and password');
 				return;
 			}
 
-			// ✅ Store session in localStorage
-			localStorage.setItem(
-				'meroGharUser',
-				JSON.stringify({
-					email: matchedUser.email,
-					role: matchedUser.role,
+			try {
+				// Sending correct format that backend expects
+				const res = await fetchData(
+					'/api/auth/login',
+					{
+						email: email, // ✅ Correct field name
+						password: password, // ✅ Correct field name
+						role: role, // ✅ Optional field
+					},
+					'POST',
+					'application/json',
+				);
+
+				console.log('Login response:', res);
+
+				if (!res.ok) {
+					alert(res.message || 'Login failed');
+					return;
+				}
+
+				// Check if user data exists in response
+				if (!res.user) {
+					console.error('No user data in response:', res);
+					alert('Login failed: No user data received');
+					return;
+				}
+
+				// Store user data (backend sends: id, name, email, role)
+				const userData = {
+					id: res.user.id,
+					name: res.user.name,
+					email: res.user.email,
+					role: res.user.role,
 					loggedIn: true,
-				}),
-			);
+				};
 
-			// ✅ Redirect based on role
-			window.location.href = ROLE_ROUTES[matchedUser.role];
+				localStorage.setItem('meroGharUser', JSON.stringify(userData));
+				console.log('Stored user data:', userData);
+
+				console.log('User role:', res.user.role);
+				console.log('Redirecting to:', ROLE_ROUTES[res.user.role]);
+
+				// Redirect based on role
+				const redirectPath =
+					ROLE_ROUTES[res.user.role] || '/src/pages/user.html';
+				window.location.href = redirectPath;
+			} catch (err) {
+				console.error('Login error:', err);
+				alert('Server error. Try again.');
+			}
 		});
-}
+	}
+});
 
-//=== SIGNUP HANDLER (optional, can be removed if not needed) ===
-if (window.location.pathname.endsWith('signup.html')) {
-	console.log('running');
+// ==================================================
+// SIGNUP HANDLER
+// ==================================================
+document.addEventListener('DOMContentLoaded', function () {
 	const signupForm = document.getElementById('signupForm');
-	signupForm.addEventListener('submit', function (e) {
-		console.log('y not running');
-		e.preventDefault();
-		const username = document.getElementById('signupName').value.trim();
-		const email = document.getElementById('signupEmail').value.trim();
-		const password = document.getElementById('signupPassword').value;
-		const confirmPassword = document.getElementById(
-			'signupConfirmPassword',
-		).value;
-		const role = document.querySelector(
-			'input[name="role"]:checked',
-		)?.value;
 
-		if (!username || !email || !password || !confirmPassword) {
-			console.log('this is running');
-			alert('Please fill in all fields.');
-			return;
-		}
+	if (signupForm) {
+		console.log('Signup page detected');
 
-		if (password !== confirmPassword) {
-			console.log('no this is running');
-			alert('Passwords do not match.');
-			return;
-		}
+		signupForm.addEventListener('submit', async function (e) {
+			e.preventDefault();
 
-		USERS.push({ email, password, role: role || 'user' });
+			const name = document.getElementById('signupName')?.value.trim();
+			const email = document.getElementById('signupEmail')?.value.trim();
+			const password = document.getElementById('signupPassword')?.value;
+			const confirmPassword = document.getElementById(
+				'signupConfirmPassword',
+			)?.value;
+			const phone = document.getElementById('phone')?.value;
+			const role =
+				document.querySelector('input[name="role"]:checked')?.value ||
+				'user';
 
-		// Here you would typically send a request to your backend to create the user
-		// For now, we'll just redirect to the login page
+			console.log('Signup attempt:', { name, email, role });
+
+			// Validation
+			if (!name || !email || !password || !confirmPassword) {
+				alert('Please fill in all fields.');
+				return;
+			}
+
+			if (password !== confirmPassword) {
+				alert('Passwords do not match.');
+				return;
+			}
+
+			if (password.length < 6) {
+				alert('Password must be at least 6 characters long.');
+				return;
+			}
+
+			try {
+				// Sending correct format that backend expects
+				const res = await fetchData(
+					'/api/auth/register',
+					{
+						name: name, // ✅ Correct field name (not 'username')
+						email: email, // ✅ Correct field name
+						password: password, // ✅ Correct field name
+						role: role, // ✅ Correct field name,
+						phone: phone,
+					},
+					'POST',
+					'application/json',
+				);
+
+				console.log('Register response:', res);
+
+				if (!res.ok) {
+					alert(res.message || 'Signup failed');
+					return;
+				}
+
+				alert('Signup successful! Please login.');
+				window.location.href = '/src/pages/login.html';
+			} catch (err) {
+				console.error('Signup error:', err);
+				alert('Server error. Try again.');
+			}
+		});
+	}
+});
+
+// ==================================================
+// LOGOUT FUNCTION
+// ==================================================
+window.logout = function () {
+	localStorage.removeItem('meroGharUser');
+	console.log('User logged out');
+	window.location.href = '/src/pages/login.html';
+};
+
+// ==================================================
+// CHECK AUTH STATUS
+// ==================================================
+window.checkAuth = function () {
+	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	if (!user.loggedIn) {
+		console.log('User not authenticated, redirecting to login');
 		window.location.href = '/src/pages/login.html';
-	});
-	console.log('still running then y not going to login page');
-}
+		return null;
+	}
+	console.log('Authenticated user:', user);
+	return user;
+};
+
+// ==================================================
+// GET AUTH HEADERS FOR API CALLS
+// ==================================================
+window.getAuthHeaders = function () {
+	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	return {
+		'Content-Type': 'application/json',
+		Authorization: user.loggedIn ? `Bearer ${user.id}` : '',
+	};
+};
+
+console.log('Authentication system ready');

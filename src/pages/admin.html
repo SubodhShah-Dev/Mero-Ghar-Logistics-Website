@@ -67,7 +67,22 @@
 								<circle cx="18.5" cy="18.5" r="2.5" />
 							</svg>
 							Bookings
-							<span class="nav-badge" id="pending-count">3</span>
+							<span class="nav-badge" id="pending-count">0</span>
+						</a>
+						<a class="nav-a" data-page="pending" href="#">
+							<svg
+								class="nav-ic"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2">
+								<circle cx="12" cy="12" r="10" />
+								<polyline points="12 6 12 12 16 14" />
+							</svg>
+							Pending Approvals
+							<span class="nav-badge" id="pending-approval-count"
+								>0</span
+							>
 						</a>
 						<a class="nav-a" data-page="customers" href="#">
 							<svg
@@ -148,23 +163,42 @@
 				</nav>
 
 				<div class="sb-foot">
-					<div class="user-row">
-						<div class="av">SS</div>
-						<div class="user-info">
-							<div class="u-name" id="a-name">Subodh Shah</div>
-							<div class="u-role">Super Admin</div>
-						</div>
+					<button
+						class="fbt"
+						id="admin-alerts-btn"
+						onclick="showNotifications()">
 						<svg
-							width="14"
-							height="14"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
-							stroke-width="2"
-							opacity=".35">
-							<polyline points="9 18 15 12 9 6" />
+							stroke-width="2">
+							<path
+								d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+							<path d="M13.73 21a2 2 0 0 1-3.46 0" />
 						</svg>
-					</div>
+						Alerts
+						<span
+							id="admin-alert-badge"
+							class="nbadge"
+							style="display: none"
+							>0</span
+						>
+					</button>
+					<button
+						class="fbt"
+						id="admin-logout-btn"
+						onclick="logout()">
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2">
+							<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+							<polyline points="16 17 21 12 16 7" />
+							<line x1="21" y1="12" x2="9" y2="12" />
+						</svg>
+						Sign Out
+					</button>
 				</div>
 			</aside>
 
@@ -173,7 +207,9 @@
 				<header class="top">
 					<div class="top-left">
 						<div class="top-title" id="page-title">Dashboard</div>
-						<div class="top-sub">Friday, 27 March 2026</div>
+						<div class="top-sub" id="top-sub">
+							Friday, 27 March 2026
+						</div>
 					</div>
 					<div class="search">
 						<svg
@@ -202,7 +238,7 @@
 					</div>
 				</header>
 
-				<!-- ═══ DASHBOARD PAGE ═══ -->
+				<!-- DASHBOARD PAGE -->
 				<div class="page active" id="page-dash">
 					<div class="stats">
 						<div class="sc" onclick="goPage('bookings')">
@@ -221,15 +257,7 @@
 							<div class="s-lbl">Total Bookings</div>
 							<div class="s-val" id="sv1">0</div>
 							<div class="s-dl up">
-								<svg
-									width="13"
-									height="13"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2.5">
-									<polyline points="18 15 12 9 6 15" /></svg
-								>+8.4% <span>vs last month</span>
+								+8.4% <span>vs last month</span>
 							</div>
 						</div>
 						<div class="sc vg" onclick="goPage('bookings')">
@@ -245,15 +273,7 @@
 							<div class="s-lbl">Delivered</div>
 							<div class="s-val" id="sv2">0</div>
 							<div class="s-dl up">
-								<svg
-									width="13"
-									height="13"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2.5">
-									<polyline points="18 15 12 9 6 15" /></svg
-								>+12.1% <span>vs last month</span>
+								+12.1% <span>vs last month</span>
 							</div>
 						</div>
 						<div class="sc vb" onclick="goPage('bookings')">
@@ -270,15 +290,7 @@
 							<div class="s-lbl">In Transit</div>
 							<div class="s-val" id="sv3">0</div>
 							<div class="s-dl dn">
-								<svg
-									width="13"
-									height="13"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2.5">
-									<polyline points="6 9 12 15 18 9" /></svg
-								>-2.3% <span>vs last month</span>
+								-2.3% <span>vs last month</span>
 							</div>
 						</div>
 						<div class="sc vr" onclick="goPage('revenue')">
@@ -296,21 +308,12 @@
 							<div class="s-lbl">Revenue (NPR)</div>
 							<div class="s-val" id="sv4">0</div>
 							<div class="s-dl up">
-								<svg
-									width="13"
-									height="13"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2.5">
-									<polyline points="18 15 12 9 6 15" /></svg
-								>+5.7% <span>vs last month</span>
+								+5.7% <span>vs last month</span>
 							</div>
 						</div>
 					</div>
 
 					<div class="grid2">
-						<!-- BOOKINGS PANEL -->
 						<div class="panel">
 							<div class="ph">
 								<span class="p-title">Recent Bookings</span>
@@ -370,7 +373,6 @@
 						</div>
 
 						<div class="rcol">
-							<!-- CHART -->
 							<div class="panel">
 								<div class="ph">
 									<span class="p-title">Weekly Bookings</span>
@@ -396,7 +398,6 @@
 								</div>
 							</div>
 
-							<!-- ACTIVITY -->
 							<div class="panel" style="flex: 1">
 								<div class="ph">
 									<span class="p-title">Recent Activity</span>
@@ -517,7 +518,7 @@
 					</div>
 				</div>
 
-				<!-- ═══ BOOKINGS PAGE ═══ -->
+				<!-- BOOKINGS PAGE -->
 				<div class="page" id="page-bookings">
 					<div class="panel">
 						<div class="ph">
@@ -594,7 +595,45 @@
 					</div>
 				</div>
 
-				<!-- ═══ CUSTOMERS PAGE ═══ -->
+				<!-- PENDING APPROVALS PAGE -->
+				<div class="page" id="page-pending">
+					<div class="panel">
+						<div class="ph">
+							<span class="p-title"
+								>Pending Shipment Approvals</span
+							>
+							<div class="chips" id="approval-chips">
+								<span class="chip on" data-status="pending"
+									>Pending</span
+								>
+								<span class="chip" data-status="approved"
+									>Approved</span
+								>
+								<span class="chip" data-status="rejected"
+									>Rejected</span
+								>
+							</div>
+						</div>
+						<div class="tw">
+							<table id="approval-table">
+								<thead>
+									<tr>
+										<th>Booking ID</th>
+										<th>Customer</th>
+										<th>Pickup → Drop</th>
+										<th>Move Date</th>
+										<th>Amount</th>
+										<th>Assign Vendor</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody id="approval-tbody"></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<!-- CUSTOMERS PAGE -->
 				<div class="page" id="page-customers">
 					<div class="panel">
 						<div class="ph">
@@ -644,89 +683,58 @@
 					</div>
 				</div>
 
-				<!-- ═══ VENDORS PAGE ═══ -->
+				<!-- VENDORS PAGE - UPDATED WITH DYNAMIC TABLE -->
 				<div class="page" id="page-vendors">
 					<div class="panel">
 						<div class="ph">
 							<span class="p-title">Vendors</span>
-							<button
-								class="btn btn-sm"
-								onclick="toast('Feature coming soon', 'blue')">
-								+ Add Vendor
-							</button>
+							<div class="ph-right">
+								<div class="search" style="width: 200px">
+									<svg
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2">
+										<circle cx="11" cy="11" r="8" />
+										<line
+											x1="21"
+											y1="21"
+											x2="16.65"
+											y2="16.65" />
+									</svg>
+									<input
+										id="vendor-search"
+										placeholder="Search vendors..." />
+								</div>
+								<button
+									class="btn btn-sm"
+									onclick="openAddVendor()">
+									+ Add Vendor
+								</button>
+							</div>
 						</div>
 						<div class="tw">
-							<table>
+							<table id="vendors-table">
 								<thead>
 									<tr>
-										<th>Vendor</th>
-										<th>Contact</th>
-										<th>Region</th>
-										<th>Active Routes</th>
+										<th>Business Name</th>
+										<th>Phone</th>
+										<th>Email</th>
+										<th>Service Region</th>
+										<th>Total Jobs</th>
 										<th>Rating</th>
 										<th>Status</th>
 									</tr>
 								</thead>
-								<tbody>
-									<tr>
-										<td class="b">Ram Logistics</td>
-										<td>+977-9841-123456</td>
-										<td>Kathmandu Valley</td>
-										<td>8</td>
-										<td>⭐ 4.7</td>
-										<td>
-											<span class="pill pd">Active</span>
-										</td>
-									</tr>
-									<tr>
-										<td class="b">Sita Transport</td>
-										<td>+977-9851-654321</td>
-										<td>Pokhara – Chitwan</td>
-										<td>5</td>
-										<td>⭐ 4.5</td>
-										<td>
-											<span class="pill pd">Active</span>
-										</td>
-									</tr>
-									<tr>
-										<td class="b">Himalayan Movers</td>
-										<td>+977-9801-987654</td>
-										<td>Eastern Nepal</td>
-										<td>3</td>
-										<td>⭐ 4.2</td>
-										<td>
-											<span class="pill pp">Pending</span>
-										</td>
-									</tr>
-									<tr>
-										<td class="b">Terai Carriers</td>
-										<td>+977-9811-112233</td>
-										<td>Terai Belt</td>
-										<td>6</td>
-										<td>⭐ 4.6</td>
-										<td>
-											<span class="pill pd">Active</span>
-										</td>
-									</tr>
-									<tr>
-										<td class="b">Summit Freight</td>
-										<td>+977-9821-445566</td>
-										<td>Mid-hills</td>
-										<td>2</td>
-										<td>⭐ 3.9</td>
-										<td>
-											<span class="pill pc"
-												>Inactive</span
-											>
-										</td>
-									</tr>
+								<tbody id="vendors-tbody">
+									<!-- Vendors will be loaded dynamically here -->
 								</tbody>
 							</table>
 						</div>
 					</div>
 				</div>
 
-				<!-- ═══ REVENUE PAGE ═══ -->
+				<!-- REVENUE PAGE -->
 				<div class="page" id="page-revenue">
 					<div class="stats">
 						<div class="sc">
@@ -744,15 +752,7 @@
 							<div class="s-lbl">This Month</div>
 							<div class="s-val">4.2L</div>
 							<div class="s-dl up">
-								<svg
-									width="13"
-									height="13"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2.5">
-									<polyline points="18 15 12 9 6 15" /></svg
-								>+5.7% <span>vs last</span>
+								+5.7% <span>vs last</span>
 							</div>
 						</div>
 						<div class="sc vg">
@@ -770,15 +770,7 @@
 							<div class="s-lbl">Q1 Total</div>
 							<div class="s-val">11.8L</div>
 							<div class="s-dl up">
-								<svg
-									width="13"
-									height="13"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2.5">
-									<polyline points="18 15 12 9 6 15" /></svg
-								>+18.3% <span>vs Q1 last yr</span>
+								+18.3% <span>vs Q1 last yr</span>
 							</div>
 						</div>
 						<div class="sc vb">
@@ -800,15 +792,7 @@
 							<div class="s-lbl">Avg Per Booking</div>
 							<div class="s-val">Rs 3.4k</div>
 							<div class="s-dl dn">
-								<svg
-									width="13"
-									height="13"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2.5">
-									<polyline points="6 9 12 15 18 9" /></svg
-								>-1.2% <span>vs last month</span>
+								-1.2% <span>vs last month</span>
 							</div>
 						</div>
 						<div class="sc vr">
@@ -846,7 +830,7 @@
 					</div>
 				</div>
 
-				<!-- ═══ SETTINGS PAGE ═══ -->
+				<!-- SETTINGS PAGE -->
 				<div class="page" id="page-settings">
 					<div class="panel">
 						<div class="ph">
@@ -872,8 +856,7 @@
 										margin-bottom: 8px;
 									"
 									>Company Name</label
-								>
-								<input
+								><input
 									style="
 										width: 100%;
 										background: var(--dark3);
@@ -899,8 +882,7 @@
 										margin-bottom: 8px;
 									"
 									>Support Email</label
-								>
-								<input
+								><input
 									style="
 										width: 100%;
 										background: var(--dark3);
@@ -926,8 +908,7 @@
 										margin-bottom: 8px;
 									"
 									>Default Currency</label
-								>
-								<select
+								><select
 									style="
 										width: 100%;
 										background: var(--dark3);
@@ -953,9 +934,7 @@
 					</div>
 				</div>
 			</div>
-			<!-- /main -->
 		</div>
-		<!-- /shell -->
 
 		<!-- NEW BOOKING MODAL -->
 		<div class="overlay" id="modal-new">
@@ -987,14 +966,14 @@
 								><input placeholder="+977-98…" id="nb-phone" />
 							</div>
 						</div>
-						<label>Pickup Address</label>
-						<input placeholder="From city / area" id="nb-from" />
-						<label>Drop-off Address</label>
-						<input placeholder="To city / area" id="nb-to" />
+						<label>Pickup Address</label
+						><input placeholder="From city / area" id="nb-from" />
+						<label>Drop-off Address</label
+						><input placeholder="To city / area" id="nb-to" />
 						<div class="mf-row">
 							<div>
-								<label>Move Type</label>
-								<select id="nb-type">
+								<label>Move Type</label
+								><select id="nb-type">
 									<option>Household</option>
 									<option>Office</option>
 									<option>Single Item</option>
@@ -1008,18 +987,106 @@
 									id="nb-amount" />
 							</div>
 						</div>
-						<label>Special Instructions</label>
-						<textarea
+						<label>Special Instructions</label
+						><textarea
 							placeholder="Fragile items, floor number, etc."
 							id="nb-notes"></textarea>
 					</div>
 				</div>
 				<div class="mfoot">
 					<button class="btn-ghost" onclick="closeModal('modal-new')">
-						Cancel
-					</button>
-					<button class="btn" onclick="submitBooking()">
+						Cancel</button
+					><button class="btn" onclick="submitBooking()">
 						Create Booking
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- ADD VENDOR MODAL -->
+		<div class="overlay" id="modal-add-vendor">
+			<div class="modal">
+				<div class="mh">
+					<span class="mh-title">Add New Vendor</span>
+					<div
+						class="m-close"
+						onclick="closeModal('modal-add-vendor')">
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2">
+							<line x1="18" y1="6" x2="6" y2="18" />
+							<line x1="6" y1="6" x2="18" y2="18" />
+						</svg>
+					</div>
+				</div>
+				<div class="mb">
+					<div class="mf">
+						<div class="mf-row">
+							<div>
+								<label>User ID (from users table)</label
+								><input
+									type="number"
+									id="vendor-user-id"
+									placeholder="Enter user ID" />
+							</div>
+							<div>
+								<label>Business Name</label
+								><input
+									type="text"
+									id="vendor-business-name"
+									placeholder="e.g. Ram Logistics" />
+							</div>
+						</div>
+						<div class="mf-row">
+							<div>
+								<label>Owner Name</label
+								><input
+									type="text"
+									id="vendor-owner-name"
+									placeholder="Full name" />
+							</div>
+							<div>
+								<label>Phone</label
+								><input
+									type="tel"
+									id="vendor-phone"
+									placeholder="+977-98XXXXXXXX" />
+							</div>
+						</div>
+						<div class="mf-row">
+							<div>
+								<label>Email</label
+								><input
+									type="email"
+									id="vendor-email"
+									placeholder="vendor@example.com" />
+							</div>
+							<div>
+								<label>Service Region</label
+								><input
+									type="text"
+									id="vendor-region"
+									placeholder="e.g. Kathmandu Valley" />
+							</div>
+						</div>
+						<div>
+							<label>Address</label
+							><textarea
+								id="vendor-address"
+								rows="2"
+								placeholder="Full address..."></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="mfoot">
+					<button
+						class="btn-ghost"
+						onclick="closeModal('modal-add-vendor')">
+						Cancel</button
+					><button class="btn" onclick="submitAddVendor()">
+						Add Vendor
 					</button>
 				</div>
 			</div>

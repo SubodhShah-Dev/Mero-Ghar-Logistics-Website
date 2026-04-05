@@ -1,759 +1,731 @@
-// ── DATA ──
-const JOBS = [
-	{
-		id: '#JB-901',
-		route: 'Kathmandu → Pokhara',
-		customer: 'Sita Rai',
-		date: '27 Mar',
-		time: '09:00 AM',
-		amount: 4500,
-		weight: '2 tonnes',
-		type: 'Household',
-		status: 'New',
-		vehicle: 'BA 1 KA 2233',
-		notes: '3rd floor, no lift',
-	},
-	{
-		id: '#JB-900',
-		route: 'Lalitpur → Bhaktapur',
-		customer: 'Bikash Thapa',
-		date: '27 Mar',
-		time: '11:30 AM',
-		amount: 1200,
-		weight: '0.5 tonnes',
-		type: 'Single Item',
-		status: 'New',
-		vehicle: 'BA 2 JA 4455',
-		notes: 'Daytime delivery only',
-	},
-	{
-		id: '#JB-899',
-		route: 'Kathmandu → Chitwan',
-		customer: 'Sunita KC',
-		date: '26 Mar',
-		time: '08:00 AM',
-		amount: 3800,
-		weight: '3 tonnes',
-		type: 'Household',
-		status: 'In Transit',
-		vehicle: 'BA 1 KA 2233',
-		notes: '',
-	},
-	{
-		id: '#JB-898',
-		route: 'Bhaktapur → Biratnagar',
-		customer: 'Dev Pandey',
-		date: '26 Mar',
-		time: '07:00 AM',
-		amount: 5200,
-		weight: '4 tonnes',
-		type: 'Office',
-		status: 'Accepted',
-		vehicle: 'BA 3 PA 8899',
-		notes: 'Heavy machinery, need crane',
-	},
-	{
-		id: '#JB-897',
-		route: 'Pokhara → Kathmandu',
-		customer: 'Mina Lama',
-		date: '25 Mar',
-		time: '10:00 AM',
-		amount: 4200,
-		weight: '2.5 tonnes',
-		type: 'Household',
-		status: 'Completed',
-		vehicle: 'BA 2 JA 4455',
-		notes: '',
-	},
-	{
-		id: '#JB-896',
-		route: 'Janakpur → Kathmandu',
-		customer: 'Arjun Tamang',
-		date: '24 Mar',
-		time: '06:00 AM',
-		amount: 5800,
-		weight: '5 tonnes',
-		type: 'Household',
-		status: 'Completed',
-		vehicle: 'BA 1 KA 2233',
-		notes: '',
-	},
-	{
-		id: '#JB-895',
-		route: 'Pokhara → Lumbini',
-		customer: 'Nisha Gurung',
-		date: '23 Mar',
-		time: '07:30 AM',
-		amount: 6200,
-		weight: '6 tonnes',
-		type: 'Office',
-		status: 'Completed',
-		vehicle: 'BA 4 GA 6677',
-		notes: '',
-	},
-];
+// ==================================================
+// VENDOR PORTAL - COMPLETE WORKING VERSION
+// ==================================================
 
-let FLEET = [
-	{
-		id: 'f1',
-		name: 'Tata 407',
-		plate: 'BA 1 KA 2233',
-		type: 'Mini Truck',
-		cap: '2',
-		driver: 'Hari Bahadur',
-		status: 'On Route',
-		lastJob: '#JB-899',
-	},
-	{
-		id: 'f2',
-		name: 'Ashok Leyland',
-		plate: 'BA 2 JA 4455',
-		type: 'Large Truck',
-		cap: '5',
-		driver: 'Suresh Magar',
-		status: 'Available',
-		lastJob: '#JB-897',
-	},
-	{
-		id: 'f3',
-		name: 'Mahindra Bolero',
-		plate: 'BA 3 PA 8899',
-		type: 'Pickup Van',
-		cap: '1',
-		driver: 'Kamal Tamang',
-		status: 'Available',
-		lastJob: '#JB-898',
-	},
-	{
-		id: 'f4',
-		name: 'Tata LPT 1618',
-		plate: 'BA 4 GA 6677',
-		type: 'Container',
-		cap: '8',
-		driver: 'Dipak Shrestha',
-		status: 'Maintenance',
-		lastJob: '#JB-895',
-	},
-	{
-		id: 'f5',
-		name: 'Swaraj Mazda',
-		plate: 'BA 5 CHA 1122',
-		type: 'Tempo',
-		cap: '1.5',
-		driver: 'Nayan Rai',
-		status: 'Available',
-		lastJob: '#JB-893',
-	},
-];
+const BASEURL = 'http://localhost:5000';
+let currentPage = 'overview';
+let vendorData = null;
+let vehicles = [];
+let jobs = [];
+let statusCheckInterval = null;
 
-const PAYOUTS = [
-	{
-		label: 'March payout — 12 jobs',
-		date: '25 Mar 2026',
-		amount: 'Rs 62,400',
-		color: 'green',
-	},
-	{
-		label: 'February payout — 10 jobs',
-		date: '25 Feb 2026',
-		amount: 'Rs 55,200',
-		color: 'green',
-	},
-	{
-		label: 'January payout — 14 jobs',
-		date: '25 Jan 2026',
-		amount: 'Rs 71,800',
-		color: 'green',
-	},
-	{
-		label: 'December payout — 8 jobs',
-		date: '25 Dec 2025',
-		amount: 'Rs 44,100',
-		color: 'green',
-	},
-	{
-		label: 'Festival bonus payout',
-		date: '15 Oct 2025',
-		amount: 'Rs 8,000',
-		color: 'gold',
-	},
-];
+// ==================================================
+// AUTHENTICATION
+// ==================================================
 
-// ── PILL ──
-const PC = {
-	Available: 'pAv',
-	'On Route': 'pOn',
-	Maintenance: 'pMt',
-	New: 'pNw',
-	Accepted: 'pAv',
-	'In Transit': 'pOn',
-	Completed: 'pCo',
-	Rejected: 'pRj',
-};
-const pill = (s) => `<span class="pill ${PC[s] || 'pMt'}">${s}</span>`;
+function checkAuth() {
+	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	if (!user.loggedIn || user.role !== 'vendor') {
+		window.location.href = '/src/pages/login.html';
+		return null;
+	}
+	return user;
+}
 
-// ── VEHICLE SVG ──
-const vico = () =>
-	`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`;
+function logout() {
+	if (confirm('Are you sure you want to logout?')) {
+		localStorage.removeItem('meroGharUser');
+		toast('Logged out successfully', 'green');
+		setTimeout(() => {
+			window.location.href = '/src/pages/login.html';
+		}, 500);
+	}
+}
 
-// ── RENDER INCOMING ──
-function renderIncoming() {
-	const el = document.getElementById('incoming-list');
-	const items = JOBS.filter((j) => j.status === 'New');
-	const badge = document.getElementById('incoming-badge');
-	badge.textContent = items.length ? `${items.length} new` : 'None';
-	const nb = document.getElementById('new-badge');
-	nb.textContent = items.length || '';
-	nb.style.display = items.length ? '' : 'none';
-	const dot = document.getElementById('notif-dot');
-	dot.style.display = items.length ? '' : 'none';
-	if (!items.length) {
-		el.innerHTML = `<p style="padding:28px 22px;color:var(--dim);font-size:13px;text-align:center">No new requests right now.<br>Check back soon.</p>`;
+// ==================================================
+// API FUNCTIONS
+// ==================================================
+
+async function fetchAPI(url, options = {}) {
+	// Get user from localStorage
+	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	console.log('FetchAPI - User from localStorage:', user);
+
+	const headers = {
+		'Content-Type': 'application/json',
+		...options.headers,
+	};
+
+	// Add user ID to headers if available
+	if (user.id) {
+		headers['X-User-Id'] = user.id.toString();
+		console.log('FetchAPI - Adding X-User-Id header:', user.id);
+	} else {
+		console.log('FetchAPI - No user ID found in localStorage');
+	}
+
+	try {
+		const response = await fetch(`${BASEURL}${url}`, {
+			...options,
+			headers,
+		});
+		const data = await response.json();
+		console.log('FetchAPI - Response:', data);
+		return { ok: response.ok, ...data };
+	} catch (error) {
+		console.error('FetchAPI - Error:', error);
+		return { ok: false, message: error.message };
+	}
+}
+
+// ==================================================
+// VENDOR PROFILE MANAGEMENT
+// ==================================================
+
+async function checkVendorProfile() {
+	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	console.log('checkVendorProfile - User:', user);
+
+	if (!user.id) {
+		console.log('No user ID found, redirecting to login');
+		window.location.href = '/src/pages/login.html';
 		return;
 	}
-	el.innerHTML = items
-		.map(
-			(j) => `
-    <div class="pi" style="border-bottom:1px solid var(--bdim)">
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:600;font-size:14px;color:var(--text)">${j.route}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px">${j.customer} · ${j.weight} · ${j.date}, ${j.time}</div>
-        ${j.notes ? `<div style="font-size:11px;color:var(--dim);margin-top:3px">${j.notes}</div>` : ''}
-      </div>
-      <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--gold);margin:0 10px">Rs ${j.amount.toLocaleString()}</div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
-        <button class="btn-g" onclick="acceptJob('${j.id}')">Accept</button>
-        <button class="btn-r" onclick="declineJob('${j.id}')">Decline</button>
-      </div>
-    </div>`,
-		)
-		.join('');
-}
 
-// ── RENDER COMPLETIONS ──
-function renderCompletions() {
-	const el = document.getElementById('completions-tb');
-	const items = JOBS.filter((j) => j.status === 'Completed').slice(0, 5);
-	if (!items.length) {
-		el.innerHTML = `<tr><td colspan="4" class="empty">No completed jobs yet</td></tr>`;
-		return;
-	}
-	el.innerHTML = items
-		.map(
-			(j) => `
-    <tr>
-      <td class="m">${j.id}</td>
-      <td class="b" style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${j.route}</td>
-      <td style="color:var(--green);font-family:var(--mono);font-size:12px;font-weight:600">+Rs ${j.amount.toLocaleString()}</td>
-      <td>${j.date}</td>
-    </tr>`,
-		)
-		.join('');
-}
+	console.log('Fetching vendor profile for user ID:', user.id);
 
-// ── RENDER FLEET STRIP ──
-function renderFleetStrip() {
-	const el = document.getElementById('fleet-strip');
-	el.innerHTML = FLEET.map(
-		(v) => `
-    <tr onclick="goPage('fleet')">
-      <td class="b">${v.name}</td>
-      <td class="m">${v.plate}</td>
-      <td>${v.type}</td>
-      <td>${v.driver}</td>
-      <td>${pill(v.status)}</td>
-      <td class="m">${v.lastJob}</td>
-    </tr>`,
-	).join('');
-}
+	const result = await fetchAPI('/api/vendor/profile');
+	console.log('Vendor profile result:', result);
 
-// ── RENDER JOBS ──
-let jobFilter = 'all';
-function renderJobs(f) {
-	if (f) jobFilter = f;
-	const el = document.getElementById('jobs-grid');
-	let data = [...JOBS];
-	if (jobFilter !== 'all') data = data.filter((j) => j.status === jobFilter);
-	if (!data.length) {
-		el.innerHTML = `<p style="padding:28px;color:var(--dim);font-size:13px;grid-column:1/-1;text-align:center">No jobs in this category.</p>`;
-		return;
-	}
-	el.innerHTML = data
-		.map(
-			(j) => `
-    <div class="jcard${j.status === 'New' ? ' isnew' : ''}">
-      <div class="jc-badge">${pill(j.status)}</div>
-      <div class="jc-id">${j.id}</div>
-      <div class="jc-route">${j.route}</div>
-      <div class="jc-cust">${j.customer} · ${j.type}</div>
-      <div class="jc-meta">
-        <div class="jcm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${j.date}, ${j.time}</div>
-        <div class="jcm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${j.weight}</div>
-        <div class="jcm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>${j.vehicle}</div>
-      </div>
-      ${j.notes ? `<div class="jc-note">${j.notes}</div>` : ''}
-      <div class="jc-foot">
-        <span class="jc-amount">Rs ${j.amount.toLocaleString()}</span>
-        <div class="jc-acts">
-          ${
-				j.status === 'New'
-					? `<button class="btn-g" onclick="acceptJob('${j.id}')">Accept</button><button class="btn-r" onclick="declineJob('${j.id}')">Decline</button>`
-					: j.status === 'Accepted'
-						? `<button class="btn btn-sm" onclick="startJob('${j.id}')">Start Trip</button>`
-						: j.status === 'In Transit'
-							? `<button class="btn btn-sm" onclick="completeJob('${j.id}')">Mark Delivered</button>`
-							: `<button class="btn-ghost bgsm" onclick="toast('Receipt downloaded','green')">Receipt</button>`
-			}
-        </div>
-      </div>
-    </div>`,
-		)
-		.join('');
-}
+	if (result.ok && result.vendor) {
+		vendorData = result.vendor;
+		console.log('Vendor data received:', vendorData);
 
-// ── JOB ACTIONS ──
-function acceptJob(id) {
-	const j = JOBS.find((x) => x.id === id);
-	if (!j) return;
-	j.status = 'Accepted';
-	toast(`${id} accepted`, 'green');
-	refresh();
-}
-function declineJob(id) {
-	const j = JOBS.find((x) => x.id === id);
-	if (!j) return;
-	j.status = 'Rejected';
-	toast(`${id} declined`, 'red');
-	refresh();
-}
-function startJob(id) {
-	const j = JOBS.find((x) => x.id === id);
-	if (!j) return;
-	j.status = 'In Transit';
-	toast(`Trip started — ${id}`, 'gold');
-	renderJobs();
-	updateKPIs();
-}
-function completeJob(id) {
-	const j = JOBS.find((x) => x.id === id);
-	if (!j) return;
-	j.status = 'Completed';
-	const done = JOBS.filter((x) => x.status === 'Completed').length;
-	document.getElementById('sb-done').textContent = done;
-	document.getElementById('kv-done').textContent = done;
-	toast(`${id} marked as delivered`, 'green');
-	refresh();
-}
-
-// ── RENDER FLEET ──
-let fleetFilter = 'all';
-function renderFleet(f) {
-	if (f) fleetFilter = f;
-	const el = document.getElementById('fleet-grid');
-	let data = [...FLEET];
-	if (fleetFilter !== 'all')
-		data = data.filter((v) => v.status === fleetFilter);
-	if (!data.length) {
-		el.innerHTML = `<p style="padding:28px;color:var(--dim);font-size:13px;grid-column:1/-1;text-align:center">No vehicles in this category.</p>`;
-		return;
-	}
-	el.innerHTML = data
-		.map(
-			(v) => `
-    <div class="vcard">
-      <div class="vc-head">
-        <div class="vc-ico">${vico()}</div>
-        <div class="vc-info"><div class="vc-name">${v.name}</div><div class="vc-plate">${v.plate}</div></div>
-        ${pill(v.status)}
-      </div>
-      <div class="vc-body">
-        <div class="vr"><span class="vr-l">Type</span><span class="vr-v">${v.type}</span></div>
-        <div class="vr"><span class="vr-l">Capacity</span><span class="vr-v">${v.cap} tonnes</span></div>
-        <div class="vr"><span class="vr-l">Driver</span><span class="vr-v">${v.driver}</span></div>
-        <div class="vr"><span class="vr-l">Last Job</span><span class="vr-v" style="font-family:var(--mono);font-size:11px;color:var(--dim)">${v.lastJob}</span></div>
-      </div>
-      <div class="vc-foot">
-        ${
-			v.status === 'Maintenance'
-				? `<button class="btn-g" style="flex:1" onclick="setVStatus('${v.id}','Available')">Mark Available</button>`
-				: v.status === 'Available'
-					? `<button class="btn-ghost bgsm" style="flex:1" onclick="setVStatus('${v.id}','Maintenance')">Send for Maintenance</button>`
-					: `<button class="btn-ghost bgsm" style="flex:1" onclick="toast('Vehicle is currently on a job','gold')">Currently on job</button>`
+		if (vendorData.status === 'active') {
+			showApprovedDashboard();
+			await loadFleet();
+			await loadJobs();
+			updateStats();
+			goPage('overview');
+			if (statusCheckInterval) clearInterval(statusCheckInterval);
+		} else if (vendorData.status === 'pending') {
+			showPendingState();
+			startStatusCheck();
 		}
-        <button class="btn-r" onclick="removeVehicle('${v.id}')">Remove</button>
-      </div>
-    </div>`,
-		)
-		.join('');
+	} else {
+		console.log('No vendor profile found, showing registration form');
+		showRegistrationForm();
+	}
 }
 
-function setVStatus(id, status) {
-	const v = FLEET.find((x) => x.id === id);
-	if (!v) return;
-	v.status = status;
-	renderFleet();
-	renderFleetStrip();
-	updateKPIs();
-	toast(`${v.name} → ${status}`, 'green');
-}
-function removeVehicle(id) {
-	const idx = FLEET.findIndex((x) => x.id === id);
-	if (idx < 0) return;
-	const n = FLEET[idx].name;
-	FLEET.splice(idx, 1);
-	renderFleet();
-	renderFleetStrip();
-	updateKPIs();
-	document.getElementById('sb-fleet').textContent = FLEET.length;
-	toast(`${n} removed from fleet`, 'red');
+function showRegistrationForm() {
+	document.getElementById('vendor-reg-form').style.display = 'block';
+	document.getElementById('vendor-pending-state').style.display = 'none';
+	document.getElementById('dashboard-content').style.display = 'none';
+	document.getElementById('vendor-profile-card').style.display = 'none';
 }
 
-// ── UPDATE KPIs ──
-function updateKPIs() {
-	const active = JOBS.filter(
-		(j) => j.status === 'Accepted' || j.status === 'In Transit',
-	).length;
-	const newCount = JOBS.filter((j) => j.status === 'New').length;
-	document.getElementById('kv-active').textContent = active;
-	document.getElementById('kv-active-sub').textContent =
-		`${newCount} new request${newCount !== 1 ? 's' : ''}`;
-	document.getElementById('kv-fleet').textContent = FLEET.length;
-	const avail = FLEET.filter((v) => v.status === 'Available').length;
-	document.getElementById('kv-fleet-sub').textContent = `${avail} available`;
-	document.getElementById('sb-fleet').textContent = FLEET.length;
+function showPendingState() {
+	document.getElementById('vendor-reg-form').style.display = 'none';
+	document.getElementById('vendor-pending-state').style.display = 'block';
+	document.getElementById('dashboard-content').style.display = 'none';
+	document.getElementById('vendor-profile-card').style.display = 'none';
 }
 
-// ── RENDER PAYOUTS ──
-function renderPayouts() {
-	const el = document.getElementById('plist');
-	el.innerHTML = PAYOUTS.map(
-		(p) => `
-    <div class="pi">
-      <div class="pi-ico" style="background:${p.color === 'gold' ? 'rgba(248,192,106,.12)' : 'rgba(76,175,125,.12)'}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="${p.color === 'gold' ? '#f8c06a' : '#4caf7d'}" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </div>
-      <div class="pi-body"><div class="pi-lbl">${p.label}</div><div class="pi-date">${p.date}</div></div>
-      <div class="pi-amt" style="color:${p.color === 'gold' ? 'var(--gold)' : 'var(--green)'}">+${p.amount}</div>
-    </div>`,
-	).join('');
+function showApprovedDashboard() {
+	document.getElementById('vendor-reg-form').style.display = 'none';
+	document.getElementById('vendor-pending-state').style.display = 'none';
+	document.getElementById('dashboard-content').style.display = 'block';
+	document.getElementById('vendor-profile-card').style.display = 'block';
+
+	// Update profile card
+	document.getElementById('vendor-name-display').textContent =
+		vendorData.business_name || vendorData.name;
+	document.getElementById('vendor-region-display').textContent =
+		vendorData.service_region || 'Kathmandu Valley';
+	const initials = (vendorData.business_name || vendorData.name)
+		.split(' ')
+		.map((n) => n[0])
+		.join('')
+		.toUpperCase()
+		.slice(0, 2);
+	document.getElementById('vendor-avatar').textContent = initials;
+	document.getElementById('vendor-rating').textContent =
+		(vendorData.rating || 0) + '★';
+	document.getElementById('vendor-fleet').textContent = vehicles.length;
+	document.getElementById('vendor-jobs').textContent =
+		vendorData.total_jobs || 0;
 }
 
-// ── EARN CHART ──
-let earnChart;
-function drawEarnChart(months) {
-	const m6 = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
-	const m12 = [
-		'Apr',
-		'May',
-		'Jun',
-		'Jul',
-		'Aug',
-		'Sep',
-		'Oct',
-		'Nov',
-		'Dec',
-		'Jan',
-		'Feb',
-		'Mar',
-	];
-	const d6 = [38000, 42000, 36000, 50000, 55000, 68500];
-	const d12 = [
-		22000, 28000, 31000, 25000, 34000, 40000, 38000, 42000, 36000, 50000,
-		55000, 68500,
-	];
-	const labels = months === 12 ? m12 : m6,
-		data = months === 12 ? d12 : d6;
-	const ctx = document.getElementById('earn-chart').getContext('2d');
-	if (earnChart) earnChart.destroy();
-	earnChart = new Chart(ctx, {
-		type: 'line',
-		data: {
-			labels,
-			datasets: [
-				{
-					data,
-					borderColor: '#f8c06a',
-					borderWidth: 2,
-					pointRadius: 3,
-					pointBackgroundColor: '#f8c06a',
-					tension: 0.4,
-					fill: true,
-					backgroundColor: (c) => {
-						const g = c.chart.ctx.createLinearGradient(
-							0,
-							0,
-							0,
-							200,
-						);
-						g.addColorStop(0, 'rgba(248,192,106,0.22)');
-						g.addColorStop(1, 'rgba(248,192,106,0)');
-						return g;
-					},
-				},
-			],
-		},
-		options: {
-			responsive: true,
-			maintainAspectRatio: false,
-			plugins: {
-				legend: { display: false },
-				tooltip: {
-					callbacks: {
-						label: (v) => `Rs ${v.raw.toLocaleString()}`,
-					},
-					backgroundColor: '#16261d',
-					titleColor: '#eef2ee',
-					bodyColor: 'rgba(238,242,238,.6)',
-					borderColor: 'rgba(248,192,106,.3)',
-					borderWidth: 1,
-					padding: 10,
-					displayColors: false,
-				},
-			},
-			scales: {
-				x: {
-					ticks: {
-						color: 'rgba(238,242,238,.35)',
-						font: { family: 'var(--mono)', size: 11 },
-					},
-					grid: { display: false },
-					border: { display: false },
-				},
-				y: {
-					ticks: {
-						color: 'rgba(238,242,238,.35)',
-						font: { family: 'var(--mono)', size: 11 },
-						callback: (v) => `${v / 1000}k`,
-					},
-					grid: { color: 'rgba(255,255,255,.05)' },
-					border: { display: false },
-				},
-			},
-		},
-	});
-}
-document
-	.getElementById('earn-chips')
-	.querySelectorAll('.chip')
-	.forEach((c) => {
-		c.addEventListener('click', () => {
-			document
-				.getElementById('earn-chips')
-				.querySelectorAll('.chip')
-				.forEach((x) => x.classList.remove('on'));
-			c.classList.add('on');
-			drawEarnChart(Number(c.dataset.r));
-		});
-	});
-
-// ── ONLINE TOGGLE ──
-let isOnline = true;
-function toggleOnline() {
-	isOnline = !isOnline;
-	const sw = document.getElementById('sw'),
-		dot = document.getElementById('ol-dot'),
-		txt = document.getElementById('ol-txt');
-	sw.classList.toggle('on', isOnline);
-	dot.className = 'ol-dot ' + (isOnline ? 'on' : 'off');
-	txt.textContent = isOnline ? 'Online & Available' : 'Offline';
-	toast(
-		isOnline ? 'You are now online' : 'You are now offline',
-		isOnline ? 'green' : 'red',
-	);
+function startStatusCheck() {
+	if (statusCheckInterval) clearInterval(statusCheckInterval);
+	statusCheckInterval = setInterval(async () => {
+		const result = await fetchAPI('/api/vendor/profile');
+		if (result.ok && result.vendor && result.vendor.status === 'active') {
+			clearInterval(statusCheckInterval);
+			toast(
+				'Your vendor account has been approved! Refreshing...',
+				'green',
+			);
+			setTimeout(() => location.reload(), 2000);
+		}
+	}, 30000);
 }
 
-// ── PAGE NAV ──
-const TITLES = {
-	overview: 'Overview',
-	jobs: 'Assigned Jobs',
-	fleet: 'My Fleet',
-	earnings: 'Earnings',
-	profile: 'Profile & Docs',
-	support: 'Help & Support',
+window.checkStatusManually = async function () {
+	toast('Checking status...', 'gold');
+	const result = await fetchAPI('/api/vendor/profile');
+	if (result.ok && result.vendor && result.vendor.status === 'active') {
+		toast('Your account has been approved! Refreshing...', 'green');
+		setTimeout(() => location.reload(), 1500);
+	} else {
+		toast('Still pending approval', 'blue');
+	}
 };
-const SUBS = {
-	overview: 'Welcome back, Ram Logistics · Friday 27 Mar 2026',
-	jobs: 'Accept, manage and track your job assignments',
-	fleet: 'Track vehicle availability and driver assignments',
-	earnings: 'Your payouts and financial summary',
-	profile: 'Business details and document verification status',
-	support: 'Get help from the Mero Ghar team',
-};
-function goPage(name) {
-	document.querySelectorAll('.pg').forEach((p) => p.classList.remove('on'));
-	document.querySelectorAll('.na').forEach((a) => a.classList.remove('on'));
-	const pg = document.getElementById('pg-' + name);
-	if (pg) pg.classList.add('on');
-	const na = document.querySelector(`.na[data-page="${name}"]`);
-	if (na) na.classList.add('on');
-	document.getElementById('pg-title').textContent = TITLES[name] || name;
-	document.getElementById('pg-sub').textContent = SUBS[name] || '';
-	if (name === 'earnings') setTimeout(() => drawEarnChart(6), 80);
-}
-document.querySelectorAll('.na[data-page]').forEach((a) => {
-	a.addEventListener('click', (e) => {
-		e.preventDefault();
-		goPage(a.dataset.page);
-	});
-});
 
-// ── JOB CHIPS ──
-document
-	.getElementById('job-chips')
-	.querySelectorAll('.chip')
-	.forEach((c) => {
-		c.addEventListener('click', () => {
-			document
-				.getElementById('job-chips')
-				.querySelectorAll('.chip')
-				.forEach((x) => x.classList.remove('on'));
-			c.classList.add('on');
-			renderJobs(c.dataset.f);
-		});
-	});
-document
-	.getElementById('fleet-chips')
-	.querySelectorAll('.chip')
-	.forEach((c) => {
-		c.addEventListener('click', () => {
-			document
-				.getElementById('fleet-chips')
-				.querySelectorAll('.chip')
-				.forEach((x) => x.classList.remove('on'));
-			c.classList.add('on');
-			renderFleet(c.dataset.f);
-		});
-	});
+async function submitVendorRegistration() {
+	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	const business_name = document
+		.getElementById('vendor-business-name')
+		?.value.trim();
+	const owner_name = document
+		.getElementById('vendor-owner-name')
+		?.value.trim();
+	const phone = document.getElementById('vendor-phone')?.value.trim();
+	const service_region = document.getElementById(
+		'vendor-service-region',
+	)?.value;
+	const address = document.getElementById('vendor-address')?.value.trim();
 
-// ── ADD VEHICLE ──
-function openAddVehicle() {
-	document.getElementById('modal-v').classList.add('open');
-}
-function closeModal(id) {
-	document.getElementById(id).classList.remove('open');
-}
-document.querySelectorAll('.overlay').forEach((o) => {
-	o.addEventListener('click', (e) => {
-		if (e.target === o) o.classList.remove('open');
-	});
-});
-function submitVehicle() {
-	const nm = document.getElementById('v-nm').value.trim();
-	const pl = document.getElementById('v-pl').value.trim();
-	const ty = document.getElementById('v-ty').value;
-	const cp = document.getElementById('v-cp').value;
-	const dr = document.getElementById('v-dr').value.trim();
-	if (!nm || !pl || !dr) {
+	if (!business_name || !owner_name || !phone || !service_region) {
 		toast('Please fill all required fields', 'red');
 		return;
 	}
-	FLEET.push({
-		id: 'f' + Date.now(),
-		name: nm,
-		plate: pl,
-		type: ty,
-		cap: cp || '1',
-		driver: dr,
+
+	const result = await fetchAPI('/api/vendor/register', {
+		method: 'POST',
+		body: JSON.stringify({
+			user_id: user.id,
+			business_name,
+			owner_name,
+			phone,
+			email: user.email,
+			service_region,
+			address,
+		}),
+	});
+
+	if (result.ok) {
+		toast('Vendor registration submitted for admin approval!', 'green');
+		setTimeout(() => location.reload(), 2000);
+	} else {
+		toast(result.message || 'Registration failed', 'red');
+	}
+}
+
+async function updateVendorProfile() {
+	const business_name = document
+		.getElementById('profile-business-name')
+		?.value.trim();
+	const owner_name = document
+		.getElementById('profile-owner-name')
+		?.value.trim();
+	const phone = document.getElementById('profile-phone')?.value.trim();
+	const service_region = document
+		.getElementById('profile-region')
+		?.value.trim();
+	const address = document.getElementById('profile-address')?.value.trim();
+
+	const result = await fetchAPI('/api/vendor/profile', {
+		method: 'PUT',
+		body: JSON.stringify({
+			business_name,
+			owner_name,
+			phone,
+			service_region,
+			address,
+		}),
+	});
+
+	if (result.ok) {
+		toast('Profile updated successfully!', 'green');
+		await checkVendorProfile();
+	} else {
+		toast('Failed to update profile', 'red');
+	}
+}
+
+// ==================================================
+// FLEET MANAGEMENT
+// ==================================================
+
+function openAddVehicle() {
+	document.getElementById('modal-add-vehicle')?.classList.remove('hidden');
+}
+
+function closeModal(id) {
+	document.getElementById(id)?.classList.add('hidden');
+}
+
+async function addVehicle() {
+	const name = document.getElementById('vehicle-name')?.value.trim();
+	const plate = document.getElementById('vehicle-plate')?.value.trim();
+	const type = document.getElementById('vehicle-type')?.value;
+	const driver = document.getElementById('vehicle-driver')?.value.trim();
+
+	if (!name || !plate || !driver) {
+		toast('Please fill required fields', 'red');
+		return;
+	}
+
+	const newVehicle = {
+		id: Date.now(),
+		name,
+		plate,
+		type,
+		driver,
 		status: 'Available',
 		lastJob: '—',
-	});
-	closeModal('modal-v');
-	toast(`${nm} added to fleet`, 'green');
-	['v-nm', 'v-pl', 'v-cp', 'v-dr', 'v-dp'].forEach((id) => {
+	};
+	vehicles.unshift(newVehicle);
+	saveFleet();
+	renderFleet();
+	renderFleetList();
+	updateStats();
+	closeModal('modal-add-vehicle');
+	toast(`${name} added to fleet`, 'green');
+
+	[
+		'vehicle-name',
+		'vehicle-plate',
+		'vehicle-type',
+		'vehicle-capacity',
+		'vehicle-driver',
+		'vehicle-driver-phone',
+	].forEach((id) => {
 		const el = document.getElementById(id);
 		if (el) el.value = '';
 	});
-	renderFleet();
-	renderFleetStrip();
-	updateKPIs();
-	document.getElementById('sb-fleet').textContent = FLEET.length;
 }
 
-// ── TOAST ──
+function removeVehicle(vehicleId) {
+	if (confirm('Remove this vehicle?')) {
+		const index = vehicles.findIndex((v) => v.id == vehicleId);
+		if (index > -1) {
+			const name = vehicles[index].name;
+			vehicles.splice(index, 1);
+			saveFleet();
+			renderFleet();
+			renderFleetList();
+			updateStats();
+			toast(`${name} removed from fleet`, 'red');
+		}
+	}
+}
+
+function updateVehicleStatus(vehicleId, status) {
+	const vehicle = vehicles.find((v) => v.id == vehicleId);
+	if (vehicle) {
+		vehicle.status = status;
+		saveFleet();
+		renderFleet();
+		renderFleetList();
+		toast(`${vehicle.name} status updated to ${status}`, 'gold');
+	}
+}
+
+function loadFleet() {
+	const savedFleet = localStorage.getItem('vendorFleet');
+	if (savedFleet) {
+		vehicles = JSON.parse(savedFleet);
+	} else {
+		vehicles = [
+			{
+				id: 1,
+				name: 'Tata 407',
+				plate: 'BA 1 KA 2233',
+				type: 'Mini Truck',
+				driver: 'Hari Bahadur',
+				status: 'Available',
+				lastJob: '—',
+			},
+			{
+				id: 2,
+				name: 'Ashok Leyland',
+				plate: 'BA 2 JA 4455',
+				type: 'Large Truck',
+				driver: 'Suresh Magar',
+				status: 'Available',
+				lastJob: '—',
+			},
+		];
+	}
+	renderFleet();
+	renderFleetList();
+}
+
+function saveFleet() {
+	localStorage.setItem('vendorFleet', JSON.stringify(vehicles));
+}
+
+function renderFleet() {
+	const container = document.getElementById('fleet-grid');
+	if (!container) return;
+	if (vehicles.length === 0) {
+		container.innerHTML =
+			'<div class="col-span-2 text-center py-8 text-[rgba(238,242,238,0.5)]">No vehicles</div>';
+		return;
+	}
+	container.innerHTML = vehicles
+		.map(
+			(v) => `
+        <div class="bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-xl overflow-hidden">
+            <div class="p-4 border-b border-[rgba(255,255,255,0.07)] flex justify-between items-start">
+                <div><div class="font-semibold">${v.name}</div><div class="text-xs font-mono text-[#f8c06a]">${v.plate}</div></div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono ${v.status === 'Available' ? 'bg-[rgba(76,175,125,0.15)] text-[#4caf7d]' : 'bg-[rgba(248,192,106,0.15)] text-[#f8c06a]'}">${v.status}</span>
+            </div>
+            <div class="p-4 space-y-2"><div class="flex justify-between text-sm"><span class="text-[rgba(238,242,238,0.5)]">Type:</span><span>${v.type}</span></div><div class="flex justify-between text-sm"><span class="text-[rgba(238,242,238,0.5)]">Driver:</span><span>${v.driver}</span></div></div>
+            <div class="p-4 border-t border-[rgba(255,255,255,0.07)] flex gap-2">
+                <select onchange="updateVehicleStatus(${v.id}, this.value)" class="flex-1 bg-[#1d3327] border border-[rgba(255,255,255,0.07)] rounded-lg px-3 py-1.5 text-xs"><option value="Available" ${v.status === 'Available' ? 'selected' : ''}>Available</option><option value="On Route" ${v.status === 'On Route' ? 'selected' : ''}>On Route</option><option value="Maintenance" ${v.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option></select>
+                <button onclick="removeVehicle(${v.id})" class="bg-[rgba(224,94,94,0.15)] text-[#e05e5e] px-3 py-1.5 rounded-lg text-xs">Remove</button>
+            </div>
+        </div>
+    `,
+		)
+		.join('');
+}
+
+function renderFleetList() {
+	const container = document.getElementById('fleet-list');
+	if (!container) return;
+	if (vehicles.length === 0) {
+		container.innerHTML =
+			'<div class="p-4 text-center text-[rgba(238,242,238,0.5)]">No vehicles in fleet</div>';
+		return;
+	}
+	container.innerHTML = `<div class="overflow-x-auto"><table class="w-full"><thead class="border-b border-[rgba(255,255,255,0.07)]"><tr class="text-left text-[10px] font-mono text-[rgba(238,242,238,0.28)] uppercase"><th class="px-5 py-3">Vehicle</th><th class="px-5 py-3">Plate</th><th class="px-5 py-3">Type</th><th class="px-5 py-3">Driver</th><th class="px-5 py-3">Status</th></tr></thead><tbody>${vehicles.map((v) => `<tr class="border-b border-[rgba(255,255,255,0.05)]"><td class="px-5 py-3 font-medium">${v.name}</td><td class="px-5 py-3 font-mono text-xs">${v.plate}</td><td class="px-5 py-3">${v.type}</td><td class="px-5 py-3">${v.driver}</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-mono ${v.status === 'Available' ? 'bg-[rgba(76,175,125,0.15)] text-[#4caf7d]' : 'bg-[rgba(248,192,106,0.15)] text-[#f8c06a]'}">${v.status}</span></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+// ==================================================
+// JOBS MANAGEMENT
+// ==================================================
+
+async function loadJobs() {
+	const result = await fetchAPI('/api/vendor/shipments');
+	if (result.ok && result.shipments) {
+		jobs = result.shipments;
+		renderJobs();
+		renderNewJobsList();
+		renderRecentCompletions();
+		updateStats();
+	}
+}
+
+function renderJobs() {
+	const container = document.getElementById('jobs-grid');
+	if (!container) return;
+	const activeJobs = jobs.filter(
+		(j) =>
+			j.status === 'pending' ||
+			j.status === 'accepted' ||
+			j.status === 'in_transit',
+	);
+	if (activeJobs.length === 0) {
+		container.innerHTML =
+			'<div class="col-span-2 text-center py-8 text-[rgba(238,242,238,0.5)]">No assigned jobs</div>';
+		return;
+	}
+	container.innerHTML = activeJobs
+		.map(
+			(job) => `
+        <div class="bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-xl p-4">
+            <div class="flex justify-between items-start mb-3"><span class="text-xs font-mono text-[rgba(238,242,238,0.28)]">${job.booking_id || `#MG-${job.id}`}</span><span class="px-2 py-0.5 rounded-full text-[10px] font-mono ${job.status === 'pending' ? 'bg-[rgba(240,120,64,0.15)] text-[#f07840]' : job.status === 'accepted' ? 'bg-[rgba(76,175,125,0.15)] text-[#4caf7d]' : 'bg-[rgba(248,192,106,0.15)] text-[#f8c06a]'}">${job.status || 'Pending'}</span></div>
+            <div class="font-semibold text-sm mb-1">${job.pickup_district} → ${job.drop_district}</div>
+            <div class="text-xs text-[rgba(238,242,238,0.5)] mb-2">${job.customer_name}</div>
+            <div class="flex gap-3 text-xs text-[rgba(238,242,238,0.4)] mb-3"><span>📅 ${job.move_date}</span><span>💰 Rs ${(job.final_quote || 0).toLocaleString()}</span></div>
+            <div class="flex gap-2">
+                ${job.status === 'pending' ? `<button onclick="acceptJob(${job.id})" class="flex-1 bg-[rgba(76,175,125,0.15)] text-[#4caf7d] border border-[rgba(76,175,125,0.25)] px-3 py-1.5 rounded-lg text-sm">Accept</button><button onclick="declineJob(${job.id})" class="flex-1 bg-[rgba(224,94,94,0.15)] text-[#e05e5e] border border-[rgba(224,94,94,0.25)] px-3 py-1.5 rounded-lg text-sm">Decline</button>` : job.status === 'accepted' ? `<button onclick="startDelivery(${job.id})" class="w-full bg-[#f8c06a] text-[#0b1510] px-3 py-1.5 rounded-lg text-sm font-semibold">Start Delivery</button>` : job.status === 'in_transit' ? `<button onclick="completeDelivery(${job.id})" class="w-full bg-[#4caf7d] text-white px-3 py-1.5 rounded-lg text-sm font-semibold">Complete Delivery</button>` : ''}
+            </div>
+        </div>
+    `,
+		)
+		.join('');
+}
+
+async function acceptJob(jobId) {
+	const result = await fetchAPI(`/api/vendor/shipments/${jobId}/accept`, {
+		method: 'PUT',
+	});
+	if (result.ok) {
+		toast('Job accepted!', 'green');
+		await loadJobs();
+	}
+}
+
+async function declineJob(jobId) {
+	if (confirm('Decline this job?')) {
+		toast('Job declined', 'red');
+		await loadJobs();
+	}
+}
+
+async function startDelivery(jobId) {
+	const result = await fetchAPI(`/api/vendor/shipments/${jobId}/start`, {
+		method: 'PUT',
+	});
+	if (result.ok) {
+		toast('Delivery started!', 'gold');
+		await loadJobs();
+	}
+}
+
+async function completeDelivery(jobId) {
+	const result = await fetchAPI(`/api/vendor/shipments/${jobId}/complete`, {
+		method: 'PUT',
+	});
+	if (result.ok) {
+		toast('Delivery completed!', 'green');
+		await loadJobs();
+		if (vendorData) {
+			vendorData.total_jobs++;
+			document.getElementById('vendor-jobs').textContent =
+				vendorData.total_jobs;
+		}
+	}
+}
+
+function renderNewJobsList() {
+	const container = document.getElementById('new-jobs-list');
+	if (!container) return;
+	const newJobs = jobs.filter((j) => j.status === 'pending');
+	const badge = document.getElementById('new-jobs-badge');
+	const jobBadge = document.getElementById('job-badge');
+	if (badge) {
+		if (newJobs.length > 0) {
+			badge.classList.remove('hidden');
+			badge.textContent = `${newJobs.length} new`;
+			if (jobBadge) {
+				jobBadge.classList.remove('hidden');
+				jobBadge.textContent = newJobs.length;
+			}
+		} else {
+			badge.classList.add('hidden');
+			if (jobBadge) jobBadge.classList.add('hidden');
+		}
+	}
+	if (newJobs.length === 0) {
+		container.innerHTML =
+			'<div class="p-5 text-center text-[rgba(238,242,238,0.5)]">No new job requests</div>';
+		return;
+	}
+	container.innerHTML = newJobs
+		.map(
+			(job) =>
+				`<div class="p-4 hover:bg-[rgba(248,192,106,0.05)]"><div class="flex justify-between items-start"><div><div class="font-medium text-sm">${job.pickup_district} → ${job.drop_district}</div><div class="text-xs text-[rgba(238,242,238,0.5)] mt-1">${job.customer_name} · ${job.move_date}</div></div><div class="text-right"><div class="text-[#f8c06a] font-semibold">Rs ${(job.final_quote || 0).toLocaleString()}</div><button onclick="acceptJob(${job.id})" class="mt-2 bg-[rgba(76,175,125,0.15)] text-[#4caf7d] px-3 py-1 rounded-lg text-xs">Accept</button></div></div></div>`,
+		)
+		.join('');
+}
+
+function renderRecentCompletions() {
+	const container = document.getElementById('recent-completions');
+	if (!container) return;
+	const completedJobs = jobs
+		.filter((j) => j.status === 'delivered' || j.status === 'completed')
+		.slice(0, 5);
+	if (completedJobs.length === 0) {
+		container.innerHTML =
+			'<div class="p-4 text-center text-[rgba(238,242,238,0.5)]">No completed jobs</div>';
+		return;
+	}
+	container.innerHTML = `<div class="overflow-x-auto"><table class="w-full"><thead class="border-b border-[rgba(255,255,255,0.07)]"><tr class="text-left text-[10px] font-mono text-[rgba(238,242,238,0.28)] uppercase"><th class="px-5 py-3">Job ID</th><th class="px-5 py-3">Route</th><th class="px-5 py-3">Earned</th><th class="px-5 py-3">Date</th></tr></thead><tbody>${completedJobs.map((job) => `<tr class="border-b border-[rgba(255,255,255,0.05)]"><td class="px-5 py-3 text-sm font-mono">${job.booking_id}</td><td class="px-5 py-3 text-sm">${job.pickup_district} → ${job.drop_district}</td><td class="px-5 py-3 text-sm text-[#4caf7d]">+Rs ${(job.final_quote || 0).toLocaleString()}</td><td class="px-5 py-3 text-sm">${job.move_date}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+// ==================================================
+// UI HELPERS
+// ==================================================
+
+function updateStats() {
+	const activeJobs = jobs.filter(
+		(j) => j.status === 'accepted' || j.status === 'in_transit',
+	).length;
+	const totalEarned = jobs
+		.filter((j) => j.status === 'delivered' || j.status === 'completed')
+		.reduce((sum, j) => sum + (j.final_quote || 0), 0);
+	const completedCount = jobs.filter(
+		(j) => j.status === 'delivered' || j.status === 'completed',
+	).length;
+	document.getElementById('active-jobs').textContent = activeJobs;
+	document.getElementById('fleet-size').textContent = vehicles.length;
+	document.getElementById('vendor-fleet').textContent = vehicles.length;
+	document.getElementById('earn-total').textContent =
+		`Rs ${(totalEarned / 1000).toFixed(0)}k`;
+	document.getElementById('earn-jobs').textContent = completedCount;
+	document.getElementById('month-earning').textContent =
+		`Rs ${Math.floor(totalEarned / 12).toLocaleString()}`;
+	document.getElementById('earn-pending').textContent =
+		`Rs ${(jobs.filter((j) => j.status === 'pending').length * 3000).toLocaleString()}`;
+}
+
+function goPage(page) {
+	currentPage = page;
+	const pages = [
+		'overview',
+		'jobs',
+		'fleet',
+		'earnings',
+		'profile',
+		'support',
+	];
+	pages.forEach((p) => {
+		const el = document.getElementById(`page-${p}`);
+		if (el) el.style.display = 'none';
+	});
+	const selectedPage = document.getElementById(`page-${page}`);
+	if (selectedPage) selectedPage.style.display = 'block';
+	document.querySelectorAll('.nav-link').forEach((link) => {
+		link.classList.remove('bg-[rgba(248,192,106,0.1)]', 'text-[#f8c06a]');
+		if (link.getAttribute('data-page') === page)
+			link.classList.add('bg-[rgba(248,192,106,0.1)]', 'text-[#f8c06a]');
+	});
+	const titles = {
+		overview: 'Overview',
+		jobs: 'Assigned Jobs',
+		fleet: 'My Fleet',
+		earnings: 'Earnings',
+		profile: 'Profile & Docs',
+		support: 'Help & Support',
+	};
+	document.getElementById('page-title').textContent = titles[page] || page;
+	if (page === 'profile' && vendorData) {
+		document.getElementById('profile-business-name').value =
+			vendorData.business_name || '';
+		document.getElementById('profile-owner-name').value =
+			vendorData.owner_name || '';
+		document.getElementById('profile-phone').value = vendorData.phone || '';
+		document.getElementById('profile-region').value =
+			vendorData.service_region || '';
+		document.getElementById('profile-address').value =
+			vendorData.address || '';
+	}
+}
+
+function showNotifications() {
+	const pendingJobs = jobs.filter((j) => j.status === 'pending').length;
+	if (pendingJobs > 0) {
+		toast(`You have ${pendingJobs} new job requests!`, 'gold');
+		goPage('jobs');
+	} else {
+		toast('No new notifications', 'blue');
+	}
+}
+
+function toggleOnline() {
+	console.log('toggleOnline called');
+
+	const statusSpan = document.getElementById('online-status');
+	const dotSpan = document.getElementById('online-dot');
+	const toggleBtn = document.getElementById('online-toggle-btn');
+	const toggleKnob = document.getElementById('online-toggle-knob');
+
+	if (!statusSpan) {
+		console.error('online-status element not found');
+		return;
+	}
+
+	const isOnline = statusSpan.textContent === 'Online & Available';
+
+	if (isOnline) {
+		// Going OFFLINE - Gray, Knob LEFT
+		statusSpan.textContent = 'Offline';
+		if (dotSpan) dotSpan.style.backgroundColor = '#9ca3af';
+		if (toggleBtn) toggleBtn.style.backgroundColor = '#6b7280';
+		if (toggleKnob) toggleKnob.style.transform = 'translateX(0px)';
+		toast('You are now offline', 'red');
+	} else {
+		// Going ONLINE - Green, Knob RIGHT
+		statusSpan.textContent = 'Online & Available';
+		if (dotSpan) dotSpan.style.backgroundColor = '#4caf7d';
+		if (toggleBtn) toggleBtn.style.backgroundColor = '#2d5a3d';
+		if (toggleKnob) toggleKnob.style.transform = 'translateX(16px)';
+		toast('You are now online', 'green');
+	}
+}
+
+// Initialize toggle state when page loads
+function initializeToggleState() {
+	const statusSpan = document.getElementById('online-status');
+	const dotSpan = document.getElementById('online-dot');
+	const toggleBtn = document.getElementById('online-toggle-btn');
+	const toggleKnob = document.getElementById('online-toggle-knob');
+
+	if (!statusSpan) return;
+
+	const isOnline = statusSpan.textContent === 'Online & Available';
+
+	if (isOnline) {
+		if (dotSpan) dotSpan.style.backgroundColor = '#4caf7d';
+		if (toggleBtn) toggleBtn.style.backgroundColor = '#2d5a3d';
+		if (toggleKnob) toggleKnob.style.transform = 'translateX(16px)';
+	} else {
+		if (dotSpan) dotSpan.style.backgroundColor = '#9ca3af';
+		if (toggleBtn) toggleBtn.style.backgroundColor = '#6b7280';
+		if (toggleKnob) toggleKnob.style.transform = 'translateX(0px)';
+	}
+}
+
+// Call initialization when DOM is ready
+document.addEventListener('DOMContentLoaded', function () {
+	initializeToggleState();
+});
+
+function submitSupportTicket() {
+	const subject = document.getElementById('support-subject')?.value;
+	const message = document.getElementById('support-message')?.value;
+	if (!subject || !message) {
+		toast('Please fill subject and message', 'red');
+		return;
+	}
+	toast('Ticket submitted!', 'green');
+	document.getElementById('support-subject').value = '';
+	document.getElementById('support-message').value = '';
+}
+
 function toast(msg, color = 'gold') {
-	const cols = {
+	const colors = {
 		gold: '#f8c06a',
 		green: '#4caf7d',
 		red: '#e05e5e',
 		blue: '#5e9fe0',
 	};
-	const wrap = document.getElementById('tw');
+	const container = document.getElementById('toast-container');
+	if (!container) return;
 	const el = document.createElement('div');
-	el.className = 'toast';
-	el.innerHTML = `<span class="tdot" style="background:${cols[color] || cols.gold}"></span>${msg}`;
-	wrap.appendChild(el);
+	el.className =
+		'bg-[#16261d] border border-[rgba(248,192,106,0.3)] rounded-lg px-4 py-3 text-sm flex items-center gap-2 mb-2';
+	el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full" style="background:${colors[color] || colors.gold}"></span>${msg}`;
+	container.appendChild(el);
 	setTimeout(() => {
-		el.classList.add('out');
-		setTimeout(() => el.remove(), 220);
+		el.style.opacity = '0';
+		el.style.transform = 'translateX(10px)';
+		setTimeout(() => el.remove(), 200);
 	}, 2800);
 }
 
-// ── COUNTER ──
-function counter(id, target, fmt) {
-	let c = 0;
-	const el = document.getElementById(id);
-	const step = Math.ceil(target / 55);
-	const f = fmt || ((v) => v.toLocaleString());
-	const tick = () => {
-		c = Math.min(c + step, target);
-		el.textContent = f(c);
-		if (c < target) requestAnimationFrame(tick);
-	};
-	setTimeout(tick, 220);
-}
+// ==================================================
+// INITIALIZATION
+// ==================================================
 
-// === For Getting Logo ===
-function getLogoText(name) {
-	return name
-		.trim()
-		.split(' ')
-		.filter((word) => word.length > 0)
-		.map((word) => word[0].toUpperCase())
-		.join('');
-}
+document.addEventListener('DOMContentLoaded', async () => {
+	const user = checkAuth();
+	if (!user) return;
+	await checkVendorProfile();
+});
 
-// === For Saving Changes in Profile ===
-function saveProfile() {
-	const form = document.getElementById('profileForm');
-	form.addEventListener('submit', (e) => {
-		e.preventDefault();
-		const ownerName = document.getElementById('ownerName').value.trim();
-		const businessName = document
-			.getElementById('businessName')
-			.value.trim();
-		const businessLogo = getLogoText(businessName);
-		const phone = document.getElementById('phone').value.trim();
-		const serviceRegion = document.getElementById('serviceRegion').value;
-		const vendorNameDiv = document.querySelector('.v-nm');
-		const vendorLocDiv = document.querySelector('.v-loc');
-		const vendorLogo = document.querySelector('.v-av');
-		if (!ownerName || !businessName || !phone) {
-			toast('Please fill all required fields', 'red');
-			return;
-		}
-		vendorNameDiv.textContent = businessName;
-		vendorLocDiv.textContent = serviceRegion;
-		vendorLogo.textContent = businessLogo;
-		toast('Profile updated', 'green');
-	});
-}
-
-// ── REFRESH ──
-function refresh() {
-	renderIncoming();
-	renderCompletions();
-	renderFleetStrip();
-	renderJobs();
-	updateKPIs();
-}
-
-// ── INIT ──
-counter(
-	'kv-earn',
-	68500,
-	(v) => `Rs ${v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v}`,
-);
-renderPayouts();
-refresh();
-renderFleet();
-saveProfile();
+// Make functions global
+window.goPage = goPage;
+window.logout = logout;
+window.openAddVehicle = openAddVehicle;
+window.closeModal = closeModal;
+window.addVehicle = addVehicle;
+window.removeVehicle = removeVehicle;
+window.updateVehicleStatus = updateVehicleStatus;
+window.acceptJob = acceptJob;
+window.declineJob = declineJob;
+window.startDelivery = startDelivery;
+window.completeDelivery = completeDelivery;
+window.showNotifications = showNotifications;
+window.toggleOnline = toggleOnline;
+window.submitVendorRegistration = submitVendorRegistration;
+window.updateVendorProfile = updateVendorProfile;
+window.submitSupportTicket = submitSupportTicket;
+window.checkStatusManually = checkStatusManually;

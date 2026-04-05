@@ -5,21 +5,57 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Vendor Portal — Mero Ghar</title>
 		<link rel="stylesheet" href="/src/styles/vendor.css" />
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = {
+				theme: {
+					extend: {
+						colors: {
+							forest: {
+								50: '#eef2ee',
+								100: '#d4e0d4',
+								200: '#a9c1a9',
+								300: '#7ea27e',
+								400: '#538353',
+								500: '#2b5e2b',
+								600: '#224a22',
+								700: '#1a371a',
+								800: '#112411',
+								900: '#091209',
+							},
+							saffron: {
+								50: '#fef8ed',
+								100: '#fdf0db',
+								200: '#fbe1b7',
+								300: '#f9d293',
+								400: '#f7c36f',
+								500: '#f5b44b',
+								600: '#c4903c',
+								700: '#936c2d',
+								800: '#62481e',
+								900: '#31240f',
+							},
+						},
+					},
+				},
+			};
+		</script>
 	</head>
-	<body>
-		<div class="shell">
+	<body class="bg-[#0b1510] text-[#eef2ee] font-sans">
+		<div class="flex h-screen overflow-hidden">
 			<!-- SIDEBAR -->
-			<aside class="sb">
-				<div class="sb-head">
-					<div class="brand">
-						<div class="b-ico">
+			<aside
+				class="w-64 min-w-[258px] bg-[#111d16] border-r border-[rgba(255,255,255,0.07)] flex flex-col overflow-hidden relative">
+				<div class="p-6 pb-4 border-b border-[rgba(255,255,255,0.07)]">
+					<div class="flex items-center gap-3">
+						<div
+							class="w-10 h-10 bg-[#f8c06a] rounded-xl flex items-center justify-center">
 							<svg
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="#0b1510"
 								stroke-width="2.5"
-								stroke-linecap="round"
-								stroke-linejoin="round">
+								class="w-5 h-5">
 								<path d="M1 3h15v13H1z" />
 								<path d="M16 8h4l3 3v5h-7V8z" />
 								<circle cx="5.5" cy="18.5" r="2.5" />
@@ -27,62 +63,113 @@
 							</svg>
 						</div>
 						<div>
-							<a href="/index.html">
-								<div class="b-name">Mero Ghar</div>
-								<div class="b-tag">Vendor Portal</div>
-							</a>
-						</div>
-					</div>
-
-					<div class="v-id">
-						<div class="v-id-top">
-							<div class="v-av">SL</div>
-							<div>
-								<div class="v-nm">Subodh Logistics</div>
-								<div class="v-loc">Kathmandu Valley</div>
-							</div>n
-						</div>
-						<div class="v-stats">
-							<div class="vst">
-								<div class="vst-n">4.7★</div>
-								<div class="vst-l">Rating</div>
-							</div>
-							<div class="vst">
-								<div class="vst-n" id="sb-fleet">5</div>
-								<div class="vst-l">Vehicles</div>
-							</div>
-							<div class="vst">
-								<div class="vst-n" id="sb-done">48</div>
-								<div class="vst-l">Jobs Done</div>
-							</div>
-						</div>
-						<div class="online-row">
-							<span class="ol-label">
-								<span class="ol-dot on" id="ol-dot"></span>
-								<span id="ol-txt">Online &amp; Available</span>
-							</span>
 							<div
-								class="sw-track on"
-								id="sw"
-								onclick="toggleOnline()">
-								<div class="sw-thumb"></div>
+								class="font-mono font-bold text-[#f8c06a] text-lg">
+								Mero Ghar
+							</div>
+							<div
+								class="font-mono text-[10px] text-[#f8c06a] tracking-wider uppercase">
+								Vendor Portal
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<nav class="sb-nav">
-					<div class="ngrp">
-						<div class="ngrp-lbl">Workspace</div>
-						<a class="na on" data-page="overview" href="#">
+				<!-- Vendor Profile Card -->
+				<div
+					id="vendor-profile-card"
+					class="m-4 p-4 bg-[#16261d] border border-[rgba(248,192,106,0.18)] rounded-xl">
+					<div class="flex items-center gap-3 mb-3">
+						<div
+							id="vendor-avatar"
+							class="w-10 h-10 rounded-full bg-gradient-to-br from-[#c8953e] to-[#f8c06a] flex items-center justify-center font-bold text-[#0b1510]">
+							SL
+						</div>
+						<div>
+							<div
+								id="vendor-name-display"
+								class="font-semibold text-sm">
+								Loading...
+							</div>
+							<div
+								id="vendor-region-display"
+								class="text-xs text-[rgba(238,242,238,0.5)]">
+								Loading...
+							</div>
+						</div>
+					</div>
+					<div class="grid grid-cols-3 gap-2 mb-3">
+						<div class="text-center bg-[#1d3327] rounded-lg py-2">
+							<div
+								id="vendor-rating"
+								class="font-mono text-sm font-semibold text-[#f8c06a]">
+								0★
+							</div>
+							<div
+								class="text-[10px] text-[rgba(238,242,238,0.28)] uppercase">
+								Rating
+							</div>
+						</div>
+						<div class="text-center bg-[#1d3327] rounded-lg py-2">
+							<div
+								id="vendor-fleet"
+								class="font-mono text-sm font-semibold text-[#f8c06a]">
+								0
+							</div>
+							<div
+								class="text-[10px] text-[rgba(238,242,238,0.28)] uppercase">
+								Vehicles
+							</div>
+						</div>
+						<div class="text-center bg-[#1d3327] rounded-lg py-2">
+							<div
+								id="vendor-jobs"
+								class="font-mono text-sm font-semibold text-[#f8c06a]">
+								0
+							</div>
+							<div
+								class="text-[10px] text-[rgba(238,242,238,0.28)] uppercase">
+								Jobs Done
+							</div>
+						</div>
+					</div>
+					<div
+						class="flex items-center justify-between px-3 py-2 bg-[#1d3327] rounded-lg">
+						<span
+							class="text-xs font-medium flex items-center gap-2">
+							<span
+								id="online-dot"
+								class="w-1.5 h-1.5 rounded-full bg-[#4caf7d]"></span>
+							<span id="online-status">Online & Available</span>
+						</span>
+						<button
+							id="online-toggle-btn"
+							onclick="toggleOnline()"
+							class="relative w-9 h-5 rounded-full transition-all duration-300"
+							style="background-color: #2d5a3d">
+							<span
+								id="online-toggle-knob"
+								class="absolute top-[3px] left-[3px] w-3.5 h-3.5 bg-white rounded-full transition-transform duration-300"></span>
+						</button>
+					</div>
+				</div>
+
+				<nav class="flex-1 p-4 overflow-y-auto">
+					<div class="mb-6">
+						<div
+							class="font-mono text-[10px] tracking-wider text-[rgba(238,242,238,0.28)] px-3 pb-2 uppercase">
+							Workspace
+						</div>
+						<a
+							onclick="goPage('overview')"
+							data-page="overview"
+							class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-[rgba(238,242,238,0.5)] hover:bg-[rgba(248,192,106,0.1)] hover:text-[#eef2ee] cursor-pointer transition-all">
 							<svg
-								class="nic"
+								class="w-4 h-4"
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round">
+								stroke-width="2">
 								<rect x="3" y="3" width="7" height="7" />
 								<rect x="14" y="3" width="7" height="7" />
 								<rect x="3" y="14" width="7" height="7" />
@@ -90,31 +177,37 @@
 							</svg>
 							Overview
 						</a>
-						<a class="na" data-page="jobs" href="#">
+						<a
+							onclick="goPage('jobs')"
+							data-page="jobs"
+							class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-[rgba(238,242,238,0.5)] hover:bg-[rgba(248,192,106,0.1)] hover:text-[#eef2ee] cursor-pointer transition-all">
 							<svg
-								class="nic"
+								class="w-4 h-4"
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round">
+								stroke-width="2">
 								<path d="M9 11l3 3L22 4" />
 								<path
 									d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
 							</svg>
 							Assigned Jobs
-							<span class="nbadge" id="new-badge">2</span>
+							<span
+								id="job-badge"
+								class="ml-auto bg-[#e05e5e] text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden"
+								>0</span
+							>
 						</a>
-						<a class="na" data-page="fleet" href="#">
+						<a
+							onclick="goPage('fleet')"
+							data-page="fleet"
+							class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-[rgba(238,242,238,0.5)] hover:bg-[rgba(248,192,106,0.1)] hover:text-[#eef2ee] cursor-pointer transition-all">
 							<svg
-								class="nic"
+								class="w-4 h-4"
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round">
+								stroke-width="2">
 								<rect x="1" y="3" width="15" height="13" />
 								<polygon
 									points="16 8 20 8 23 11 23 16 16 16 16 8" />
@@ -123,15 +216,16 @@
 							</svg>
 							My Fleet
 						</a>
-						<a class="na" data-page="earnings" href="#">
+						<a
+							onclick="goPage('earnings')"
+							data-page="earnings"
+							class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-[rgba(238,242,238,0.5)] hover:bg-[rgba(248,192,106,0.1)] hover:text-[#eef2ee] cursor-pointer transition-all">
 							<svg
-								class="nic"
+								class="w-4 h-4"
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round">
+								stroke-width="2">
 								<line x1="12" y1="1" x2="12" y2="23" />
 								<path
 									d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
@@ -139,50 +233,54 @@
 							Earnings
 						</a>
 					</div>
-					<div class="ngrp">
-						<div class="ngrp-lbl">Account</div>
-						<a class="na" data-page="profile" href="#">
+					<div class="mb-6">
+						<div
+							class="font-mono text-[10px] tracking-wider text-[rgba(238,242,238,0.28)] px-3 pb-2 uppercase">
+							Account
+						</div>
+						<a
+							onclick="goPage('profile')"
+							data-page="profile"
+							class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-[rgba(238,242,238,0.5)] hover:bg-[rgba(248,192,106,0.1)] hover:text-[#eef2ee] cursor-pointer transition-all">
 							<svg
-								class="nic"
+								class="w-4 h-4"
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round">
+								stroke-width="2">
 								<path
 									d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
 								<circle cx="12" cy="7" r="4" />
 							</svg>
-							Profile &amp; Docs
+							Profile & Docs
 						</a>
-						<a class="na" data-page="support" href="#">
+						<a
+							onclick="goPage('support')"
+							data-page="support"
+							class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-[rgba(238,242,238,0.5)] hover:bg-[rgba(248,192,106,0.1)] hover:text-[#eef2ee] cursor-pointer transition-all">
 							<svg
-								class="nic"
+								class="w-4 h-4"
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round">
+								stroke-width="2">
 								<circle cx="12" cy="12" r="10" />
 								<path
 									d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
 								<line x1="12" y1="17" x2="12.01" y2="17" />
 							</svg>
-							Help &amp; Support
+							Help & Support
 						</a>
 					</div>
 				</nav>
 
-				<div class="sb-foot">
+				<div
+					class="p-4 border-t border-[rgba(255,255,255,0.07)] space-y-2">
 					<button
-						class="fbt"
-						onclick="
-							goPage('jobs');
-							toast('Check new job requests', 'gold');
-						">
+						onclick="showNotifications()"
+						class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-[#16261d] border border-[rgba(255,255,255,0.07)] text-[rgba(238,242,238,0.5)] hover:border-[rgba(248,192,106,0.18)] hover:text-[#eef2ee] transition-all">
 						<svg
+							class="w-4 h-4"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
@@ -192,9 +290,17 @@
 							<path d="M13.73 21a2 2 0 0 1-3.46 0" />
 						</svg>
 						Alerts
+						<span
+							id="alert-badge"
+							class="ml-auto bg-[#e05e5e] text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden"
+							>0</span
+						>
 					</button>
-					<button class="fbt" onclick="toast('Signed out', 'red')">
+					<button
+						onclick="logout()"
+						class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-[#16261d] border border-[rgba(255,255,255,0.07)] text-[rgba(238,242,238,0.5)] hover:border-[rgba(224,94,94,0.3)] hover:text-[#e05e5e] transition-all">
 						<svg
+							class="w-4 h-4"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
@@ -208,540 +314,234 @@
 				</div>
 			</aside>
 
-			<!-- MAIN -->
-			<div class="main">
-				<header class="topbar">
-					<div class="tl">
-						<div class="t-title" id="pg-title">Overview</div>
-						<div class="t-sub" id="pg-sub">
-							Welcome back, Ram Logistics · Friday 27 Mar 2026
-						</div>
+			<!-- MAIN CONTENT -->
+			<div class="flex-1 flex flex-col overflow-hidden">
+				<header
+					class="h-16 min-h-16 border-b border-[rgba(255,255,255,0.07)] flex items-center justify-between px-7 bg-[#111d16]">
+					<div>
+						<h1 id="page-title" class="font-bold text-xl">
+							Overview
+						</h1>
+						<p
+							id="page-sub"
+							class="text-xs text-[rgba(238,242,238,0.5)]">
+							Welcome to your vendor dashboard
+						</p>
 					</div>
-					<div class="tr">
-						<div
-							class="icb"
-							id="notif-btn"
-							onclick="goPage('jobs')"
-							title="New job requests">
-							<svg
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2">
-								<path
-									d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-								<path d="M13.73 21a2 2 0 0 1-3.46 0" />
-							</svg>
-							<span class="dot" id="notif-dot"></span>
-						</div>
-						<button class="btn btn-sm" onclick="openAddVehicle()">
+					<div class="flex items-center gap-3">
+						<button
+							onclick="openAddVehicle()"
+							class="bg-[#f8c06a] text-[#0b1510] text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-85 transition">
 							+ Add Vehicle
 						</button>
 					</div>
 				</header>
 
-				<!-- OVERVIEW -->
-				<div class="pg on" id="pg-overview">
-					<div class="kpis">
-						<div class="kpi cg" onclick="goPage('earnings')">
-							<div class="ki kg">
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2">
-									<line x1="12" y1="1" x2="12" y2="23" />
-									<path
-										d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-								</svg>
-							</div>
-							<div class="k-lbl">This Month</div>
-							<div class="k-val" id="kv-earn">Rs 0</div>
-							<div class="k-note ku">
-								<svg
-									width="12"
-									height="12"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2.5">
-									<polyline points="18 15 12 9 6 15" /></svg
-								>+11.2% vs last month
-							</div>
-						</div>
-						<div class="kpi cv" onclick="goPage('jobs')">
-							<div class="ki kv">
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2">
-									<path d="M9 11l3 3L22 4" />
-									<path
-										d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-								</svg>
-							</div>
-							<div class="k-lbl">Active Jobs</div>
-							<div class="k-val" id="kv-active">0</div>
+				<div class="flex-1 overflow-y-auto p-7">
+					<!-- REGISTRATION FORM (shown when NO vendor profile exists) -->
+					<div id="vendor-reg-form" class="max-w-2xl mx-auto">
+						<div
+							class="bg-[#111d16] border border-[rgba(248,192,106,0.18)] rounded-xl overflow-hidden">
 							<div
-								class="k-note"
-								id="kv-active-sub"
-								style="color: var(--dim)">
-								—
+								class="bg-[#16261d] px-6 py-4 border-b border-[rgba(255,255,255,0.07)]">
+								<h2 class="text-lg font-bold">
+									Complete Your Vendor Profile
+								</h2>
+								<p
+									class="text-xs text-[rgba(238,242,238,0.5)] mt-1">
+									Please provide your business details for
+									admin approval
+								</p>
 							</div>
-						</div>
-						<div class="kpi cb" onclick="goPage('fleet')">
-							<div class="ki kb">
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2">
-									<rect x="1" y="3" width="15" height="13" />
-									<polygon
-										points="16 8 20 8 23 11 23 16 16 16 16 8" />
-									<circle cx="5.5" cy="18.5" r="2.5" />
-									<circle cx="18.5" cy="18.5" r="2.5" />
-								</svg>
-							</div>
-							<div class="k-lbl">Fleet Size</div>
-							<div class="k-val" id="kv-fleet">0</div>
-							<div
-								class="k-note"
-								id="kv-fleet-sub"
-								style="color: var(--dim)">
-								—
-							</div>
-						</div>
-						<div class="kpi co">
-							<div class="ki ko">
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2">
-									<polygon
-										points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-								</svg>
-							</div>
-							<div class="k-lbl">Rating</div>
-							<div class="k-val">4.7</div>
-							<div class="k-note" style="color: var(--dim)">
-								Based on 48 reviews
-							</div>
-						</div>
-					</div>
-
-					<div
-						style="
-							display: grid;
-							grid-template-columns: 1fr 1fr;
-							gap: 18px;
-						">
-						<!-- incoming -->
-						<div class="panel">
-							<div class="ph">
-								<span class="ph-t">New Job Requests</span>
-								<span
-									class="chip on"
-									id="incoming-badge"
-									style="pointer-events: none"
-									>2 new</span
-								>
-							</div>
-							<div id="incoming-list"></div>
-						</div>
-						<!-- recent completions -->
-						<div class="panel">
-							<div class="ph">
-								<span class="ph-t">Recent Completions</span>
-							</div>
-							<div class="tw">
-								<table>
-									<thead>
-										<tr>
-											<th>Job ID</th>
-											<th>Route</th>
-											<th>Earned</th>
-											<th>Date</th>
-										</tr>
-									</thead>
-									<tbody id="completions-tb"></tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-
-					<!-- fleet strip -->
-					<div class="panel">
-						<div class="ph">
-							<span class="ph-t">Fleet Status</span>
-							<button
-								class="btn btn-sm"
-								onclick="goPage('fleet')">
-								Manage Fleet →
-							</button>
-						</div>
-						<div class="tw">
-							<table>
-								<thead>
-									<tr>
-										<th>Vehicle</th>
-										<th>Plate</th>
-										<th>Type</th>
-										<th>Driver</th>
-										<th>Status</th>
-										<th>Last Job</th>
-									</tr>
-								</thead>
-								<tbody id="fleet-strip"></tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-
-				<!-- JOBS -->
-				<div class="pg" id="pg-jobs">
-					<div class="panel">
-						<div class="ph">
-							<span class="ph-t">Assigned Jobs</span>
-							<div class="chips" id="job-chips">
-								<span class="chip on" data-f="all">All</span>
-								<span class="chip" data-f="New">New</span>
-								<span class="chip" data-f="Accepted"
-									>Accepted</span
-								>
-								<span class="chip" data-f="In Transit"
-									>In Transit</span
-								>
-								<span class="chip" data-f="Completed"
-									>Completed</span
-								>
-							</div>
-						</div>
-						<div class="jgrid" id="jobs-grid"></div>
-					</div>
-				</div>
-
-				<!-- FLEET -->
-				<div class="pg" id="pg-fleet">
-					<div class="panel">
-						<div class="ph">
-							<span class="ph-t">My Fleet</span>
-							<div class="ph-r">
-								<div class="chips" id="fleet-chips">
-									<span class="chip on" data-f="all"
-										>All</span
-									>
-									<span class="chip" data-f="Available"
-										>Available</span
-									>
-									<span class="chip" data-f="On Route"
-										>On Route</span
-									>
-									<span class="chip" data-f="Maintenance"
-										>Maintenance</span
-									>
+							<div class="p-6 space-y-4">
+								<div>
+									<label
+										class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase tracking-wide mb-1"
+										>Business Name *</label
+									><input
+										type="text"
+										id="vendor-business-name"
+										placeholder="e.g. Ram Logistics"
+										class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2.5 text-sm text-[#eef2ee] focus:border-[rgba(248,192,106,0.3)] outline-none transition" />
+								</div>
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label
+											class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase tracking-wide mb-1"
+											>Owner Name *</label
+										><input
+											type="text"
+											id="vendor-owner-name"
+											placeholder="Full name"
+											class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2.5 text-sm text-[#eef2ee]" />
+									</div>
+									<div>
+										<label
+											class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase tracking-wide mb-1"
+											>Phone *</label
+										><input
+											type="tel"
+											id="vendor-phone"
+											placeholder="+977-98XXXXXXXX"
+											class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2.5 text-sm text-[#eef2ee]" />
+									</div>
+								</div>
+								<div>
+									<label
+										class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase tracking-wide mb-1"
+										>Service Region *</label
+									><select
+										id="vendor-service-region"
+										class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2.5 text-sm text-[#eef2ee]">
+										<option value="">Select Region</option>
+										<option>Kathmandu Valley</option>
+										<option>Pokhara – Chitwan</option>
+										<option>Eastern Nepal</option>
+										<option>Terai Belt</option>
+										<option>Mid-western Nepal</option>
+										<option>Far-western Nepal</option>
+									</select>
+								</div>
+								<div>
+									<label
+										class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase tracking-wide mb-1"
+										>Business Address</label
+									><textarea
+										id="vendor-address"
+										rows="3"
+										placeholder="Full business address..."
+										class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2.5 text-sm text-[#eef2ee] resize-none"></textarea>
+								</div>
+								<div
+									class="bg-[rgba(248,192,106,0.05)] border border-[rgba(248,192,106,0.15)] rounded-lg p-3">
+									<p
+										class="text-xs text-[rgba(238,242,238,0.6)]">
+										📋 After submission, your profile will
+										be reviewed by our admin team.
+									</p>
 								</div>
 								<button
-									class="btn btn-sm"
-									onclick="openAddVehicle()">
-									+ Add Vehicle
+									onclick="submitVendorRegistration()"
+									class="w-full bg-[#f8c06a] text-[#0b1510] font-semibold py-3 rounded-lg hover:opacity-85 transition">
+									Submit for Approval
 								</button>
 							</div>
 						</div>
-						<div class="fgrid" id="fleet-grid"></div>
 					</div>
-				</div>
 
-				<!-- EARNINGS -->
-				<div class="pg" id="pg-earnings">
-					<div class="kpis">
-						<div class="kpi cg">
-							<div class="ki kg">
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2">
-									<line x1="12" y1="1" x2="12" y2="23" />
-									<path
-										d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-								</svg>
+					<!-- PENDING STATE (shown when vendor exists but status = pending) -->
+					<div
+						id="vendor-pending-state"
+						class="max-w-2xl mx-auto"
+						style="display: none">
+						<div
+							class="bg-[#111d16] border border-[rgba(248,192,106,0.18)] rounded-xl overflow-hidden">
+							<div
+								class="bg-[#16261d] px-6 py-4 border-b border-[rgba(255,255,255,0.07)]">
+								<h2 class="text-lg font-bold">
+									Registration Under Review
+								</h2>
+								<p
+									class="text-xs text-[rgba(238,242,238,0.5)] mt-1">
+									Your profile is pending admin approval
+								</p>
 							</div>
-							<div class="k-lbl">This Month</div>
-							<div class="k-val">Rs 68,500</div>
-							<div class="k-note ku">
-								<svg
-									width="12"
-									height="12"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2.5">
-									<polyline points="18 15 12 9 6 15" /></svg
-								>+11.2%
-							</div>
-						</div>
-						<div class="kpi cv">
-							<div class="ki kv">
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2">
-									<rect
-										x="2"
-										y="3"
-										width="20"
-										height="14"
-										rx="2" />
-									<line x1="8" y1="21" x2="16" y2="21" />
-									<line x1="12" y1="17" x2="12" y2="21" />
-								</svg>
-							</div>
-							<div class="k-lbl">Pending Payout</div>
-							<div class="k-val">Rs 18,400</div>
-							<div class="k-note" style="color: var(--dim)">
-								Expected 29 Mar
-							</div>
-						</div>
-						<div class="kpi cb">
-							<div class="ki kb">
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2">
-									<polyline
-										points="23 6 13.5 15.5 8.5 10.5 1 18" />
-									<polyline points="17 6 23 6 23 12" />
-								</svg>
-							</div>
-							<div class="k-lbl">Total Earned</div>
-							<div class="k-val">Rs 3.8L</div>
-							<div class="k-note ku">
-								<svg
-									width="12"
-									height="12"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2.5">
-									<polyline points="18 15 12 9 6 15" /></svg
-								>All time
-							</div>
-						</div>
-						<div class="kpi co">
-							<div class="ki ko">
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2">
-									<path
-										d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-									<polyline points="22 4 12 14.01 9 11.01" />
-								</svg>
-							</div>
-							<div class="k-lbl">Jobs Completed</div>
-							<div class="k-val" id="kv-done">48</div>
-							<div class="k-note" style="color: var(--dim)">
-								100% acceptance rate
-							</div>
-						</div>
-					</div>
-					<div class="earn-2col">
-						<div class="panel">
-							<div class="ph">
-								<span class="ph-t">Monthly Earnings</span>
-								<div class="chips" id="earn-chips">
-									<span class="chip on" data-r="6"
-										>6 months</span
-									>
-									<span class="chip" data-r="12"
-										>12 months</span
-									>
+							<div class="p-10 text-center">
+								<div
+									class="w-16 h-16 mx-auto mb-4 rounded-full bg-[rgba(248,192,106,0.1)] flex items-center justify-center">
+									<svg
+										class="w-8 h-8 text-[#f8c06a]"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2">
+										<circle cx="12" cy="12" r="10" />
+										<polyline points="12 6 12 12 16 14" />
+									</svg>
 								</div>
+								<div class="font-semibold text-lg mb-1">
+									Awaiting Admin Approval
+								</div>
+								<p
+									class="text-sm text-[rgba(238,242,238,0.5)] max-w-sm mx-auto">
+									Your vendor registration has been submitted.
+									Our admin team will review and activate your
+									account.
+								</p>
+								<button
+									onclick="checkStatusManually()"
+									class="mt-6 px-5 py-2 rounded-lg bg-[rgba(248,192,106,0.1)] border border-[rgba(248,192,106,0.2)] text-[#f8c06a] text-sm hover:bg-[rgba(248,192,106,0.15)]">
+									Check Status
+								</button>
 							</div>
-							<div class="chart-wrap">
-								<canvas id="earn-chart" class="ec"></canvas>
-							</div>
-						</div>
-						<div class="panel">
-							<div class="ph">
-								<span class="ph-t">Payout History</span>
-							</div>
-							<div class="plist" id="plist"></div>
 						</div>
 					</div>
-				</div>
 
-				<!-- PROFILE -->
-				<div class="pg" id="pg-profile">
-					<div class="p2col">
-						<div class="panel">
-							<div class="ph">
-								<span class="ph-t">Business Information</span>
-							</div>
-							<form action="" id="profileForm">
-								<div class="fs">
-									<div class="fg">
-										<label for="businessName"
-											>Business Name</label
-										><input
-											id="businessName"
-											value="Ram Logistics" />
-									</div>
-									<div class="fg">
-										<label for="ownerName">Owner Name</label
-										><input
-											id="ownerName"
-											value="Ram Bahadur Thapa" />
-									</div>
-									<div class="fg">
-										<label for="phone">Phone</label
-										><input
-											id="phone"
-											value="+977-9841-123456" />
-									</div>
-									<div class="fg">
-										<label for="serviceRegion"
-											>Service Region</label
-										>
-										<select id="serviceRegion">
-											<option>Kathmandu Valley</option>
-											<option>Pokhara – Chitwan</option>
-											<option>Eastern Nepal</option>
-											<option>Terai Belt</option>
-										</select>
-									</div>
-									<div class="fg">
-										<label>Address</label
-										><textarea>
-Balaju, Kathmandu, Bagmati Province</textarea
-										>
-									</div>
-									<button
-										id="changeBtn"
-										class="btn"
-										onclick="
-											toast(
-												'Profile saved successfully',
-												'green',
-											)
-										">
-										Save Changes
-									</button>
-								</div>
-							</form>
-						</div>
-						<div class="panel">
-							<div class="ph">
-								<span class="ph-t"
-									>Documents &amp; Verification</span
-								>
-							</div>
-							<div class="fs">
-								<div class="doc-row">
-									<div class="doc-ico">
+					<!-- DASHBOARD (shown when vendor exists and status = active) -->
+					<div id="dashboard-content" style="display: none">
+						<!-- OVERVIEW PAGE -->
+						<div id="page-overview" class="space-y-6">
+							<div class="grid grid-cols-4 gap-4">
+								<div
+									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
+									<div
+										class="w-9 h-9 rounded-lg bg-[rgba(248,192,106,0.1)] border border-[rgba(248,192,106,0.18)] flex items-center justify-center mb-3">
 										<svg
+											class="w-4 h-4 text-[#f8c06a]"
 											viewBox="0 0 24 24"
 											fill="none"
 											stroke="currentColor"
 											stroke-width="2">
+											<line
+												x1="12"
+												y1="1"
+												x2="12"
+												y2="23" />
 											<path
-												d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-											<polyline points="14 2 14 8 20 8" />
+												d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
 										</svg>
 									</div>
-									<div class="doc-info">
-										<div class="doc-name">
-											Business Registration
-										</div>
-										<div
-											class="doc-stat"
-											style="color: var(--green)">
-											✓ Verified
-										</div>
+									<div
+										class="text-[10px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										This Month
 									</div>
-									<button
-										class="btn-ghost bgsm"
-										onclick="
-											toast('Opening document…', 'blue')
-										">
-										View
-									</button>
+									<div
+										class="text-2xl font-bold mt-1"
+										id="month-earning">
+										Rs 0
+									</div>
 								</div>
-								<div class="doc-row">
-									<div class="doc-ico">
+								<div
+									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
+									<div
+										class="w-9 h-9 rounded-lg bg-[rgba(76,175,125,0.1)] border border-[rgba(76,175,125,0.2)] flex items-center justify-center mb-3">
 										<svg
+											class="w-4 h-4 text-[#4caf7d]"
 											viewBox="0 0 24 24"
 											fill="none"
 											stroke="currentColor"
 											stroke-width="2">
-											<rect
-												x="3"
-												y="3"
-												width="18"
-												height="18"
-												rx="2" />
-											<path d="M9 9h6M9 13h6M9 17h4" />
-										</svg>
-									</div>
-									<div class="doc-info">
-										<div class="doc-name">
-											PAN Certificate
-										</div>
-										<div
-											class="doc-stat"
-											style="color: var(--green)">
-											✓ Verified
-										</div>
-									</div>
-									<button
-										class="btn-ghost bgsm"
-										onclick="
-											toast('Opening document…', 'blue')
-										">
-										View
-									</button>
-								</div>
-								<div class="doc-row">
-									<div class="doc-ico">
-										<svg
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2">
+											<path d="M9 11l3 3L22 4" />
 											<path
-												d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+												d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
 										</svg>
 									</div>
-									<div class="doc-info">
-										<div class="doc-name">
-											Vehicle Insurance
-										</div>
-										<div
-											class="doc-stat"
-											style="color: var(--orange)">
-											⚠ Expiring soon
-										</div>
+									<div
+										class="text-[10px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										Active Jobs
 									</div>
-									<button
-										class="btn btn-sm"
-										onclick="
-											toast(
-												'Renewal request submitted',
-												'green',
-											)
-										">
-										Renew
-									</button>
+									<div
+										class="text-2xl font-bold mt-1"
+										id="active-jobs">
+										0
+									</div>
 								</div>
-								<div class="doc-row">
-									<div class="doc-ico">
+								<div
+									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
+									<div
+										class="w-9 h-9 rounded-lg bg-[rgba(94,159,224,0.1)] border border-[rgba(94,159,224,0.2)] flex items-center justify-center mb-3">
 										<svg
+											class="w-4 h-4 text-[#5e9fe0]"
 											viewBox="0 0 24 24"
 											fill="none"
 											stroke="currentColor"
@@ -763,77 +563,312 @@ Balaju, Kathmandu, Bagmati Province</textarea
 												r="2.5" />
 										</svg>
 									</div>
-									<div class="doc-info">
-										<div class="doc-name">Route Permit</div>
-										<div
-											class="doc-stat"
-											style="color: var(--green)">
-											✓ Verified
-										</div>
+									<div
+										class="text-[10px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										Fleet Size
 									</div>
-									<button
-										class="btn-ghost bgsm"
-										onclick="
-											toast('Opening document…', 'blue')
-										">
-										View
+									<div
+										class="text-2xl font-bold mt-1"
+										id="fleet-size">
+										0
+									</div>
+								</div>
+								<div
+									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
+									<div
+										class="w-9 h-9 rounded-lg bg-[rgba(240,120,64,0.1)] border border-[rgba(240,120,64,0.2)] flex items-center justify-center mb-3">
+										<svg
+											class="w-4 h-4 text-[#f07840]"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2">
+											<polygon
+												points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+										</svg>
+									</div>
+									<div
+										class="text-[10px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										Rating
+									</div>
+									<div
+										class="text-2xl font-bold mt-1"
+										id="vendor-rating-val">
+										0.0
+									</div>
+								</div>
+							</div>
+							<div class="grid grid-cols-2 gap-4">
+								<div
+									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl">
+									<div
+										class="px-5 py-4 border-b border-[rgba(255,255,255,0.07)]">
+										<span class="font-semibold"
+											>New Job Requests</span
+										><span
+											id="new-jobs-badge"
+											class="ml-2 px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#f8c06a] text-[#0b1510] hidden"
+											>0</span
+										>
+									</div>
+									<div
+										id="new-jobs-list"
+										class="divide-y divide-[rgba(255,255,255,0.05)]"></div>
+								</div>
+								<div
+									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl">
+									<div
+										class="px-5 py-4 border-b border-[rgba(255,255,255,0.07)]">
+										<span class="font-semibold"
+											>Recent Completions</span
+										>
+									</div>
+									<div
+										id="recent-completions"
+										class="p-4 text-center text-[rgba(238,242,238,0.5)]">
+										Loading...
+									</div>
+								</div>
+							</div>
+							<div
+								class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl">
+								<div
+									class="px-5 py-4 border-b border-[rgba(255,255,255,0.07)]">
+									<span class="font-semibold"
+										>Fleet Status</span
+									>
+								</div>
+								<div
+									id="fleet-list"
+									class="p-4 text-center text-[rgba(238,242,238,0.5)]">
+									No vehicles
+								</div>
+							</div>
+						</div>
+
+						<!-- JOBS PAGE -->
+						<div
+							id="page-jobs"
+							class="space-y-6"
+							style="display: none">
+							<div
+								class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl">
+								<div
+									class="px-5 py-4 border-b border-[rgba(255,255,255,0.07)]">
+									<span class="font-semibold"
+										>Assigned Jobs</span
+									>
+								</div>
+								<div
+									id="jobs-grid"
+									class="grid grid-cols-2 gap-4 p-5"></div>
+							</div>
+						</div>
+
+						<!-- FLEET PAGE -->
+						<div
+							id="page-fleet"
+							class="space-y-6"
+							style="display: none">
+							<div
+								class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl">
+								<div
+									class="px-5 py-4 border-b border-[rgba(255,255,255,0.07)] flex justify-between items-center">
+									<span class="font-semibold">My Fleet</span
+									><button
+										onclick="openAddVehicle()"
+										class="text-xs bg-[#f8c06a] text-[#0b1510] px-3 py-1 rounded-lg">
+										+ Add Vehicle
 									</button>
 								</div>
-								<button
-									class="btn-ghost"
-									style="
-										width: 100%;
-										margin-top: 6px;
-										justify-content: center;
-										display: flex;
-									"
-									onclick="
-										toast('Select a file to upload', 'blue')
-									">
-									+ Upload New Document
-								</button>
+								<div
+									id="fleet-grid"
+									class="grid grid-cols-2 gap-4 p-5"></div>
 							</div>
 						</div>
-					</div>
-				</div>
 
-				<!-- SUPPORT -->
-				<div class="pg" id="pg-support">
-					<div class="panel" style="max-width: 620px">
-						<div class="ph">
-							<span class="ph-t">Help &amp; Support</span>
+						<!-- EARNINGS PAGE -->
+						<div
+							id="page-earnings"
+							class="space-y-6"
+							style="display: none">
+							<div class="grid grid-cols-4 gap-4">
+								<div
+									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
+									<div
+										class="text-[10px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										This Month
+									</div>
+									<div
+										class="text-2xl font-bold mt-1"
+										id="earn-month">
+										Rs 0
+									</div>
+								</div>
+								<div
+									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
+									<div
+										class="text-[10px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										Pending Payout
+									</div>
+									<div
+										class="text-2xl font-bold mt-1"
+										id="earn-pending">
+										Rs 0
+									</div>
+								</div>
+								<div
+									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
+									<div
+										class="text-[10px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										Total Earned
+									</div>
+									<div
+										class="text-2xl font-bold mt-1"
+										id="earn-total">
+										Rs 0
+									</div>
+								</div>
+								<div
+									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
+									<div
+										class="text-[10px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										Jobs Completed
+									</div>
+									<div
+										class="text-2xl font-bold mt-1"
+										id="earn-jobs">
+										0
+									</div>
+								</div>
+							</div>
 						</div>
-						<div class="fs">
-							<div class="fg">
-								<label>Issue Category</label>
-								<select>
-									<option>Payment Issue</option>
-									<option>Job Assignment</option>
-									<option>Vehicle / Documents</option>
-									<option>Technical Problem</option>
-									<option>Other</option>
-								</select>
+
+						<!-- PROFILE PAGE -->
+						<div
+							id="page-profile"
+							class="space-y-6"
+							style="display: none">
+							<div
+								class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl">
+								<div
+									class="px-5 py-4 border-b border-[rgba(255,255,255,0.07)]">
+									<span class="font-semibold"
+										>Business Information</span
+									>
+								</div>
+								<div class="p-5 space-y-4">
+									<div class="grid grid-cols-2 gap-4">
+										<div>
+											<label
+												class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+												>Business Name</label
+											><input
+												type="text"
+												id="profile-business-name"
+												class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2 text-sm" />
+										</div>
+										<div>
+											<label
+												class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+												>Owner Name</label
+											><input
+												type="text"
+												id="profile-owner-name"
+												class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2 text-sm" />
+										</div>
+									</div>
+									<div class="grid grid-cols-2 gap-4">
+										<div>
+											<label
+												class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+												>Phone</label
+											><input
+												type="tel"
+												id="profile-phone"
+												class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2 text-sm" />
+										</div>
+										<div>
+											<label
+												class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+												>Service Region</label
+											><input
+												type="text"
+												id="profile-region"
+												class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2 text-sm" />
+										</div>
+									</div>
+									<div>
+										<label
+											class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+											>Address</label
+										><textarea
+											id="profile-address"
+											rows="2"
+											class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2 text-sm resize-none"></textarea>
+									</div>
+									<button
+										onclick="updateVendorProfile()"
+										class="bg-[#f8c06a] text-[#0b1510] font-semibold px-6 py-2 rounded-lg">
+										Save Changes
+									</button>
+								</div>
 							</div>
-							<div class="fg">
-								<label>Subject</label
-								><input
-									placeholder="Brief description of your issue" />
+						</div>
+
+						<!-- SUPPORT PAGE -->
+						<div
+							id="page-support"
+							class="space-y-6"
+							style="display: none">
+							<div
+								class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl max-w-2xl">
+								<div
+									class="px-5 py-4 border-b border-[rgba(255,255,255,0.07)]">
+									<span class="font-semibold"
+										>Help & Support</span
+									>
+								</div>
+								<div class="p-5 space-y-4">
+									<div>
+										<label
+											class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+											>Issue Category</label
+										><select
+											id="support-category"
+											class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2 text-sm">
+											<option>Payment Issue</option>
+											<option>Job Assignment</option>
+											<option>Vehicle / Documents</option>
+											<option>Technical Problem</option>
+											<option>Other</option>
+										</select>
+									</div>
+									<div>
+										<label
+											class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+											>Subject</label
+										><input
+											type="text"
+											id="support-subject"
+											class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2 text-sm" />
+									</div>
+									<div>
+										<label
+											class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+											>Message</label
+										><textarea
+											id="support-message"
+											rows="4"
+											class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-4 py-2 text-sm resize-none"></textarea>
+									</div>
+									<button
+										onclick="submitSupportTicket()"
+										class="bg-[#f8c06a] text-[#0b1510] font-semibold px-6 py-2 rounded-lg">
+										Submit Ticket
+									</button>
+								</div>
 							</div>
-							<div class="fg">
-								<label>Message</label
-								><textarea
-									placeholder="Describe your issue in detail…"></textarea>
-							</div>
-							<button
-								class="btn"
-								onclick="
-									toast(
-										'Ticket submitted — we\'ll respond within 24 hours',
-										'green',
-									)
-								">
-								Submit Ticket
-							</button>
 						</div>
 					</div>
 				</div>
@@ -841,12 +876,19 @@ Balaju, Kathmandu, Bagmati Province</textarea
 		</div>
 
 		<!-- ADD VEHICLE MODAL -->
-		<div class="overlay" id="modal-v">
-			<div class="modal">
-				<div class="mh">
-					<span>Add Vehicle</span>
-					<div class="mx" onclick="closeModal('modal-v')">
+		<div
+			id="modal-add-vehicle"
+			class="fixed inset-0 bg-black/65 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+			<div
+				class="bg-[#111d16] border border-[rgba(248,192,106,0.18)] rounded-xl w-[460px] max-w-[93vw] overflow-hidden">
+				<div
+					class="flex justify-between items-center px-6 py-4 border-b border-[rgba(255,255,255,0.07)]">
+					<span class="font-semibold">Add Vehicle</span
+					><button
+						onclick="closeModal('modal-add-vehicle')"
+						class="w-8 h-8 rounded-lg bg-[#16261d] border border-[rgba(255,255,255,0.07)] flex items-center justify-center">
 						<svg
+							class="w-4 h-4"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
@@ -854,23 +896,39 @@ Balaju, Kathmandu, Bagmati Province</textarea
 							<line x1="18" y1="6" x2="6" y2="18" />
 							<line x1="6" y1="6" x2="18" y2="18" />
 						</svg>
-					</div>
+					</button>
 				</div>
-				<div class="mb">
-					<div class="mr2">
+				<div class="p-6 space-y-4">
+					<div class="grid grid-cols-2 gap-4">
 						<div>
-							<label>Vehicle Name / Model</label
-							><input placeholder="e.g. Tata 407" id="v-nm" />
+							<label
+								class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+								>Vehicle Name</label
+							><input
+								type="text"
+								id="vehicle-name"
+								placeholder="e.g. Tata 407"
+								class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-3 py-2 text-sm" />
 						</div>
 						<div>
-							<label>Plate Number</label
-							><input placeholder="BA 1 KHA 1234" id="v-pl" />
+							<label
+								class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+								>Plate Number</label
+							><input
+								type="text"
+								id="vehicle-plate"
+								placeholder="BA 1 KHA 1234"
+								class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-3 py-2 text-sm" />
 						</div>
 					</div>
-					<div class="mr2">
+					<div class="grid grid-cols-2 gap-4">
 						<div>
-							<label>Vehicle Type</label>
-							<select id="v-ty">
+							<label
+								class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+								>Vehicle Type</label
+							><select
+								id="vehicle-type"
+								class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-3 py-2 text-sm">
 								<option>Mini Truck</option>
 								<option>Large Truck</option>
 								<option>Pickup Van</option>
@@ -879,35 +937,58 @@ Balaju, Kathmandu, Bagmati Province</textarea
 							</select>
 						</div>
 						<div>
-							<label>Capacity (tonnes)</label
-							><input type="number" placeholder="1.5" id="v-cp" />
+							<label
+								class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+								>Capacity (tonnes)</label
+							><input
+								type="number"
+								id="vehicle-capacity"
+								placeholder="1.5"
+								class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-3 py-2 text-sm" />
 						</div>
 					</div>
-					<div class="mr2">
+					<div class="grid grid-cols-2 gap-4">
 						<div>
-							<label>Driver Name</label
-							><input placeholder="Full name" id="v-dr" />
+							<label
+								class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+								>Driver Name</label
+							><input
+								type="text"
+								id="vehicle-driver"
+								placeholder="Full name"
+								class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-3 py-2 text-sm" />
 						</div>
 						<div>
-							<label>Driver Phone</label
-							><input placeholder="+977-98…" id="v-dp" />
+							<label
+								class="block text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase mb-1"
+								>Driver Phone</label
+							><input
+								type="tel"
+								id="vehicle-driver-phone"
+								placeholder="+977-98..."
+								class="w-full bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-lg px-3 py-2 text-sm" />
 						</div>
 					</div>
 				</div>
-				<div class="mfoot">
-					<button class="btn-ghost" onclick="closeModal('modal-v')">
-						Cancel
-					</button>
-					<button class="btn" onclick="submitVehicle()">
+				<div class="flex justify-end gap-3 px-6 pb-6">
+					<button
+						onclick="closeModal('modal-add-vehicle')"
+						class="px-4 py-2 rounded-lg border border-[rgba(255,255,255,0.07)] text-[rgba(238,242,238,0.5)]">
+						Cancel</button
+					><button
+						onclick="addVehicle()"
+						class="px-4 py-2 rounded-lg bg-[#f8c06a] text-[#0b1510] font-semibold">
 						Add to Fleet
 					</button>
 				</div>
 			</div>
 		</div>
 
-		<div class="toast-wrap" id="tw"></div>
+		<!-- TOAST CONTAINER -->
+		<div
+			id="toast-container"
+			class="fixed bottom-5 right-5 z-50 space-y-2"></div>
 
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 		<script src="/src/js/vendor.js"></script>
 	</body>
 </html>

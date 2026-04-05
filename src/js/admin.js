@@ -1,143 +1,220 @@
-// ── DATA ──
-const BOOKINGS = [
-	{
-		id: '#MG-4821',
-		customer: 'Sita Rai',
-		route: 'Kathmandu → Pokhara',
-		date: '27 Mar',
-		status: 'In Transit',
-		amount: 4500,
-		phone: '+977-9841-001',
-	},
-	{
-		id: '#MG-4820',
-		customer: 'Bikash Thapa',
-		route: 'Lalitpur → Bhaktapur',
-		date: '27 Mar',
-		status: 'Delivered',
-		amount: 1200,
-		phone: '+977-9851-002',
-	},
-	{
-		id: '#MG-4819',
-		customer: 'Priya Shrestha',
-		route: 'Biratnagar → Dharan',
-		date: '26 Mar',
-		status: 'Pending',
-		amount: 2800,
-		phone: '+977-9801-003',
-	},
-	{
-		id: '#MG-4818',
-		customer: 'Rohan Karki',
-		route: 'Chitwan → Butwal',
-		date: '26 Mar',
-		status: 'Delivered',
-		amount: 3100,
-		phone: '+977-9811-004',
-	},
-	{
-		id: '#MG-4817',
-		customer: 'Mina Lama',
-		route: 'Pokhara → Kathmandu',
-		date: '25 Mar',
-		status: 'Cancelled',
-		amount: 4500,
-		phone: '+977-9821-005',
-	},
-	{
-		id: '#MG-4816',
-		customer: 'Arjun Tamang',
-		route: 'Janakpur → Kathmandu',
-		date: '25 Mar',
-		status: 'In Transit',
-		amount: 5200,
-		phone: '+977-9841-006',
-	},
-	{
-		id: '#MG-4815',
-		customer: 'Nisha Gurung',
-		route: 'Dharan → Itahari',
-		date: '24 Mar',
-		status: 'Delivered',
-		amount: 900,
-		phone: '+977-9851-007',
-	},
-	{
-		id: '#MG-4814',
-		customer: 'Dev Pandey',
-		route: 'Pokhara → Lumbini',
-		date: '24 Mar',
-		status: 'Pending',
-		amount: 3800,
-		phone: '+977-9801-008',
-	},
-	{
-		id: '#MG-4813',
-		customer: 'Sunita KC',
-		route: 'Kathmandu → Chitwan',
-		date: '23 Mar',
-		status: 'In Transit',
-		amount: 2200,
-		phone: '+977-9811-009',
-	},
-];
-const CUSTOMERS = [
-	{
-		name: 'Sita Rai',
-		email: 'sita@email.com',
-		phone: '+977-9841-001',
-		bookings: 7,
-		joined: 'Jan 2024',
-		status: 'Active',
-	},
-	{
-		name: 'Bikash Thapa',
-		email: 'bikash@email.com',
-		phone: '+977-9851-002',
-		bookings: 4,
-		joined: 'Mar 2024',
-		status: 'Active',
-	},
-	{
-		name: 'Priya Shrestha',
-		email: 'priya@email.com',
-		phone: '+977-9801-003',
-		bookings: 2,
-		joined: 'Jun 2024',
-		status: 'Active',
-	},
-	{
-		name: 'Rohan Karki',
-		email: 'rohan@email.com',
-		phone: '+977-9811-004',
-		bookings: 9,
-		joined: 'Nov 2023',
-		status: 'Active',
-	},
-	{
-		name: 'Mina Lama',
-		email: 'mina@email.com',
-		phone: '+977-9821-005',
-		bookings: 1,
-		joined: 'Feb 2025',
-		status: 'Inactive',
-	},
-	{
-		name: 'Arjun Tamang',
-		email: 'arjun@email.com',
-		phone: '+977-9841-006',
-		bookings: 5,
-		joined: 'Apr 2024',
-		status: 'Active',
-	},
-];
+// ==================================================
+// ADMIN PANEL - COMPLETE WORKING VERSION
+// ==================================================
 
+// ── CONFIGURATION ──
+const BASEURL = 'http://localhost:5000';
+let BOOKINGS = [];
+let CUSTOMERS = [];
+let VENDORS = [];
+let PENDING_SHIPMENTS = [];
 let sortState = { col: null, dir: 1 };
-let bookFilter = 'all',
-	dashFilter = 'all';
+let bookFilter = 'all';
+let dashFilter = 'all';
+let approvalFilter = 'pending';
 
-// ── PILL HTML ──
+// ==================================================
+// AUTHENTICATION FUNCTIONS
+// ==================================================
+
+function checkAuth() {
+	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	if (!user.loggedIn || user.role !== 'admin') {
+		window.location.href = '/src/pages/login.html';
+		return null;
+	}
+
+	const adminNameEl = document.getElementById('a-name');
+	if (adminNameEl) adminNameEl.textContent = user.name || 'Admin User';
+
+	const avatarEl = document.querySelector('.av');
+	if (avatarEl && user.name) {
+		const initials = user.name
+			.split(' ')
+			.map((n) => n[0])
+			.join('')
+			.toUpperCase()
+			.slice(0, 2);
+		avatarEl.textContent = initials;
+	}
+
+	return user;
+}
+
+function logout() {
+	if (confirm('Are you sure you want to logout?')) {
+		localStorage.removeItem('meroGharUser');
+		toast('Logged out successfully', 'green');
+		setTimeout(() => {
+			window.location.href = '/src/pages/login.html';
+		}, 500);
+	}
+}
+
+// ==================================================
+// API FUNCTIONS
+// ==================================================
+
+async function fetchAPI(url, options = {}) {
+	const token = localStorage.getItem('meroGharUser');
+	const headers = {
+		'Content-Type': 'application/json',
+		...options.headers,
+	};
+
+	if (token) {
+		const user = JSON.parse(token);
+		headers['Authorization'] = `Bearer ${user.id}`;
+	}
+
+	try {
+		const response = await fetch(`${BASEURL}${url}`, {
+			...options,
+			headers,
+		});
+		const data = await response.json();
+		return { ok: response.ok, ...data };
+	} catch (error) {
+		console.error('API Error:', error);
+		return { ok: false, message: error.message };
+	}
+}
+
+async function loadBookings() {
+	const result = await fetchAPI('/api/shipment/all');
+	if (result.ok && result.shipments) {
+		BOOKINGS = result.shipments.map((shipment) => ({
+			id: shipment.id, // Make sure this is the numeric ID
+			booking_id: shipment.booking_id || `#MG-${shipment.id}`,
+			customer:
+				`${shipment.first_name || ''} ${shipment.last_name || ''}`.trim(),
+			route: `${shipment.pickup_district || ''} → ${shipment.drop_district || ''}`,
+			date: shipment.move_date
+				? new Date(shipment.move_date).toLocaleDateString('en-GB', {
+						day: 'numeric',
+						month: 'short',
+					})
+				: '—',
+			status: shipment.status || 'pending',
+			amount: shipment.final_quote || 0,
+			phone: shipment.mobile_number || '—',
+			full_route: `${shipment.pickup_city || ''}, ${shipment.pickup_district || ''} → ${shipment.drop_city || ''}, ${shipment.drop_district || ''}`,
+			move_date: shipment.move_date,
+			created_at: shipment.created_at,
+			approval_status: shipment.approval_status || 'pending',
+			assigned_vendor_id: shipment.assigned_vendor_id,
+			vendor_name: shipment.vendor_name || null,
+		}));
+		renderDashTable(dashFilter, '');
+		renderBookTable(bookFilter, '');
+		updateStats();
+	}
+}
+
+async function loadCustomers() {
+	const result = await fetchAPI('/api/auth/users');
+	if (result.ok && result.users) {
+		CUSTOMERS = result.users.map((user) => ({
+			name: user.name,
+			email: user.email,
+			phone: user.phone || '—',
+			bookings: BOOKINGS.filter((b) => b.customer.includes(user.name))
+				.length,
+			joined: user.created_at
+				? new Date(user.created_at).toLocaleDateString('en-GB', {
+						month: 'short',
+						year: 'numeric',
+					})
+				: '—',
+			status: 'Active',
+		}));
+		renderCustomers('');
+	}
+}
+
+async function loadVendors() {
+	try {
+		const result = await fetchAPI('/api/admin/vendors');
+		if (result.ok && result.vendors) {
+			VENDORS = result.vendors;
+			renderVendorsTable();
+			return VENDORS;
+		}
+		return [];
+	} catch (error) {
+		console.error('Error loading vendors:', error);
+		return [];
+	}
+}
+
+async function loadActiveVendors() {
+	try {
+		const result = await fetchAPI('/api/admin/vendors/active');
+		if (result.ok && result.vendors) {
+			return result.vendors;
+		}
+		return [];
+	} catch (error) {
+		console.error('Error loading active vendors:', error);
+		return [];
+	}
+}
+
+async function loadPendingShipments() {
+	const result = await fetchAPI('/api/admin/shipments/pending');
+	if (result.ok && result.shipments) {
+		PENDING_SHIPMENTS = result.shipments;
+		renderApprovalTable(PENDING_SHIPMENTS);
+		const pendingCount = document.getElementById('pending-approval-count');
+		if (pendingCount) pendingCount.textContent = PENDING_SHIPMENTS.length;
+	}
+}
+
+async function loadShipmentsByStatus(status) {
+	const result = await fetchAPI(`/api/admin/shipments/status/${status}`);
+	if (result.ok && result.shipments) {
+		renderApprovalTable(result.shipments);
+	}
+}
+
+// ==================================================
+// UI UPDATE FUNCTIONS
+// ==================================================
+
+function updateStats() {
+	const total = BOOKINGS.length;
+	const delivered = BOOKINGS.filter((b) => b.status === 'Delivered').length;
+	const inTransit = BOOKINGS.filter((b) => b.status === 'In Transit').length;
+	const revenue = BOOKINGS.reduce((sum, b) => sum + (b.amount || 0), 0);
+
+	animateNumber('sv1', total);
+	animateNumber('sv2', delivered);
+	animateNumber('sv3', inTransit);
+	animateNumber('sv4', revenue, (v) => `Rs ${(v / 1000).toFixed(0)}k`);
+
+	const pendingCount = document.getElementById('pending-count');
+	if (pendingCount)
+		pendingCount.textContent = BOOKINGS.filter(
+			(b) => b.status === 'Pending',
+		).length;
+}
+
+function animateNumber(id, target, formatter = (v) => v.toLocaleString()) {
+	let current = 0;
+	const el = document.getElementById(id);
+	if (!el) return;
+	const step = Math.ceil(target / 50);
+	const interval = setInterval(() => {
+		current = Math.min(current + step, target);
+		el.textContent = formatter(current);
+		if (current >= target) clearInterval(interval);
+	}, 20);
+}
+
+// ==================================================
+// PILL & TABLE RENDER FUNCTIONS
+// ==================================================
+
 function pillHtml(status) {
 	const map = {
 		Delivered: 'pd',
@@ -146,21 +223,25 @@ function pillHtml(status) {
 		Cancelled: 'pc',
 		Active: 'pd',
 		Inactive: 'pc',
+		approved: 'pd',
+		pending: 'pp',
+		rejected: 'pc',
 	};
 	return `<span class="pill ${map[status] || 'pp'}">${status}</span>`;
 }
 
-// ── RENDER DASH TABLE ──
 function renderDashTable(filter, search) {
 	const tbody = document.getElementById('dash-tbody');
-	let data = BOOKINGS.slice(0, 6);
+	if (!tbody) return;
+
+	let data = [...BOOKINGS].slice(0, 6);
 	if (filter && filter !== 'all')
 		data = data.filter((r) => r.status === filter);
 	if (search)
 		data = data.filter(
 			(r) =>
-				r.customer.toLowerCase().includes(search) ||
-				r.id.includes(search),
+				r.customer.toLowerCase().includes(search.toLowerCase()) ||
+				r.booking_id.toLowerCase().includes(search.toLowerCase()),
 		);
 	if (!data.length) {
 		tbody.innerHTML = `<tr><td colspan="6" class="no-results">No bookings found</td></tr>`;
@@ -169,20 +250,21 @@ function renderDashTable(filter, search) {
 	tbody.innerHTML = data
 		.map(
 			(r) => `
-    <tr onclick="toggleDetail('d-${r.id.replace('#', '')}')">
-      <td class="m">${r.id}</td><td class="b">${r.customer}</td>
+    <tr onclick="toggleDetail('d-${r.id}')">
+      <td class="m">${r.booking_id}</td><td class="b">${r.customer}</td>
       <td>${r.route}</td><td>${r.date}</td>
-      <td>${pillHtml(r.status)}</td><td class="b">Rs ${r.amount.toLocaleString()}</td>
+      <td>${pillHtml(r.status)}</td><td class="b">Rs ${(r.amount || 0).toLocaleString()}</td>
     </tr>
-    <tr class="row-detail" id="d-${r.id.replace('#', '')}">
+    <tr class="row-detail" id="d-${r.id}">
       <td colspan="6"><div class="rd-inner">
-        <div class="rd-item"><div class="rd-lbl">Phone</div><div class="rd-val">${r.phone}</div></div>
-        <div class="rd-item"><div class="rd-lbl">Full Route</div><div class="rd-val">${r.route}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Phone</div><div class="rd-val">${r.phone || '—'}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Full Route</div><div class="rd-val">${r.full_route || r.route}</div></div>
         <div class="rd-item"><div class="rd-lbl">Status</div><div class="rd-val">${r.status}</div></div>
-        <div class="rd-item"><div class="rd-lbl">Amount</div><div class="rd-val">Rs ${r.amount.toLocaleString()}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Approval</div><div class="rd-val">${pillHtml(r.approval_status)}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Amount</div><div class="rd-val">Rs ${(r.amount || 0).toLocaleString()}</div></div>
         <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-          <button class="btn-ghost btn-sm" onclick="event.stopPropagation();toast('Booking updated','gold')">Update Status</button>
-          <button class="btn btn-sm" onclick="event.stopPropagation();toast('Details copied','green')">Copy ID</button>
+          <button class="btn-ghost btn-sm" onclick="event.stopPropagation();editBooking(${r.id})">Edit</button>
+          <button class="btn btn-sm" onclick="event.stopPropagation();copyToClipboard('${r.booking_id}')">Copy ID</button>
         </div>
       </div></td>
     </tr>`,
@@ -190,9 +272,10 @@ function renderDashTable(filter, search) {
 		.join('');
 }
 
-// ── RENDER BOOKINGS TABLE ──
 function renderBookTable(filter, search) {
 	const tbody = document.getElementById('book-tbody');
+	if (!tbody) return;
+
 	let data = [...BOOKINGS];
 	if (filter && filter !== 'all')
 		data = data.filter((r) => r.status === filter);
@@ -200,7 +283,7 @@ function renderBookTable(filter, search) {
 		data = data.filter(
 			(r) =>
 				r.customer.toLowerCase().includes(search.toLowerCase()) ||
-				r.id.toLowerCase().includes(search.toLowerCase()),
+				r.booking_id.toLowerCase().includes(search.toLowerCase()),
 		);
 	if (sortState.col) {
 		data.sort((a, b) => {
@@ -220,30 +303,32 @@ function renderBookTable(filter, search) {
 	tbody.innerHTML = data
 		.map(
 			(r) => `
-    <tr onclick="toggleDetail('bd-${r.id.replace('#', '')}')">
-      <td class="m">${r.id}</td><td class="b">${r.customer}</td>
+    <tr onclick="toggleDetail('bd-${r.id}')">
+      <td class="m">${r.booking_id}</td><td class="b">${r.customer}</td>
       <td>${r.route}</td><td>${r.date}</td>
-      <td>${pillHtml(r.status)}</td><td class="b">Rs ${r.amount.toLocaleString()}</td>
+      <td>${pillHtml(r.status)}</td><td class="b">Rs ${(r.amount || 0).toLocaleString()}</td>
       <td><div style="display:flex;gap:6px" onclick="event.stopPropagation()">
-        <button class="btn-ghost btn-sm" onclick="toast('Status updated','gold')">Edit</button>
-        <button class="btn btn-sm" onclick="deleteBooking('${r.id}')">Delete</button>
+        <button class="btn-ghost btn-sm" onclick="editBooking(${r.id})">Edit</button>
       </div></td>
     </tr>
-    <tr class="row-detail" id="bd-${r.id.replace('#', '')}">
+    <tr class="row-detail" id="bd-${r.id}">
       <td colspan="7"><div class="rd-inner">
-        <div class="rd-item"><div class="rd-lbl">Customer Phone</div><div class="rd-val">${r.phone}</div></div>
-        <div class="rd-item"><div class="rd-lbl">Route</div><div class="rd-val">${r.route}</div></div>
-        <div class="rd-item"><div class="rd-lbl">Current Status</div><div class="rd-val">${r.status}</div></div>
-        <div class="rd-item"><div class="rd-lbl">Booking Amount</div><div class="rd-val">Rs ${r.amount.toLocaleString()}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Customer Phone</div><div class="rd-val">${r.phone || '—'}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Route</div><div class="rd-val">${r.full_route || r.route}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Status</div><div class="rd-val">${r.status}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Approval</div><div class="rd-val">${pillHtml(r.approval_status)}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Amount</div><div class="rd-val">Rs ${(r.amount || 0).toLocaleString()}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Move Date</div><div class="rd-val">${r.move_date || r.date}</div></div>
       </div></td>
     </tr>`,
 		)
 		.join('');
 }
 
-// ── RENDER CUSTOMERS ──
 function renderCustomers(search) {
 	const tbody = document.getElementById('cust-tbody');
+	if (!tbody) return;
+
 	let data = [...CUSTOMERS];
 	if (search)
 		data = data.filter((r) =>
@@ -252,86 +337,509 @@ function renderCustomers(search) {
 	tbody.innerHTML = data
 		.map(
 			(r) => `
-    <tr>
-      <td class="b">${r.name}</td><td>${r.email}</td>
-      <td>${r.phone}</td><td>${r.bookings}</td>
-      <td>${r.joined}</td><td>${pillHtml(r.status)}</td>
-    </tr>`,
+      <tr>
+        <td class="b">${r.name}</td><td>${r.email}</td>
+        <td>${r.phone}</td><td>${r.bookings}</td>
+        <td>${r.joined}</td><td>${pillHtml(r.status)}</td>
+      </tr>`,
 		)
 		.join('');
 }
 
-// ── TOGGLE ROW DETAIL ──
+function renderVendorsTable() {
+	const tbody = document.getElementById('vendors-tbody');
+	if (!tbody) return;
+
+	if (!VENDORS || VENDORS.length === 0) {
+		tbody.innerHTML = `<tr><td colspan="7" class="no-results">No vendors found. Click "Add Vendor" to create one.</td></tr>`;
+		return;
+	}
+
+	tbody.innerHTML = VENDORS.map(
+		(v) => `
+      <tr>
+        <td class="b">${v.business_name || v.name || '—'}</td>
+        <td>${v.phone || '—'}</td>
+        <td>${v.email || '—'}</td>
+        <td>${v.service_region || '—'}</td>
+        <td>${v.total_jobs || 0}</td>
+        <td>⭐ ${v.rating || 0}</td>
+        <td>
+          <select onchange="updateVendorStatus(${v.id}, this.value)" class="vendor-status-select" style="padding: 5px 10px; border-radius: 6px; background: var(--dark3); color: var(--text); border: 1px solid var(--bdim);">
+            <option value="pending" ${v.status === 'pending' ? 'selected' : ''}>Pending</option>
+            <option value="active" ${v.status === 'active' ? 'selected' : ''}>Active</option>
+            <option value="inactive" ${v.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+          </select>
+        </td>
+      </tr>`,
+	).join('');
+}
+
+async function renderApprovalTable(shipments) {
+	const tbody = document.getElementById('approval-tbody');
+	if (!tbody) return;
+
+	const activeVendors = await loadActiveVendors();
+
+	if (!shipments || shipments.length === 0) {
+		tbody.innerHTML = `<tr><td colspan="7" class="no-results">No shipments found</td></tr>`;
+		return;
+	}
+
+	tbody.innerHTML = shipments
+		.map(
+			(shipment) => `
+      <tr id="approval-row-${shipment.id}">
+        <td class="m">${shipment.booking_id || `#MG-${shipment.id}`}</td>
+        <td class="b">${shipment.customer_name || `${shipment.first_name} ${shipment.last_name}`}</td>
+        <td>${shipment.pickup_district || ''} → ${shipment.drop_district || ''}</td>
+        <td>${shipment.move_date || '—'}</td>
+        <td class="b">Rs ${(shipment.final_quote || 0).toLocaleString()}</td>
+        <td>
+          <select id="vendor-select-${shipment.id}" class="vendor-select" ${shipment.approval_status !== 'pending' ? 'disabled' : ''} style="padding: 6px 10px; border-radius: 6px; background: var(--dark3); color: var(--text); border: 1px solid var(--bdim); min-width: 180px;">
+            <option value="">-- Select Vendor --</option>
+            ${activeVendors.map((v) => `<option value="${v.id}">${v.business_name} (⭐ ${v.rating || 0}) - ${v.service_region || ''}</option>`).join('')}
+          </select>
+        </td>
+        <td>
+          ${
+				shipment.approval_status === 'pending'
+					? `
+            <button class="btn-g btn-sm" onclick="approveShipment(${shipment.id})">Approve</button>
+            <button class="btn-r btn-sm" onclick="rejectShipment(${shipment.id})">Reject</button>
+          `
+					: shipment.approval_status === 'approved'
+						? `<span class="pill pd">Approved - ${shipment.vendor_name || 'Assigned'}</span>`
+						: `<span class="pill pc">Rejected</span>`
+			}
+        </td>
+      </tr>`,
+		)
+		.join('');
+}
+
+// ==================================================
+// ACTION FUNCTIONS
+// ==================================================
+
+async function editBooking(bookingId) {
+	// Find the booking by numeric id, not booking_id
+	const booking = BOOKINGS.find((b) => b.id === parseInt(bookingId));
+	if (!booking) {
+		toast('Booking not found', 'red');
+		return;
+	}
+
+	const newStatus = prompt(
+		'Enter new status (pending/accepted/in_transit/delivered/cancelled):',
+		booking.status,
+	);
+	if (!newStatus || newStatus === booking.status) return;
+
+	console.log('Updating booking - ID:', booking.id, 'New Status:', newStatus);
+
+	// Use the numeric ID, not booking_id
+	const result = await fetchAPI(`/api/shipment/${booking.id}/status`, {
+		method: 'PUT',
+		body: JSON.stringify({ status: newStatus }),
+	});
+
+	if (result.ok) {
+		toast(`Booking ${booking.booking_id} updated to ${newStatus}`, 'green');
+		await loadBookings();
+		await loadPendingShipments();
+	} else {
+		toast(result.message || 'Failed to update status', 'red');
+	}
+}
+
+async function approveShipment(shipmentId) {
+	const vendorSelect = document.getElementById(`vendor-select-${shipmentId}`);
+	if (!vendorSelect) {
+		toast('Vendor select not found', 'red');
+		return;
+	}
+
+	const vendorId = vendorSelect.value;
+	if (!vendorId) {
+		toast('Please select a vendor', 'red');
+		return;
+	}
+
+	const selectedOption = vendorSelect.options[vendorSelect.selectedIndex];
+	const vendorName = selectedOption ? selectedOption.text : 'Vendor';
+
+	if (!confirm(`Assign this shipment to ${vendorName}?`)) {
+		return;
+	}
+
+	const result = await fetchAPI(
+		`/api/admin/shipments/${shipmentId}/approve`,
+		{
+			method: 'PUT',
+			body: JSON.stringify({ vendor_id: vendorId }),
+		},
+	);
+
+	if (result.ok) {
+		toast(`Shipment approved and assigned to ${vendorName}!`, 'green');
+		await loadPendingShipments();
+		await loadBookings();
+
+		// Refresh the approval table to show updated status
+		if (approvalFilter === 'pending') {
+			await loadPendingShipments();
+		}
+	} else {
+		toast(result.message || 'Failed to approve shipment', 'red');
+	}
+}
+
+async function rejectShipment(shipmentId) {
+	const reason = prompt('Enter rejection reason:');
+	if (!reason) return;
+
+	const result = await fetchAPI(`/api/admin/shipments/${shipmentId}/reject`, {
+		method: 'PUT',
+		body: JSON.stringify({ reason }),
+	});
+
+	if (result.ok) {
+		toast('Shipment rejected', 'green');
+		await loadPendingShipments();
+		await loadBookings();
+	} else {
+		toast('Failed to reject', 'red');
+	}
+}
+
+async function updateVendorStatus(vendorId, status) {
+	const result = await fetchAPI(`/api/admin/vendors/${vendorId}/status`, {
+		method: 'PUT',
+		body: JSON.stringify({ status }),
+	});
+
+	if (result.ok) {
+		toast(`Vendor status updated to ${status}`, 'green');
+		await loadVendors();
+
+		// Refresh pending approvals table
+		if (approvalFilter === 'pending') {
+			await loadPendingShipments();
+		} else {
+			await loadShipmentsByStatus(approvalFilter);
+		}
+
+		if (status === 'active') {
+			toast(
+				`Vendor activated! They can now log in and receive shipments.`,
+				'green',
+			);
+		}
+	} else {
+		toast('Failed to update vendor status', 'red');
+	}
+}
+
 function toggleDetail(id) {
 	const row = document.getElementById(id);
 	if (!row) return;
 	row.classList.toggle('open');
 }
 
-// ── DELETE BOOKING ──
-function deleteBooking(id) {
-	const idx = BOOKINGS.findIndex((b) => b.id === id);
-	if (idx > -1) {
-		BOOKINGS.splice(idx, 1);
-		renderBookTable(
-			bookFilter,
-			document.getElementById('book-search').value,
-		);
-	}
-	toast('Booking removed', 'red');
-	document.getElementById('pending-count').textContent = BOOKINGS.filter(
-		(b) => b.status === 'Pending',
-	).length;
+function copyToClipboard(text) {
+	navigator.clipboard.writeText(text);
+	toast('Copied to clipboard', 'green');
 }
 
-// ── SORT ──
+// ==================================================
+// SORT & FILTER FUNCTIONS
+// ==================================================
+
 function setupSort(tableId, renderFn) {
-	document
-		.querySelectorAll(`#${tableId} thead th[data-col]`)
-		.forEach((th) => {
-			th.addEventListener('click', () => {
-				const col = th.dataset.col;
-				if (sortState.col === col) sortState.dir *= -1;
-				else {
-					sortState.col = col;
-					sortState.dir = 1;
-				}
-				document
-					.querySelectorAll(`#${tableId} thead th`)
-					.forEach((h) => h.classList.remove('sorted'));
-				th.classList.add('sorted');
-				th.querySelector('.sort-ic').textContent =
-					sortState.dir === 1 ? '↑' : '↓';
-				renderFn();
-			});
+	const table = document.getElementById(tableId);
+	if (!table) return;
+
+	table.querySelectorAll('thead th[data-col]').forEach((th) => {
+		th.addEventListener('click', () => {
+			const col = th.dataset.col;
+			if (sortState.col === col) sortState.dir *= -1;
+			else {
+				sortState.col = col;
+				sortState.dir = 1;
+			}
+			table
+				.querySelectorAll('thead th')
+				.forEach((h) => h.classList.remove('sorted'));
+			th.classList.add('sorted');
+			const sortIcon = th.querySelector('.sort-ic');
+			if (sortIcon)
+				sortIcon.textContent = sortState.dir === 1 ? '↑' : '↓';
+			renderFn();
 		});
+	});
 }
 
-// ── CHIP FILTER ──
 function setupChips(groupId, renderFn, searchId) {
-	document
-		.getElementById(groupId)
-		.querySelectorAll('.chip')
-		.forEach((c) => {
-			c.addEventListener('click', () => {
-				document
-					.getElementById(groupId)
-					.querySelectorAll('.chip')
-					.forEach((x) => x.classList.remove('on'));
-				c.classList.add('on');
-				const f = c.dataset.filter;
-				if (groupId === 'dash-chips') dashFilter = f;
-				if (groupId === 'book-chips') bookFilter = f;
-				const search = searchId
-					? document.getElementById(searchId).value
-					: '';
-				renderFn(f, search);
-			});
+	const container = document.getElementById(groupId);
+	if (!container) return;
+
+	container.querySelectorAll('.chip').forEach((c) => {
+		c.addEventListener('click', () => {
+			container
+				.querySelectorAll('.chip')
+				.forEach((x) => x.classList.remove('on'));
+			c.classList.add('on');
+			const f = c.dataset.filter;
+			if (groupId === 'dash-chips') dashFilter = f;
+			if (groupId === 'book-chips') bookFilter = f;
+			const search = searchId
+				? document.getElementById(searchId)?.value
+				: '';
+			renderFn(f, search);
 		});
+	});
 }
 
-// ── CHARTS ──
+function setupApprovalChips() {
+	const container = document.getElementById('approval-chips');
+	if (!container) return;
+
+	container.querySelectorAll('.chip').forEach((c) => {
+		c.addEventListener('click', async () => {
+			container
+				.querySelectorAll('.chip')
+				.forEach((x) => x.classList.remove('on'));
+			c.classList.add('on');
+			const status = c.dataset.status;
+			approvalFilter = status;
+			if (status === 'pending') {
+				await loadPendingShipments();
+			} else {
+				await loadShipmentsByStatus(status);
+			}
+		});
+	});
+}
+
+// ==================================================
+// NAVIGATION FUNCTIONS
+// ==================================================
+
+function goPage(pageName) {
+	const validPages = [
+		'dash',
+		'bookings',
+		'customers',
+		'vendors',
+		'revenue',
+		'settings',
+		'pending',
+	];
+
+	if (!validPages.includes(pageName)) return;
+
+	validPages.forEach((page) => {
+		const pageElement = document.getElementById(`page-${page}`);
+		if (pageElement) pageElement.classList.remove('active');
+	});
+
+	const selectedPageElement = document.getElementById(`page-${pageName}`);
+	if (selectedPageElement) selectedPageElement.classList.add('active');
+
+	document.querySelectorAll('.nav-a').forEach((link) => {
+		link.classList.remove('on');
+		const linkPage = link.getAttribute('data-page');
+		if (linkPage === pageName) link.classList.add('on');
+	});
+
+	const titleMap = {
+		dash: 'Dashboard',
+		bookings: 'Bookings',
+		customers: 'Customers',
+		vendors: 'Vendors',
+		revenue: 'Revenue',
+		settings: 'Settings',
+		pending: 'Pending Approvals',
+	};
+
+	const pageTitle = document.getElementById('page-title');
+	if (pageTitle) pageTitle.textContent = titleMap[pageName] || pageName;
+
+	const topSub = document.getElementById('top-sub');
+	if (topSub && pageName === 'dash') {
+		const today = new Date();
+		const options = {
+			weekday: 'long',
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+		};
+		topSub.textContent = today.toLocaleDateString('en-US', options);
+	}
+
+	if (pageName === 'revenue') setTimeout(() => drawRevChart(), 100);
+	if (pageName === 'pending') loadPendingShipments();
+	if (pageName === 'vendors') loadVendors();
+}
+
+function setupSidebarNavigation() {
+	const navLinks = document.querySelectorAll('.nav-a');
+	navLinks.forEach((link) => {
+		const newLink = link.cloneNode(true);
+		link.parentNode.replaceChild(newLink, link);
+		newLink.addEventListener('click', (e) => {
+			e.preventDefault();
+			const page = newLink.getAttribute('data-page');
+			if (page) goPage(page);
+		});
+	});
+}
+
+// ==================================================
+// MODAL FUNCTIONS
+// ==================================================
+
+function openNewBooking() {
+	const modal = document.getElementById('modal-new');
+	if (modal) modal.classList.add('open');
+}
+
+function closeModal(id) {
+	const modal = document.getElementById(id);
+	if (modal) modal.classList.remove('open');
+}
+
+async function submitBooking() {
+	const name = document.getElementById('nb-name')?.value.trim();
+	const from = document.getElementById('nb-from')?.value.trim();
+	const to = document.getElementById('nb-to')?.value.trim();
+	const amt = document.getElementById('nb-amount')?.value;
+
+	if (!name || !from || !to) {
+		toast('Please fill all required fields', 'red');
+		return;
+	}
+
+	toast('Booking created successfully', 'green');
+	closeModal('modal-new');
+	await loadBookings();
+
+	[
+		'nb-name',
+		'nb-phone',
+		'nb-from',
+		'nb-to',
+		'nb-amount',
+		'nb-notes',
+	].forEach((id) => {
+		const el = document.getElementById(id);
+		if (el) el.value = '';
+	});
+}
+
+function openAddVendor() {
+	const modal = document.getElementById('modal-add-vendor');
+	if (modal) modal.classList.add('open');
+}
+
+async function submitAddVendor() {
+	const user_id = document.getElementById('vendor-user-id')?.value;
+	const business_name = document
+		.getElementById('vendor-business-name')
+		?.value.trim();
+	const owner_name = document
+		.getElementById('vendor-owner-name')
+		?.value.trim();
+	const phone = document.getElementById('vendor-phone')?.value.trim();
+	const email = document.getElementById('vendor-email')?.value.trim();
+	const service_region = document
+		.getElementById('vendor-region')
+		?.value.trim();
+	const address = document.getElementById('vendor-address')?.value.trim();
+
+	if (!user_id || !business_name || !owner_name || !phone || !email) {
+		toast('Please fill all required fields', 'red');
+		return;
+	}
+
+	const result = await fetchAPI('/api/vendor/register', {
+		method: 'POST',
+		body: JSON.stringify({
+			user_id: parseInt(user_id),
+			business_name,
+			owner_name,
+			phone,
+			email,
+			service_region,
+			address,
+		}),
+	});
+
+	if (result.ok) {
+		toast('Vendor added successfully!', 'green');
+		closeModal('modal-add-vendor');
+		await loadVendors();
+
+		[
+			'vendor-user-id',
+			'vendor-business-name',
+			'vendor-owner-name',
+			'vendor-phone',
+			'vendor-email',
+			'vendor-region',
+			'vendor-address',
+		].forEach((id) => {
+			const el = document.getElementById(id);
+			if (el) el.value = '';
+		});
+	} else {
+		toast(result.message || 'Failed to add vendor', 'red');
+	}
+}
+
+// ==================================================
+// NOTIFICATION FUNCTIONS
+// ==================================================
+
+function showNotifications() {
+	const notifDot = document.getElementById('notif-dot');
+	if (notifDot) notifDot.style.display = 'none';
+	const badge = document.getElementById('admin-alert-badge');
+	if (badge) badge.style.display = 'none';
+	toast('3 new bookings pending approval', 'gold');
+}
+
+// ==================================================
+// TOAST FUNCTION
+// ==================================================
+
+function toast(msg, color = 'gold') {
+	const colors = {
+		gold: '#f8c06a',
+		green: '#4caf7d',
+		red: '#e05e5e',
+		blue: '#5e9fe0',
+	};
+	const wrap = document.getElementById('toast-wrap');
+	if (!wrap) return;
+
+	const el = document.createElement('div');
+	el.className = 'toast';
+	el.innerHTML = `<span class="toast-dot" style="background:${colors[color] || colors.gold}"></span>${msg}`;
+	wrap.appendChild(el);
+	setTimeout(() => {
+		el.classList.add('out');
+		setTimeout(() => el.remove(), 220);
+	}, 2800);
+}
+
+// ==================================================
+// CHART FUNCTIONS
+// ==================================================
+
 let sparkChart, revChart;
+
 function drawSparkChart(days) {
 	const labels = [],
 		data = [];
@@ -340,21 +848,15 @@ function drawSparkChart(days) {
 		const d = new Date();
 		d.setDate(d.getDate() - i);
 		labels.push(
-			d.toLocaleDateString('en-GB', {
-				day: 'numeric',
-				month: 'short',
-			}),
+			d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
 		);
 		data.push(base[i % base.length] + Math.floor(Math.random() * 5));
 	}
-	const lblEl = document.getElementById('chart-labels');
-	const step = Math.ceil(days / 6);
-	lblEl.innerHTML = labels
-		.filter((_, i) => i % step === 0 || i === labels.length - 1)
-		.map((l) => `<span>${l}</span>`)
-		.join('');
-	const ctx = document.getElementById('spark-chart').getContext('2d');
+
+	const ctx = document.getElementById('spark-chart')?.getContext('2d');
+	if (!ctx) return;
 	if (sparkChart) sparkChart.destroy();
+
 	sparkChart = new Chart(ctx, {
 		type: 'line',
 		data: {
@@ -387,9 +889,7 @@ function drawSparkChart(days) {
 			plugins: {
 				legend: { display: false },
 				tooltip: {
-					callbacks: {
-						label: (v) => `${v.raw} bookings`,
-					},
+					callbacks: { label: (v) => `${v.raw} bookings` },
 					backgroundColor: '#16261d',
 					titleColor: '#eef2ee',
 					bodyColor: 'rgba(238,242,238,.6)',
@@ -399,18 +899,19 @@ function drawSparkChart(days) {
 					displayColors: false,
 				},
 			},
-			scales: {
-				x: { display: false },
-				y: { display: false },
-			},
+			scales: { x: { display: false }, y: { display: false } },
 		},
 	});
 }
+
 function drawRevChart() {
-	const ctx = document.getElementById('rev-chart').getContext('2d');
+	const ctx = document.getElementById('rev-chart')?.getContext('2d');
+	if (!ctx) return;
 	if (revChart) revChart.destroy();
+
 	const months = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
 	const vals = [280000, 310000, 295000, 340000, 380000, 420000];
+
 	revChart = new Chart(ctx, {
 		type: 'bar',
 		data: {
@@ -466,193 +967,127 @@ function drawRevChart() {
 	});
 }
 
-// ── CHART RANGE ──
-document
-	.getElementById('chart-range')
-	.querySelectorAll('.chip')
-	.forEach((c) => {
-		c.addEventListener('click', () => {
-			document
-				.getElementById('chart-range')
-				.querySelectorAll('.chip')
-				.forEach((x) => x.classList.remove('on'));
-			c.classList.add('on');
-			drawSparkChart(Number(c.dataset.range));
+// ==================================================
+// INITIALIZATION
+// ==================================================
+
+document.addEventListener('DOMContentLoaded', async () => {
+	const user = checkAuth();
+	if (!user) return;
+
+	setupSidebarNavigation();
+
+	await Promise.all([
+		loadBookings(),
+		loadCustomers(),
+		loadVendors(),
+		loadPendingShipments(),
+	]);
+
+	renderDashTable('all', '');
+	renderBookTable('all', '');
+	renderCustomers('');
+	renderVendorsTable();
+
+	setupChips('dash-chips', (f, s) => renderDashTable(f, s), null);
+	setupChips('book-chips', (f, s) => renderBookTable(f, s), 'book-search');
+	setupApprovalChips();
+	setupSort('book-table', () =>
+		renderBookTable(
+			bookFilter,
+			document.getElementById('book-search')?.value || '',
+		),
+	);
+
+	drawSparkChart(7);
+
+	const chartRange = document.getElementById('chart-range');
+	if (chartRange) {
+		chartRange.querySelectorAll('.chip').forEach((c) => {
+			c.addEventListener('click', () => {
+				chartRange
+					.querySelectorAll('.chip')
+					.forEach((x) => x.classList.remove('on'));
+				c.classList.add('on');
+				drawSparkChart(Number(c.dataset.range));
+			});
+		});
+	}
+
+	const globalSearch = document.getElementById('global-search');
+	if (globalSearch) {
+		globalSearch.addEventListener('input', (e) => {
+			const v = e.target.value.toLowerCase();
+			if (!v) {
+				renderDashTable(dashFilter, '');
+				return;
+			}
+			goPage('dash');
+			renderDashTable('all', v);
+			const dashChips = document.getElementById('dash-chips');
+			if (dashChips) {
+				dashChips
+					.querySelectorAll('.chip')
+					.forEach((c) =>
+						c.classList.toggle('on', c.dataset.filter === 'all'),
+					);
+			}
+			dashFilter = 'all';
+		});
+	}
+
+	const bookSearch = document.getElementById('book-search');
+	if (bookSearch)
+		bookSearch.addEventListener('input', (e) =>
+			renderBookTable(bookFilter, e.target.value),
+		);
+
+	const custSearch = document.getElementById('cust-search');
+	if (custSearch)
+		custSearch.addEventListener('input', (e) =>
+			renderCustomers(e.target.value),
+		);
+
+	document.querySelectorAll('.overlay').forEach((o) => {
+		o.addEventListener('click', (e) => {
+			if (e.target === o) o.classList.remove('open');
 		});
 	});
 
-// ── PAGE NAV ──
-function goPage(name) {
-	document
-		.querySelectorAll('.page')
-		.forEach((p) => p.classList.remove('active'));
-	document
-		.querySelectorAll('.nav-a')
-		.forEach((a) => a.classList.remove('on'));
-	const pg = document.getElementById('page-' + name);
-	if (pg) pg.classList.add('active');
-	const na = document.querySelector(`.nav-a[data-page="${name}"]`);
-	if (na) na.classList.add('on');
-	document.getElementById('page-title').textContent =
-		{
-			dash: 'Dashboard',
-			bookings: 'Bookings',
-			customers: 'Customers',
-			vendors: 'Vendors',
-			revenue: 'Revenue',
-			settings: 'Settings',
-		}[name] || name;
-	if (name === 'revenue') setTimeout(drawRevChart, 100);
-}
-document.querySelectorAll('.nav-a[data-page]').forEach((a) => {
-	a.addEventListener('click', (e) => {
-		e.preventDefault();
-		goPage(a.dataset.page);
-	});
-});
-
-// ── GLOBAL SEARCH ──
-document.getElementById('global-search').addEventListener('input', (e) => {
-	const v = e.target.value.toLowerCase();
-	if (!v) {
-		renderDashTable(dashFilter, '');
-		return;
+	const notifBtn = document.getElementById('notif-btn');
+	if (notifBtn) {
+		notifBtn.addEventListener('click', () => {
+			const notifDot = document.getElementById('notif-dot');
+			if (notifDot) notifDot.style.display = 'none';
+			toast('3 new bookings pending approval', 'gold');
+		});
 	}
-	goPage('dash');
-	renderDashTable('all', v);
-	document
-		.getElementById('dash-chips')
-		.querySelectorAll('.chip')
-		.forEach((c) => c.classList.toggle('on', c.dataset.filter === 'all'));
-	dashFilter = 'all';
-});
 
-// ── BOOKINGS SEARCH ──
-document.getElementById('book-search').addEventListener('input', (e) => {
-	renderBookTable(bookFilter, e.target.value);
-});
-
-// ── CUSTOMER SEARCH ──
-document.getElementById('cust-search').addEventListener('input', (e) => {
-	renderCustomers(e.target.value);
-});
-
-// ── MODALS ──
-function openNewBooking() {
-	document.getElementById('modal-new').classList.add('open');
-}
-function closeModal(id) {
-	document.getElementById(id).classList.remove('open');
-}
-document.querySelectorAll('.overlay').forEach((o) => {
-	o.addEventListener('click', (e) => {
-		if (e.target === o) o.classList.remove('open');
-	});
-});
-
-function submitBooking() {
-	const name = document.getElementById('nb-name').value.trim();
-	const from = document.getElementById('nb-from').value.trim();
-	const to = document.getElementById('nb-to').value.trim();
-	const amt = document.getElementById('nb-amount').value;
-	if (!name || !from || !to) {
-		toast('Please fill all required fields', 'red');
-		return;
-	}
-	const newId = `#MG-${4822 + BOOKINGS.length}`;
-	BOOKINGS.unshift({
-		id: newId,
-		customer: name,
-		route: `${from} → ${to}`,
-		date: '27 Mar',
-		status: 'Pending',
-		amount: Number(amt) || 0,
-		phone: '—',
-	});
-	closeModal('modal-new');
-	toast(`Booking ${newId} created`, 'green');
-	renderDashTable(dashFilter, '');
-	renderBookTable(bookFilter, '');
-	document.getElementById('pending-count').textContent = BOOKINGS.filter(
-		(b) => b.status === 'Pending',
-	).length;
-	[
-		'nb-name',
-		'nb-phone',
-		'nb-from',
-		'nb-to',
-		'nb-amount',
-		'nb-notes',
-	].forEach((id) => {
-		const el = document.getElementById(id);
-		if (el) el.value = '';
-	});
-}
-
-// ── TOAST ──
-function toast(msg, color = 'gold') {
-	const colors = {
-		gold: getComputedStyle(document.documentElement)
-			.getPropertyValue('--gold')
-			.trim(),
-		green: '#4caf7d',
-		red: '#e05e5e',
-		blue: '#5e9fe0',
-	};
-	const wrap = document.getElementById('toast-wrap');
-	const el = document.createElement('div');
-	el.className = 'toast';
-	el.innerHTML = `<span class="toast-dot" style="background:${colors[color] || colors.gold}"></span>${msg}`;
-	wrap.appendChild(el);
 	setTimeout(() => {
-		el.classList.add('out');
-		setTimeout(() => el.remove(), 220);
-	}, 2800);
-}
+		document.querySelectorAll('.m-fill').forEach((el) => {
+			if (el.dataset.w) el.style.width = el.dataset.w + '%';
+		});
+	}, 400);
 
-// ── NOTIFICATIONS ──
-document.getElementById('notif-btn').addEventListener('click', () => {
-	document.getElementById('notif-dot').style.display = 'none';
-	toast('3 new bookings pending approval', 'gold');
+	goPage('dash');
 });
 
-// ── COUNTERS ──
-[
-	{ id: 'sv1', target: 1248 },
-	{ id: 'sv2', target: 986 },
-	{ id: 'sv3', target: 47 },
-	{
-		id: 'sv4',
-		target: 420000,
-		fmt: (v) => (v / 100000).toFixed(1) + 'L',
-	},
-].forEach(({ id, target, fmt }) => {
-	let cur = 0;
-	const el = document.getElementById(id);
-	const step = Math.ceil(target / 55);
-	const f = fmt || ((v) => v.toLocaleString());
-	const tick = () => {
-		cur = Math.min(cur + step, target);
-		el.textContent = f(cur);
-		if (cur < target) requestAnimationFrame(tick);
-	};
-	setTimeout(tick, 200);
-});
+// ==================================================
+// EXPOSE GLOBAL FUNCTIONS
+// ==================================================
 
-// ── BAR ANIMATIONS ──
-setTimeout(() => {
-	document.querySelectorAll('.m-fill').forEach((el) => {
-		el.style.width = el.dataset.w + '%';
-	});
-}, 400);
-
-// ── INIT ──
-renderDashTable('all', '');
-renderBookTable('all', '');
-renderCustomers('');
-setupChips('dash-chips', (f, s) => renderDashTable(f, s), null);
-setupChips('book-chips', (f, s) => renderBookTable(f, s), 'book-search');
-setupSort('book-table', () =>
-	renderBookTable(bookFilter, document.getElementById('book-search').value),
-);
-drawSparkChart(7);
+window.goPage = goPage;
+window.toggleDetail = toggleDetail;
+window.openNewBooking = openNewBooking;
+window.closeModal = closeModal;
+window.submitBooking = submitBooking;
+window.toast = toast;
+window.logout = logout;
+window.editBooking = editBooking;
+window.copyToClipboard = copyToClipboard;
+window.showNotifications = showNotifications;
+window.approveShipment = approveShipment;
+window.rejectShipment = rejectShipment;
+window.updateVendorStatus = updateVendorStatus;
+window.openAddVendor = openAddVendor;
+window.submitAddVendor = submitAddVendor;
