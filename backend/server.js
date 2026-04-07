@@ -1,27 +1,34 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+import dotenv from 'dotenv';
+dotenv.config({ path: path.join(__dirname, '.env') });
+
 import authRoute from './routes/authRoute.js';
 import shipmentRoute from './routes/shipmentRoute.js';
 import adminShipmentRoute from './routes/adminShipmentRoute.js';
 import vendorRoute from './routes/vendorRoute.js';
+import dummyPaymentRoutes from './routes/dummyPaymentRoutes.js';
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Register routes - ORDER MATTERS! More specific routes first
+// Register routes
 app.use('/api/auth', authRoute);
 app.use('/api/shipment', shipmentRoute);
 app.use('/api/admin', adminShipmentRoute);
 app.use('/api/vendor', vendorRoute);
-
-// Test route to check if server is running
-app.get('/api/test', (req, res) => {
-	res.json({ message: 'API is working!' });
-});
+app.use('/api/payment', dummyPaymentRoutes);
 
 app.get('/', (req, res) => {
 	res.json('Server running');
@@ -29,10 +36,4 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
 	console.log(`Server running on http://localhost:${PORT}`);
-	console.log(`Available routes:`);
-	console.log(`  - POST /api/auth/register`);
-	console.log(`  - POST /api/auth/login`);
-	console.log(`  - GET  /api/vendor/profile`);
-	console.log(`  - POST /api/vendor/register`);
-	console.log(`  - GET  /api/vendor/shipments`);
 });

@@ -1,5 +1,5 @@
 // ==================================================
-// ADMIN PANEL - COMPLETE WORKING VERSION
+// ADMIN PANEL - COMPLETE WORKING VERSION (FIXED)
 // ==================================================
 
 // ── CONFIGURATION ──
@@ -12,6 +12,7 @@ let sortState = { col: null, dir: 1 };
 let bookFilter = 'all';
 let dashFilter = 'all';
 let approvalFilter = 'pending';
+let currentEditingBookingId = null;
 
 // ==================================================
 // AUTHENTICATION FUNCTIONS
@@ -80,31 +81,57 @@ async function fetchAPI(url, options = {}) {
 	}
 }
 
+// ==================================================
+// LOAD DATA (FIXED: status normalization + amount parsing)
+// ==================================================
+
 async function loadBookings() {
 	const result = await fetchAPI('/api/shipment/all');
 	if (result.ok && result.shipments) {
-		BOOKINGS = result.shipments.map((shipment) => ({
-			id: shipment.id, // Make sure this is the numeric ID
-			booking_id: shipment.booking_id || `#MG-${shipment.id}`,
-			customer:
-				`${shipment.first_name || ''} ${shipment.last_name || ''}`.trim(),
-			route: `${shipment.pickup_district || ''} → ${shipment.drop_district || ''}`,
-			date: shipment.move_date
-				? new Date(shipment.move_date).toLocaleDateString('en-GB', {
-						day: 'numeric',
-						month: 'short',
-					})
-				: '—',
-			status: shipment.status || 'pending',
-			amount: shipment.final_quote || 0,
-			phone: shipment.mobile_number || '—',
-			full_route: `${shipment.pickup_city || ''}, ${shipment.pickup_district || ''} → ${shipment.drop_city || ''}, ${shipment.drop_district || ''}`,
-			move_date: shipment.move_date,
-			created_at: shipment.created_at,
-			approval_status: shipment.approval_status || 'pending',
-			assigned_vendor_id: shipment.assigned_vendor_id,
-			vendor_name: shipment.vendor_name || null,
-		}));
+		BOOKINGS = result.shipments.map((shipment) => {
+			// ----- FIX NaN: parse amount safely -----
+			let rawAmount = shipment.final_quote;
+			if (rawAmount === undefined || rawAmount === null) rawAmount = 0;
+			if (typeof rawAmount === 'string') {
+				// Remove currency symbols, commas, letters (e.g., "Rs 5,000" → "5000")
+				rawAmount = rawAmount.replace(/[^0-9.-]/g, '');
+			}
+			const amountNum = parseFloat(rawAmount) || 0;
+
+			// ----- Normalize status display -----
+			let displayStatus = shipment.status || 'pending';
+			const statusMap = {
+				pending: 'Pending',
+				in_transit: 'In Transit',
+				delivered: 'Delivered',
+				cancelled: 'Cancelled',
+			};
+			displayStatus = statusMap[displayStatus] || displayStatus;
+
+			return {
+				id: shipment.id,
+				booking_id: shipment.booking_id || `#MG-${shipment.id}`,
+				customer:
+					`${shipment.first_name || ''} ${shipment.last_name || ''}`.trim(),
+				route: `${shipment.pickup_district || ''} → ${shipment.drop_district || ''}`,
+				date: shipment.move_date
+					? new Date(shipment.move_date).toLocaleDateString('en-GB', {
+							day: 'numeric',
+							month: 'short',
+						})
+					: '—',
+				status: displayStatus,
+				amount: amountNum,
+				phone: shipment.mobile_number || '—',
+				full_route: `${shipment.pickup_city || ''}, ${shipment.pickup_district || ''} → ${shipment.drop_city || ''}, ${shipment.drop_district || ''}`,
+				move_date: shipment.move_date,
+				created_at: shipment.created_at,
+				approval_status: shipment.approval_status || 'pending',
+				assigned_vendor_id: shipment.assigned_vendor_id,
+				vendor_name: shipment.vendor_name || null,
+				raw_status: shipment.status,
+			};
+		});
 		renderDashTable(dashFilter, '');
 		renderBookTable(bookFilter, '');
 		updateStats();
@@ -263,7 +290,7 @@ function renderDashTable(filter, search) {
         <div class="rd-item"><div class="rd-lbl">Approval</div><div class="rd-val">${pillHtml(r.approval_status)}</div></div>
         <div class="rd-item"><div class="rd-lbl">Amount</div><div class="rd-val">Rs ${(r.amount || 0).toLocaleString()}</div></div>
         <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-          <button class="btn-ghost btn-sm" onclick="event.stopPropagation();editBooking(${r.id})">Edit</button>
+          <button class="btn-ghost btn-sm" onclick="event.stopPropagation();openEditStatusModal(${r.id})">Edit</button>
           <button class="btn btn-sm" onclick="event.stopPropagation();copyToClipboard('${r.booking_id}')">Copy ID</button>
         </div>
       </div></td>
@@ -297,7 +324,7 @@ function renderBookTable(filter, search) {
 		});
 	}
 	if (!data.length) {
-		tbody.innerHTML = `<tr><td colspan="7" class="no-results">No bookings found</td></tr>`;
+		tbody.innerHTML = `<td><td colspan="7" class="no-results">No bookings found</td></tr>`;
 		return;
 	}
 	tbody.innerHTML = data
@@ -308,7 +335,7 @@ function renderBookTable(filter, search) {
       <td>${r.route}</td><td>${r.date}</td>
       <td>${pillHtml(r.status)}</td><td class="b">Rs ${(r.amount || 0).toLocaleString()}</td>
       <td><div style="display:flex;gap:6px" onclick="event.stopPropagation()">
-        <button class="btn-ghost btn-sm" onclick="editBooking(${r.id})">Edit</button>
+        <button class="btn-ghost btn-sm" onclick="openEditStatusModal(${r.id})">Edit</button>
       </div></td>
     </tr>
     <tr class="row-detail" id="bd-${r.id}">
@@ -419,39 +446,73 @@ async function renderApprovalTable(shipments) {
 }
 
 // ==================================================
-// ACTION FUNCTIONS
+// EDIT STATUS MODAL (clean dropdown)
 // ==================================================
 
-async function editBooking(bookingId) {
-	// Find the booking by numeric id, not booking_id
+function openEditStatusModal(bookingId) {
 	const booking = BOOKINGS.find((b) => b.id === parseInt(bookingId));
 	if (!booking) {
 		toast('Booking not found', 'red');
 		return;
 	}
+	currentEditingBookingId = booking.id;
+	const modal = document.getElementById('modal-edit-status');
+	if (!modal) {
+		console.error('Edit status modal not found');
+		return;
+	}
+	const select = document.getElementById('edit-status-select');
+	if (select) {
+		select.value = booking.status;
+	}
+	modal.classList.add('open');
+}
 
-	const newStatus = prompt(
-		'Enter new status (pending/accepted/in_transit/delivered/cancelled):',
-		booking.status,
-	);
-	if (!newStatus || newStatus === booking.status) return;
+async function submitStatusChange() {
+	const select = document.getElementById('edit-status-select');
+	const newDisplayStatus = select?.value;
+	if (!newDisplayStatus) return;
 
-	console.log('Updating booking - ID:', booking.id, 'New Status:', newStatus);
+	const booking = BOOKINGS.find((b) => b.id === currentEditingBookingId);
+	if (!booking) {
+		toast('Booking not found', 'red');
+		closeModal('modal-edit-status');
+		return;
+	}
 
-	// Use the numeric ID, not booking_id
+	const reverseStatusMap = {
+		Pending: 'pending',
+		'In Transit': 'in_transit',
+		Delivered: 'delivered',
+		Cancelled: 'cancelled',
+	};
+	const newBackendStatus = reverseStatusMap[newDisplayStatus];
+	if (!newBackendStatus) {
+		toast('Invalid status', 'red');
+		return;
+	}
+
 	const result = await fetchAPI(`/api/shipment/${booking.id}/status`, {
 		method: 'PUT',
-		body: JSON.stringify({ status: newStatus }),
+		body: JSON.stringify({ status: newBackendStatus }),
 	});
 
 	if (result.ok) {
-		toast(`Booking ${booking.booking_id} updated to ${newStatus}`, 'green');
+		toast(
+			`Booking ${booking.booking_id} updated to ${newDisplayStatus}`,
+			'green',
+		);
 		await loadBookings();
 		await loadPendingShipments();
+		closeModal('modal-edit-status');
 	} else {
 		toast(result.message || 'Failed to update status', 'red');
 	}
 }
+
+// ==================================================
+// OTHER ACTION FUNCTIONS
+// ==================================================
 
 async function approveShipment(shipmentId) {
 	const vendorSelect = document.getElementById(`vendor-select-${shipmentId}`);
@@ -459,19 +520,14 @@ async function approveShipment(shipmentId) {
 		toast('Vendor select not found', 'red');
 		return;
 	}
-
 	const vendorId = vendorSelect.value;
 	if (!vendorId) {
 		toast('Please select a vendor', 'red');
 		return;
 	}
-
 	const selectedOption = vendorSelect.options[vendorSelect.selectedIndex];
 	const vendorName = selectedOption ? selectedOption.text : 'Vendor';
-
-	if (!confirm(`Assign this shipment to ${vendorName}?`)) {
-		return;
-	}
+	if (!confirm(`Assign this shipment to ${vendorName}?`)) return;
 
 	const result = await fetchAPI(
 		`/api/admin/shipments/${shipmentId}/approve`,
@@ -485,11 +541,7 @@ async function approveShipment(shipmentId) {
 		toast(`Shipment approved and assigned to ${vendorName}!`, 'green');
 		await loadPendingShipments();
 		await loadBookings();
-
-		// Refresh the approval table to show updated status
-		if (approvalFilter === 'pending') {
-			await loadPendingShipments();
-		}
+		if (approvalFilter === 'pending') await loadPendingShipments();
 	} else {
 		toast(result.message || 'Failed to approve shipment', 'red');
 	}
@@ -498,12 +550,10 @@ async function approveShipment(shipmentId) {
 async function rejectShipment(shipmentId) {
 	const reason = prompt('Enter rejection reason:');
 	if (!reason) return;
-
 	const result = await fetchAPI(`/api/admin/shipments/${shipmentId}/reject`, {
 		method: 'PUT',
 		body: JSON.stringify({ reason }),
 	});
-
 	if (result.ok) {
 		toast('Shipment rejected', 'green');
 		await loadPendingShipments();
@@ -518,21 +568,17 @@ async function updateVendorStatus(vendorId, status) {
 		method: 'PUT',
 		body: JSON.stringify({ status }),
 	});
-
 	if (result.ok) {
 		toast(`Vendor status updated to ${status}`, 'green');
 		await loadVendors();
-
-		// Refresh pending approvals table
 		if (approvalFilter === 'pending') {
 			await loadPendingShipments();
 		} else {
 			await loadShipmentsByStatus(approvalFilter);
 		}
-
 		if (status === 'active') {
 			toast(
-				`Vendor activated! They can now log in and receive shipments.`,
+				'Vendor activated! They can now log in and receive shipments.',
 				'green',
 			);
 		}
@@ -543,8 +589,7 @@ async function updateVendorStatus(vendorId, status) {
 
 function toggleDetail(id) {
 	const row = document.getElementById(id);
-	if (!row) return;
-	row.classList.toggle('open');
+	if (row) row.classList.toggle('open');
 }
 
 function copyToClipboard(text) {
@@ -559,7 +604,6 @@ function copyToClipboard(text) {
 function setupSort(tableId, renderFn) {
 	const table = document.getElementById(tableId);
 	if (!table) return;
-
 	table.querySelectorAll('thead th[data-col]').forEach((th) => {
 		th.addEventListener('click', () => {
 			const col = th.dataset.col;
@@ -583,7 +627,6 @@ function setupSort(tableId, renderFn) {
 function setupChips(groupId, renderFn, searchId) {
 	const container = document.getElementById(groupId);
 	if (!container) return;
-
 	container.querySelectorAll('.chip').forEach((c) => {
 		c.addEventListener('click', () => {
 			container
@@ -604,7 +647,6 @@ function setupChips(groupId, renderFn, searchId) {
 function setupApprovalChips() {
 	const container = document.getElementById('approval-chips');
 	if (!container) return;
-
 	container.querySelectorAll('.chip').forEach((c) => {
 		c.addEventListener('click', async () => {
 			container
@@ -636,21 +678,19 @@ function goPage(pageName) {
 		'settings',
 		'pending',
 	];
-
 	if (!validPages.includes(pageName)) return;
 
 	validPages.forEach((page) => {
 		const pageElement = document.getElementById(`page-${page}`);
 		if (pageElement) pageElement.classList.remove('active');
 	});
-
 	const selectedPageElement = document.getElementById(`page-${pageName}`);
 	if (selectedPageElement) selectedPageElement.classList.add('active');
 
 	document.querySelectorAll('.nav-a').forEach((link) => {
 		link.classList.remove('on');
-		const linkPage = link.getAttribute('data-page');
-		if (linkPage === pageName) link.classList.add('on');
+		if (link.getAttribute('data-page') === pageName)
+			link.classList.add('on');
 	});
 
 	const titleMap = {
@@ -662,22 +702,19 @@ function goPage(pageName) {
 		settings: 'Settings',
 		pending: 'Pending Approvals',
 	};
-
 	const pageTitle = document.getElementById('page-title');
 	if (pageTitle) pageTitle.textContent = titleMap[pageName] || pageName;
 
 	const topSub = document.getElementById('top-sub');
 	if (topSub && pageName === 'dash') {
 		const today = new Date();
-		const options = {
+		topSub.textContent = today.toLocaleDateString('en-US', {
 			weekday: 'long',
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric',
-		};
-		topSub.textContent = today.toLocaleDateString('en-US', options);
+		});
 	}
-
 	if (pageName === 'revenue') setTimeout(() => drawRevChart(), 100);
 	if (pageName === 'pending') loadPendingShipments();
 	if (pageName === 'vendors') loadVendors();
@@ -714,17 +751,13 @@ async function submitBooking() {
 	const name = document.getElementById('nb-name')?.value.trim();
 	const from = document.getElementById('nb-from')?.value.trim();
 	const to = document.getElementById('nb-to')?.value.trim();
-	const amt = document.getElementById('nb-amount')?.value;
-
 	if (!name || !from || !to) {
 		toast('Please fill all required fields', 'red');
 		return;
 	}
-
 	toast('Booking created successfully', 'green');
 	closeModal('modal-new');
 	await loadBookings();
-
 	[
 		'nb-name',
 		'nb-phone',
@@ -757,12 +790,10 @@ async function submitAddVendor() {
 		.getElementById('vendor-region')
 		?.value.trim();
 	const address = document.getElementById('vendor-address')?.value.trim();
-
 	if (!user_id || !business_name || !owner_name || !phone || !email) {
 		toast('Please fill all required fields', 'red');
 		return;
 	}
-
 	const result = await fetchAPI('/api/vendor/register', {
 		method: 'POST',
 		body: JSON.stringify({
@@ -775,12 +806,10 @@ async function submitAddVendor() {
 			address,
 		}),
 	});
-
 	if (result.ok) {
 		toast('Vendor added successfully!', 'green');
 		closeModal('modal-add-vendor');
 		await loadVendors();
-
 		[
 			'vendor-user-id',
 			'vendor-business-name',
@@ -797,10 +826,6 @@ async function submitAddVendor() {
 		toast(result.message || 'Failed to add vendor', 'red');
 	}
 }
-
-// ==================================================
-// NOTIFICATION FUNCTIONS
-// ==================================================
 
 function showNotifications() {
 	const notifDot = document.getElementById('notif-dot');
@@ -823,7 +848,6 @@ function toast(msg, color = 'gold') {
 	};
 	const wrap = document.getElementById('toast-wrap');
 	if (!wrap) return;
-
 	const el = document.createElement('div');
 	el.className = 'toast';
 	el.innerHTML = `<span class="toast-dot" style="background:${colors[color] || colors.gold}"></span>${msg}`;
@@ -852,11 +876,9 @@ function drawSparkChart(days) {
 		);
 		data.push(base[i % base.length] + Math.floor(Math.random() * 5));
 	}
-
 	const ctx = document.getElementById('spark-chart')?.getContext('2d');
 	if (!ctx) return;
 	if (sparkChart) sparkChart.destroy();
-
 	sparkChart = new Chart(ctx, {
 		type: 'line',
 		data: {
@@ -908,10 +930,8 @@ function drawRevChart() {
 	const ctx = document.getElementById('rev-chart')?.getContext('2d');
 	if (!ctx) return;
 	if (revChart) revChart.destroy();
-
 	const months = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
 	const vals = [280000, 310000, 295000, 340000, 380000, 420000];
-
 	revChart = new Chart(ctx, {
 		type: 'bar',
 		data: {
@@ -976,14 +996,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 	if (!user) return;
 
 	setupSidebarNavigation();
-
 	await Promise.all([
 		loadBookings(),
 		loadCustomers(),
 		loadVendors(),
 		loadPendingShipments(),
 	]);
-
 	renderDashTable('all', '');
 	renderBookTable('all', '');
 	renderCustomers('');
@@ -1000,7 +1018,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 	);
 
 	drawSparkChart(7);
-
 	const chartRange = document.getElementById('chart-range');
 	if (chartRange) {
 		chartRange.querySelectorAll('.chip').forEach((c) => {
@@ -1025,13 +1042,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 			goPage('dash');
 			renderDashTable('all', v);
 			const dashChips = document.getElementById('dash-chips');
-			if (dashChips) {
+			if (dashChips)
 				dashChips
 					.querySelectorAll('.chip')
 					.forEach((c) =>
 						c.classList.toggle('on', c.dataset.filter === 'all'),
 					);
-			}
 			dashFilter = 'all';
 		});
 	}
@@ -1041,7 +1057,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 		bookSearch.addEventListener('input', (e) =>
 			renderBookTable(bookFilter, e.target.value),
 		);
-
 	const custSearch = document.getElementById('cust-search');
 	if (custSearch)
 		custSearch.addEventListener('input', (e) =>
@@ -1055,27 +1070,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 	});
 
 	const notifBtn = document.getElementById('notif-btn');
-	if (notifBtn) {
+	if (notifBtn)
 		notifBtn.addEventListener('click', () => {
-			const notifDot = document.getElementById('notif-dot');
-			if (notifDot) notifDot.style.display = 'none';
+			document.getElementById('notif-dot').style.display = 'none';
 			toast('3 new bookings pending approval', 'gold');
 		});
-	}
 
 	setTimeout(() => {
 		document.querySelectorAll('.m-fill').forEach((el) => {
 			if (el.dataset.w) el.style.width = el.dataset.w + '%';
 		});
 	}, 400);
-
 	goPage('dash');
 });
 
 // ==================================================
 // EXPOSE GLOBAL FUNCTIONS
 // ==================================================
-
 window.goPage = goPage;
 window.toggleDetail = toggleDetail;
 window.openNewBooking = openNewBooking;
@@ -1083,7 +1094,8 @@ window.closeModal = closeModal;
 window.submitBooking = submitBooking;
 window.toast = toast;
 window.logout = logout;
-window.editBooking = editBooking;
+window.openEditStatusModal = openEditStatusModal;
+window.submitStatusChange = submitStatusChange;
 window.copyToClipboard = copyToClipboard;
 window.showNotifications = showNotifications;
 window.approveShipment = approveShipment;

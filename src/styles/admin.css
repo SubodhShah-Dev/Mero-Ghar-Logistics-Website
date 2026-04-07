@@ -370,11 +370,12 @@ body {
 .page {
 	display: none;
 	flex: 1;
-	overflow-y: auto;
+	overflow-y: auto; /* ← change from 'hidden' to 'auto' */
 	padding: 32px 30px 44px;
 	flex-direction: column;
 	gap: 28px;
 }
+
 .page.active {
 	display: flex;
 }
@@ -493,6 +494,8 @@ body {
 	border: 1px solid var(--border-dim);
 	border-radius: 14px;
 	overflow: hidden;
+	display: flex;
+	flex-direction: column;
 }
 .ph {
 	display: flex;
@@ -580,7 +583,8 @@ body {
 
 /* ── TABLE ── */
 .tw {
-	overflow-x: auto;
+	flex: 1;
+	overflow: auto; /* ✅ BOTH X and Y scroll here */
 }
 table {
 	width: 100%;

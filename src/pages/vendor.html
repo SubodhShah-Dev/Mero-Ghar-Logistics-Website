@@ -654,17 +654,58 @@
 							<div
 								class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl">
 								<div
-									class="px-5 py-4 border-b border-[rgba(255,255,255,0.07)]">
-									<span class="font-semibold"
-										>Assigned Jobs</span
-									>
+									class="px-5 py-4 border-b border-[rgba(255,255,255,0.07)] flex justify-between items-center flex-wrap gap-2">
+									<span class="font-semibold">All Jobs</span>
+									<div class="chips" id="job-status-filter">
+										<button
+											data-filter="all"
+											class="chip on">
+											All
+										</button>
+										<button
+											data-filter="active"
+											class="chip">
+											Active
+										</button>
+										<button
+											data-filter="completed"
+											class="chip">
+											Completed
+										</button>
+									</div>
 								</div>
-								<div
-									id="jobs-grid"
-									class="grid grid-cols-2 gap-4 p-5"></div>
+								<div class="overflow-x-auto">
+									<table class="w-full" id="jobs-table">
+										<thead
+											class="border-b border-[rgba(255,255,255,0.07)]">
+											<tr
+												class="text-left text-[10px] font-mono text-[rgba(238,242,238,0.28)] uppercase">
+												<th class="px-5 py-3">
+													Booking ID
+												</th>
+												<th class="px-5 py-3">
+													Customer
+												</th>
+												<th class="px-5 py-3">Route</th>
+												<th class="px-5 py-3">
+													Move Date
+												</th>
+												<th class="px-5 py-3">
+													Amount
+												</th>
+												<th class="px-5 py-3">
+													Status
+												</th>
+												<th class="px-5 py-3">
+													Actions
+												</th>
+											</tr>
+										</thead>
+										<tbody id="jobs-tbody"></tbody>
+									</table>
+								</div>
 							</div>
 						</div>
-
 						<!-- FLEET PAGE -->
 						<div
 							id="page-fleet"

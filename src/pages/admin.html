@@ -1092,6 +1092,50 @@
 			</div>
 		</div>
 
+		<!-- Modal for editing booking status -->
+		<div id="modal-edit-status" class="overlay">
+			<div class="modal" style="max-width: 420px">
+				<div class="mh">
+					<div class="mh-title">Update Booking Status</div>
+					<div
+						class="m-close"
+						onclick="closeModal('modal-edit-status')">
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round">
+							<line x1="18" y1="6" x2="6" y2="18"></line>
+							<line x1="6" y1="6" x2="18" y2="18"></line>
+						</svg>
+					</div>
+				</div>
+				<div class="mb">
+					<div class="mf">
+						<label>New Status</label>
+						<select id="edit-status-select">
+							<option value="Pending">Pending</option>
+							<option value="In Transit">In Transit</option>
+							<option value="Delivered">Delivered</option>
+							<option value="Cancelled">Cancelled</option>
+						</select>
+					</div>
+				</div>
+				<div class="mfoot">
+					<button
+						class="btn-ghost"
+						onclick="closeModal('modal-edit-status')">
+						Cancel
+					</button>
+					<button class="btn" onclick="submitStatusChange()">
+						Update
+					</button>
+				</div>
+			</div>
+		</div>
+
 		<!-- TOAST CONTAINER -->
 		<div class="toast-wrap" id="toast-wrap"></div>
 

@@ -1,4 +1,5 @@
 import pool from '../config/db.js';
+import { initiateDummyPayment } from '../services/dummyPaymentService.js';
 
 export const createShipment = async (req, res) => {
 	try {
@@ -35,106 +36,112 @@ export const createShipment = async (req, res) => {
 			payment_method,
 			special_notes,
 			how_found_us,
+			final_quote,
 		} = req.body;
 
 		const userId = req.headers['x-user-id'] || null;
 		const booking_id = `MG-${Date.now()}`;
+		const transactionId = `TXN-${Date.now()}`;
 
-		// Let's do a simple insert first to test
-		// Count: 33 columns, 33 values
+		// Insert into database
 		const [result] = await pool.execute(
 			`INSERT INTO shipments (
-                booking_id, 
-                user_id, 
-                first_name, 
-                last_name, 
-                mobile_number, 
-                email,
-                pickup_province, 
-                pickup_district, 
-                pickup_city, 
-                pickup_ward, 
-                pickup_floor, 
-                pickup_lane_access,
-                drop_province, 
-                drop_district, 
-                drop_city, 
-                drop_ward, 
-                drop_floor,
-                home_size, 
-                selected_items, 
-                fragile_items,
-                vehicle_type, 
-                add_on_services,
-                move_date, 
-                alternate_date, 
-                preferred_time_slot, 
-                move_reason,
-                alternate_mobile, 
-                preferred_contact,
-                payment_method, 
-                special_notes, 
-                how_found_us,
-                approval_status, 
-                status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                booking_id, user_id,
+                pickup_province, pickup_district, pickup_city, pickup_ward, pickup_floor, pickup_lane_access,
+                drop_province, drop_district, drop_city, drop_ward, drop_floor,
+                home_size, selected_items, fragile_items, vehicle_type, add_on_services,
+                move_date, alternate_date, preferred_time_slot, move_reason,
+                first_name, last_name, mobile_number, alternate_mobile, email,
+                preferred_contact, payment_method, special_notes, how_found_us,
+                approval_status, status, transaction_id, payment_status, final_quote
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			[
-				booking_id, // 1
-				userId, // 2
-				first_name, // 3
-				last_name, // 4
-				mobile_number, // 5
-				email || null, // 6
-				pickup_province || null, // 7
-				pickup_district || null, // 8
-				pickup_city || null, // 9
-				pickup_ward || null, // 10
-				pickup_floor || null, // 11
-				pickup_lane_access || null, // 12
-				drop_province || null, // 13
-				drop_district || null, // 14
-				drop_city || null, // 15
-				drop_ward || null, // 16
-				drop_floor || null, // 17
-				home_size || null, // 18
-				selected_items ? JSON.stringify(selected_items) : null, // 19
-				fragile_items || null, // 20
-				vehicle_type || null, // 21
-				add_on_services ? JSON.stringify(add_on_services) : null, // 22
-				move_date || null, // 23
-				alternate_date || null, // 24
-				preferred_time_slot || null, // 25
-				move_reason || null, // 26
-				alternate_mobile || null, // 27
-				preferred_contact ? JSON.stringify(preferred_contact) : null, // 28
-				payment_method || null, // 29
-				special_notes || null, // 30
-				how_found_us || null, // 31
-				'pending', // 32 - approval_status
-				'pending', // 33 - status
+				booking_id,
+				userId,
+				pickup_province || null,
+				pickup_district || null,
+				pickup_city || null,
+				pickup_ward || null,
+				pickup_floor || null,
+				pickup_lane_access || null,
+				drop_province || null,
+				drop_district || null,
+				drop_city || null,
+				drop_ward || null,
+				drop_floor || null,
+				home_size || null,
+				selected_items ? JSON.stringify(selected_items) : null,
+				fragile_items || null,
+				vehicle_type || null,
+				add_on_services ? JSON.stringify(add_on_services) : null,
+				move_date || null,
+				alternate_date || null,
+				preferred_time_slot || null,
+				move_reason || null,
+				first_name,
+				last_name,
+				mobile_number,
+				alternate_mobile || null,
+				email || null,
+				preferred_contact ? JSON.stringify(preferred_contact) : null,
+				payment_method || null,
+				special_notes || null,
+				how_found_us || null,
+				'pending',
+				'pending',
+				transactionId,
+				'pending',
+				final_quote || null,
 			],
 		);
 
-		console.log('Insert successful, ID:', result.insertId);
+		console.log('✅ Insert successful, ID:', result.insertId);
 
+		// After successful insert, check if payment method is digital
+		if (
+			payment_method &&
+			(payment_method === 'esewa' ||
+				payment_method === 'khalti' ||
+				payment_method === 'imepay') &&
+			final_quote > 0
+		) {
+			const paymentData = await initiateDummyPayment(
+				final_quote,
+				transactionId,
+				booking_id,
+				`${first_name} ${last_name}`,
+				email,
+				mobile_number,
+			);
+			return res.status(201).json({
+				success: true,
+				payment_required: true,
+				payment_method: payment_method,
+				payment_data: paymentData,
+				booking_id,
+				shipment_id: result.insertId,
+			});
+		}
+
+		// No payment (if final_quote is 0)
 		res.status(201).json({
 			success: true,
 			message: 'Shipment created successfully',
 			booking_id: booking_id,
 			shipment_id: result.insertId,
+			payment_required: false,
 		});
 	} catch (error) {
-		console.error('Error creating shipment:', error);
+		console.error('❌ Error creating shipment:', error);
 		res.status(500).json({
 			success: false,
 			message: 'Failed to create shipment',
 			error: error.message,
-			code: error.code,
 		});
 	}
 };
 
-// Get all shipments
+// Keep your other functions (getAllShipments, getShipment, getUserShipments, updateShipmentStatus) unchanged
 export const getAllShipments = async (req, res) => {
 	try {
 		const [rows] = await pool.execute(
@@ -150,18 +157,16 @@ export const getAllShipments = async (req, res) => {
 	}
 };
 
-// Get single shipment
 export const getShipment = async (req, res) => {
 	try {
 		const [rows] = await pool.execute(
 			'SELECT * FROM shipments WHERE id = ?',
 			[req.params.id],
 		);
-		if (rows.length === 0) {
+		if (rows.length === 0)
 			return res
 				.status(404)
 				.json({ success: false, message: 'Shipment not found' });
-		}
 		res.json({ success: true, shipment: rows[0] });
 	} catch (error) {
 		console.error('Error fetching shipment:', error);
@@ -172,7 +177,6 @@ export const getShipment = async (req, res) => {
 	}
 };
 
-// Get user shipments
 export const getUserShipments = async (req, res) => {
 	try {
 		const [rows] = await pool.execute(
@@ -189,33 +193,30 @@ export const getUserShipments = async (req, res) => {
 	}
 };
 
-// Update shipment status
 export const updateShipmentStatus = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const { status, final_quote } = req.body;
-
 		const shipmentId = parseInt(id);
+		if (isNaN(shipmentId))
+			return res
+				.status(400)
+				.json({ success: false, message: 'Invalid shipment ID' });
 
 		let query = 'UPDATE shipments SET status = ?';
 		const params = [status];
-
 		if (final_quote !== null && final_quote !== undefined) {
 			query += ', final_quote = ?';
 			params.push(final_quote);
 		}
-
 		query += ' WHERE id = ?';
 		params.push(shipmentId);
 
 		const [result] = await pool.execute(query, params);
-
-		if (result.affectedRows === 0) {
+		if (result.affectedRows === 0)
 			return res
 				.status(404)
 				.json({ success: false, message: 'Shipment not found' });
-		}
-
 		res.json({
 			success: true,
 			message: 'Shipment status updated successfully',

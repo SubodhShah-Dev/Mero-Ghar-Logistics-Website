@@ -1,5 +1,6 @@
 // ==================================================
 // VENDOR PORTAL - COMPLETE WORKING VERSION
+// FIXED: Earnings NaN, Comprehensive Jobs Table
 // ==================================================
 
 const BASEURL = 'http://localhost:5000';
@@ -8,6 +9,7 @@ let vendorData = null;
 let vehicles = [];
 let jobs = [];
 let statusCheckInterval = null;
+let currentJobFilter = 'all'; // 'all', 'active', 'completed'
 
 // ==================================================
 // AUTHENTICATION
@@ -37,33 +39,23 @@ function logout() {
 // ==================================================
 
 async function fetchAPI(url, options = {}) {
-	// Get user from localStorage
 	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
-	console.log('FetchAPI - User from localStorage:', user);
-
 	const headers = {
 		'Content-Type': 'application/json',
 		...options.headers,
 	};
-
-	// Add user ID to headers if available
 	if (user.id) {
 		headers['X-User-Id'] = user.id.toString();
-		console.log('FetchAPI - Adding X-User-Id header:', user.id);
-	} else {
-		console.log('FetchAPI - No user ID found in localStorage');
 	}
-
 	try {
 		const response = await fetch(`${BASEURL}${url}`, {
 			...options,
 			headers,
 		});
 		const data = await response.json();
-		console.log('FetchAPI - Response:', data);
 		return { ok: response.ok, ...data };
 	} catch (error) {
-		console.error('FetchAPI - Error:', error);
+		console.error('FetchAPI Error:', error);
 		return { ok: false, message: error.message };
 	}
 }
@@ -74,23 +66,13 @@ async function fetchAPI(url, options = {}) {
 
 async function checkVendorProfile() {
 	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
-	console.log('checkVendorProfile - User:', user);
-
 	if (!user.id) {
-		console.log('No user ID found, redirecting to login');
 		window.location.href = '/src/pages/login.html';
 		return;
 	}
-
-	console.log('Fetching vendor profile for user ID:', user.id);
-
 	const result = await fetchAPI('/api/vendor/profile');
-	console.log('Vendor profile result:', result);
-
 	if (result.ok && result.vendor) {
 		vendorData = result.vendor;
-		console.log('Vendor data received:', vendorData);
-
 		if (vendorData.status === 'active') {
 			showApprovedDashboard();
 			await loadFleet();
@@ -103,7 +85,6 @@ async function checkVendorProfile() {
 			startStatusCheck();
 		}
 	} else {
-		console.log('No vendor profile found, showing registration form');
 		showRegistrationForm();
 	}
 }
@@ -128,7 +109,6 @@ function showApprovedDashboard() {
 	document.getElementById('dashboard-content').style.display = 'block';
 	document.getElementById('vendor-profile-card').style.display = 'block';
 
-	// Update profile card
 	document.getElementById('vendor-name-display').textContent =
 		vendorData.business_name || vendorData.name;
 	document.getElementById('vendor-region-display').textContent =
@@ -162,7 +142,7 @@ function startStatusCheck() {
 	}, 30000);
 }
 
-window.checkStatusManually = async function () {
+async function checkStatusManually() {
 	toast('Checking status...', 'gold');
 	const result = await fetchAPI('/api/vendor/profile');
 	if (result.ok && result.vendor && result.vendor.status === 'active') {
@@ -171,7 +151,7 @@ window.checkStatusManually = async function () {
 	} else {
 		toast('Still pending approval', 'blue');
 	}
-};
+}
 
 async function submitVendorRegistration() {
 	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
@@ -374,9 +354,16 @@ function renderFleet() {
                 <div><div class="font-semibold">${v.name}</div><div class="text-xs font-mono text-[#f8c06a]">${v.plate}</div></div>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-mono ${v.status === 'Available' ? 'bg-[rgba(76,175,125,0.15)] text-[#4caf7d]' : 'bg-[rgba(248,192,106,0.15)] text-[#f8c06a]'}">${v.status}</span>
             </div>
-            <div class="p-4 space-y-2"><div class="flex justify-between text-sm"><span class="text-[rgba(238,242,238,0.5)]">Type:</span><span>${v.type}</span></div><div class="flex justify-between text-sm"><span class="text-[rgba(238,242,238,0.5)]">Driver:</span><span>${v.driver}</span></div></div>
+            <div class="p-4 space-y-2">
+                <div class="flex justify-between text-sm"><span class="text-[rgba(238,242,238,0.5)]">Type:</span><span>${v.type}</span></div>
+                <div class="flex justify-between text-sm"><span class="text-[rgba(238,242,238,0.5)]">Driver:</span><span>${v.driver}</span></div>
+            </div>
             <div class="p-4 border-t border-[rgba(255,255,255,0.07)] flex gap-2">
-                <select onchange="updateVehicleStatus(${v.id}, this.value)" class="flex-1 bg-[#1d3327] border border-[rgba(255,255,255,0.07)] rounded-lg px-3 py-1.5 text-xs"><option value="Available" ${v.status === 'Available' ? 'selected' : ''}>Available</option><option value="On Route" ${v.status === 'On Route' ? 'selected' : ''}>On Route</option><option value="Maintenance" ${v.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option></select>
+                <select onchange="updateVehicleStatus(${v.id}, this.value)" class="flex-1 bg-[#1d3327] border border-[rgba(255,255,255,0.07)] rounded-lg px-3 py-1.5 text-xs">
+                    <option value="Available" ${v.status === 'Available' ? 'selected' : ''}>Available</option>
+                    <option value="On Route" ${v.status === 'On Route' ? 'selected' : ''}>On Route</option>
+                    <option value="Maintenance" ${v.status === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                </select>
                 <button onclick="removeVehicle(${v.id})" class="bg-[rgba(224,94,94,0.15)] text-[#e05e5e] px-3 py-1.5 rounded-lg text-xs">Remove</button>
             </div>
         </div>
@@ -397,49 +384,116 @@ function renderFleetList() {
 }
 
 // ==================================================
-// JOBS MANAGEMENT
+// JOBS MANAGEMENT (Comprehensive Table)
 // ==================================================
 
 async function loadJobs() {
 	const result = await fetchAPI('/api/vendor/shipments');
 	if (result.ok && result.shipments) {
-		jobs = result.shipments;
-		renderJobs();
+		// Parse amount to number
+		jobs = result.shipments.map((job) => ({
+			...job,
+			final_quote:
+				parseFloat(String(job.final_quote).replace(/[^0-9.-]/g, '')) ||
+				0,
+		}));
+		renderJobsTable();
 		renderNewJobsList();
 		renderRecentCompletions();
 		updateStats();
 	}
 }
 
-function renderJobs() {
-	const container = document.getElementById('jobs-grid');
-	if (!container) return;
-	const activeJobs = jobs.filter(
-		(j) =>
-			j.status === 'pending' ||
-			j.status === 'accepted' ||
-			j.status === 'in_transit',
-	);
-	if (activeJobs.length === 0) {
-		container.innerHTML =
-			'<div class="col-span-2 text-center py-8 text-[rgba(238,242,238,0.5)]">No assigned jobs</div>';
+function renderJobsTable() {
+	const tbody = document.getElementById('jobs-tbody');
+	if (!tbody) return;
+
+	let filtered = [...jobs];
+	if (currentJobFilter === 'active') {
+		filtered = jobs.filter((j) =>
+			['pending', 'accepted', 'in_transit'].includes(j.status),
+		);
+	} else if (currentJobFilter === 'completed') {
+		filtered = jobs.filter((j) =>
+			['delivered', 'completed'].includes(j.status),
+		);
+	}
+
+	if (filtered.length === 0) {
+		tbody.innerHTML =
+			'<tr><td colspan="7" class="empty">No jobs found</td></tr>';
 		return;
 	}
-	container.innerHTML = activeJobs
-		.map(
-			(job) => `
-        <div class="bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-xl p-4">
-            <div class="flex justify-between items-start mb-3"><span class="text-xs font-mono text-[rgba(238,242,238,0.28)]">${job.booking_id || `#MG-${job.id}`}</span><span class="px-2 py-0.5 rounded-full text-[10px] font-mono ${job.status === 'pending' ? 'bg-[rgba(240,120,64,0.15)] text-[#f07840]' : job.status === 'accepted' ? 'bg-[rgba(76,175,125,0.15)] text-[#4caf7d]' : 'bg-[rgba(248,192,106,0.15)] text-[#f8c06a]'}">${job.status || 'Pending'}</span></div>
-            <div class="font-semibold text-sm mb-1">${job.pickup_district} → ${job.drop_district}</div>
-            <div class="text-xs text-[rgba(238,242,238,0.5)] mb-2">${job.customer_name}</div>
-            <div class="flex gap-3 text-xs text-[rgba(238,242,238,0.4)] mb-3"><span>📅 ${job.move_date}</span><span>💰 Rs ${(job.final_quote || 0).toLocaleString()}</span></div>
-            <div class="flex gap-2">
-                ${job.status === 'pending' ? `<button onclick="acceptJob(${job.id})" class="flex-1 bg-[rgba(76,175,125,0.15)] text-[#4caf7d] border border-[rgba(76,175,125,0.25)] px-3 py-1.5 rounded-lg text-sm">Accept</button><button onclick="declineJob(${job.id})" class="flex-1 bg-[rgba(224,94,94,0.15)] text-[#e05e5e] border border-[rgba(224,94,94,0.25)] px-3 py-1.5 rounded-lg text-sm">Decline</button>` : job.status === 'accepted' ? `<button onclick="startDelivery(${job.id})" class="w-full bg-[#f8c06a] text-[#0b1510] px-3 py-1.5 rounded-lg text-sm font-semibold">Start Delivery</button>` : job.status === 'in_transit' ? `<button onclick="completeDelivery(${job.id})" class="w-full bg-[#4caf7d] text-white px-3 py-1.5 rounded-lg text-sm font-semibold">Complete Delivery</button>` : ''}
-            </div>
-        </div>
-    `,
-		)
+
+	tbody.innerHTML = filtered
+		.map((job) => {
+			let statusClass = '';
+			let statusText = job.status || 'pending';
+			switch (statusText) {
+				case 'pending':
+					statusClass = 'pill pNw';
+					statusText = 'Pending';
+					break;
+				case 'accepted':
+					statusClass = 'pill pAv';
+					statusText = 'Accepted';
+					break;
+				case 'in_transit':
+					statusClass = 'pill pOn';
+					statusText = 'In Transit';
+					break;
+				case 'delivered':
+				case 'completed':
+					statusClass = 'pill pCo';
+					statusText = 'Completed';
+					break;
+				default:
+					statusClass = 'pill pMt';
+			}
+
+			let actionButtons = '';
+			if (job.status === 'pending') {
+				actionButtons = `<button onclick="acceptJob(${job.id})" class="btn-g text-xs py-1 px-2">Accept</button>
+                             <button onclick="declineJob(${job.id})" class="btn-r text-xs py-1 px-2">Decline</button>`;
+			} else if (job.status === 'accepted') {
+				actionButtons = `<button onclick="startDelivery(${job.id})" class="btn btn-sm">Start</button>`;
+			} else if (job.status === 'in_transit') {
+				actionButtons = `<button onclick="completeDelivery(${job.id})" class="btn-g btn-sm">Complete</button>`;
+			} else {
+				actionButtons = `<span class="text-[rgba(238,242,238,0.4)] text-xs">—</span>`;
+			}
+
+			return `<tr class="border-b border-[rgba(255,255,255,0.05)]">
+                    <td class="px-5 py-3 font-mono text-xs">${job.booking_id || `#MG-${job.id}`}</td>
+                    <td class="px-5 py-3">${job.customer_name || '—'}</td>
+                    <td class="px-5 py-3">${job.pickup_district || ''} → ${job.drop_district || ''}</td>
+                    <td class="px-5 py-3">${job.move_date || '—'}</td>
+                    <td class="px-5 py-3">Rs ${(job.final_quote || 0).toLocaleString()}</td>
+                    <td class="px-5 py-3"><span class="${statusClass}">${statusText}</span></td>
+                    <td class="px-5 py-3"><div class="flex gap-2">${actionButtons}</div></td>
+                 </tr>`;
+		})
 		.join('');
+}
+
+function setupJobFilters() {
+	const filterContainer = document.getElementById('job-status-filter');
+	if (!filterContainer) return;
+	filterContainer.querySelectorAll('.chip').forEach((chip) => {
+		chip.addEventListener('click', () => {
+			filterContainer
+				.querySelectorAll('.chip')
+				.forEach((c) => c.classList.remove('on'));
+			chip.classList.add('on');
+			currentJobFilter = chip.dataset.filter;
+			renderJobsTable();
+		});
+	});
+}
+
+// Backward compatibility for old renderJobs (used in some places)
+function renderJobs() {
+	renderJobsTable();
 }
 
 async function acceptJob(jobId) {
@@ -449,6 +503,8 @@ async function acceptJob(jobId) {
 	if (result.ok) {
 		toast('Job accepted!', 'green');
 		await loadJobs();
+	} else {
+		toast('Failed to accept job', 'red');
 	}
 }
 
@@ -466,6 +522,8 @@ async function startDelivery(jobId) {
 	if (result.ok) {
 		toast('Delivery started!', 'gold');
 		await loadJobs();
+	} else {
+		toast('Failed to start delivery', 'red');
 	}
 }
 
@@ -481,6 +539,8 @@ async function completeDelivery(jobId) {
 			document.getElementById('vendor-jobs').textContent =
 				vendorData.total_jobs;
 		}
+	} else {
+		toast('Failed to complete delivery', 'red');
 	}
 }
 
@@ -510,8 +570,20 @@ function renderNewJobsList() {
 	}
 	container.innerHTML = newJobs
 		.map(
-			(job) =>
-				`<div class="p-4 hover:bg-[rgba(248,192,106,0.05)]"><div class="flex justify-between items-start"><div><div class="font-medium text-sm">${job.pickup_district} → ${job.drop_district}</div><div class="text-xs text-[rgba(238,242,238,0.5)] mt-1">${job.customer_name} · ${job.move_date}</div></div><div class="text-right"><div class="text-[#f8c06a] font-semibold">Rs ${(job.final_quote || 0).toLocaleString()}</div><button onclick="acceptJob(${job.id})" class="mt-2 bg-[rgba(76,175,125,0.15)] text-[#4caf7d] px-3 py-1 rounded-lg text-xs">Accept</button></div></div></div>`,
+			(job) => `
+        <div class="p-4 hover:bg-[rgba(248,192,106,0.05)]">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="font-medium text-sm">${job.pickup_district} → ${job.drop_district}</div>
+                    <div class="text-xs text-[rgba(238,242,238,0.5)] mt-1">${job.customer_name} · ${job.move_date}</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-[#f8c06a] font-semibold">Rs ${(job.final_quote || 0).toLocaleString()}</div>
+                    <button onclick="acceptJob(${job.id})" class="mt-2 bg-[rgba(76,175,125,0.15)] text-[#4caf7d] px-3 py-1 rounded-lg text-xs">Accept</button>
+                </div>
+            </div>
+        </div>
+    `,
 		)
 		.join('');
 }
@@ -531,30 +603,52 @@ function renderRecentCompletions() {
 }
 
 // ==================================================
-// UI HELPERS
+// STATS & EARNINGS (NaN fix)
 // ==================================================
 
 function updateStats() {
 	const activeJobs = jobs.filter(
 		(j) => j.status === 'accepted' || j.status === 'in_transit',
 	).length;
+
+	const parseAmount = (val) => {
+		if (!val) return 0;
+		if (typeof val === 'number') return val;
+		const cleaned = String(val).replace(/[^0-9.-]/g, '');
+		const num = parseFloat(cleaned);
+		return isNaN(num) ? 0 : num;
+	};
+
 	const totalEarned = jobs
 		.filter((j) => j.status === 'delivered' || j.status === 'completed')
-		.reduce((sum, j) => sum + (j.final_quote || 0), 0);
+		.reduce((sum, j) => sum + parseAmount(j.final_quote), 0);
+
 	const completedCount = jobs.filter(
 		(j) => j.status === 'delivered' || j.status === 'completed',
 	).length;
+	const pendingJobs = jobs.filter((j) => j.status === 'pending');
+	const pendingPayout = pendingJobs.reduce(
+		(sum, j) => sum + parseAmount(j.final_quote),
+		0,
+	);
+
 	document.getElementById('active-jobs').textContent = activeJobs;
 	document.getElementById('fleet-size').textContent = vehicles.length;
 	document.getElementById('vendor-fleet').textContent = vehicles.length;
 	document.getElementById('earn-total').textContent =
 		`Rs ${(totalEarned / 1000).toFixed(0)}k`;
 	document.getElementById('earn-jobs').textContent = completedCount;
+
+	const monthlyEstimate = totalEarned > 0 ? Math.floor(totalEarned / 12) : 0;
 	document.getElementById('month-earning').textContent =
-		`Rs ${Math.floor(totalEarned / 12).toLocaleString()}`;
+		`Rs ${monthlyEstimate.toLocaleString()}`;
 	document.getElementById('earn-pending').textContent =
-		`Rs ${(jobs.filter((j) => j.status === 'pending').length * 3000).toLocaleString()}`;
+		`Rs ${pendingPayout.toLocaleString()}`;
 }
+
+// ==================================================
+// UI HELPERS & NAVIGATION
+// ==================================================
 
 function goPage(page) {
 	currentPage = page;
@@ -597,6 +691,7 @@ function goPage(page) {
 		document.getElementById('profile-address').value =
 			vendorData.address || '';
 	}
+	if (page === 'jobs') renderJobsTable();
 }
 
 function showNotifications() {
@@ -610,29 +705,18 @@ function showNotifications() {
 }
 
 function toggleOnline() {
-	console.log('toggleOnline called');
-
 	const statusSpan = document.getElementById('online-status');
 	const dotSpan = document.getElementById('online-dot');
 	const toggleBtn = document.getElementById('online-toggle-btn');
 	const toggleKnob = document.getElementById('online-toggle-knob');
-
-	if (!statusSpan) {
-		console.error('online-status element not found');
-		return;
-	}
-
 	const isOnline = statusSpan.textContent === 'Online & Available';
-
 	if (isOnline) {
-		// Going OFFLINE - Gray, Knob LEFT
 		statusSpan.textContent = 'Offline';
 		if (dotSpan) dotSpan.style.backgroundColor = '#9ca3af';
 		if (toggleBtn) toggleBtn.style.backgroundColor = '#6b7280';
 		if (toggleKnob) toggleKnob.style.transform = 'translateX(0px)';
 		toast('You are now offline', 'red');
 	} else {
-		// Going ONLINE - Green, Knob RIGHT
 		statusSpan.textContent = 'Online & Available';
 		if (dotSpan) dotSpan.style.backgroundColor = '#4caf7d';
 		if (toggleBtn) toggleBtn.style.backgroundColor = '#2d5a3d';
@@ -641,17 +725,13 @@ function toggleOnline() {
 	}
 }
 
-// Initialize toggle state when page loads
 function initializeToggleState() {
 	const statusSpan = document.getElementById('online-status');
 	const dotSpan = document.getElementById('online-dot');
 	const toggleBtn = document.getElementById('online-toggle-btn');
 	const toggleKnob = document.getElementById('online-toggle-knob');
-
 	if (!statusSpan) return;
-
 	const isOnline = statusSpan.textContent === 'Online & Available';
-
 	if (isOnline) {
 		if (dotSpan) dotSpan.style.backgroundColor = '#4caf7d';
 		if (toggleBtn) toggleBtn.style.backgroundColor = '#2d5a3d';
@@ -662,11 +742,6 @@ function initializeToggleState() {
 		if (toggleKnob) toggleKnob.style.transform = 'translateX(0px)';
 	}
 }
-
-// Call initialization when DOM is ready
-document.addEventListener('DOMContentLoaded', function () {
-	initializeToggleState();
-});
 
 function submitSupportTicket() {
 	const subject = document.getElementById('support-subject')?.value;
@@ -709,9 +784,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 	const user = checkAuth();
 	if (!user) return;
 	await checkVendorProfile();
+	initializeToggleState();
+	setupJobFilters(); // Initialize job filter buttons
 });
 
-// Make functions global
+// Expose global functions
 window.goPage = goPage;
 window.logout = logout;
 window.openAddVehicle = openAddVehicle;
