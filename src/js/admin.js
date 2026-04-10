@@ -389,24 +389,45 @@ function renderVendorsTable() {
 		return;
 	}
 
-	tbody.innerHTML = VENDORS.map(
-		(v) => `
-      <tr>
-        <td class="b">${v.business_name || v.name || '—'}</td>
-        <td>${v.phone || '—'}</td>
-        <td>${v.email || '—'}</td>
-        <td>${v.service_region || '—'}</td>
-        <td>${v.total_jobs || 0}</td>
-        <td>⭐ ${v.rating || 0}</td>
-        <td>
-          <select onchange="updateVendorStatus(${v.id}, this.value)" class="vendor-status-select" style="padding: 5px 10px; border-radius: 6px; background: var(--dark3); color: var(--text); border: 1px solid var(--bdim);">
-            <option value="pending" ${v.status === 'pending' ? 'selected' : ''}>Pending</option>
-            <option value="active" ${v.status === 'active' ? 'selected' : ''}>Active</option>
-            <option value="inactive" ${v.status === 'inactive' ? 'selected' : ''}>Inactive</option>
-          </select>
-        </td>
-      </tr>`,
-	).join('');
+	tbody.innerHTML = VENDORS.map((v) => {
+		let statusOptions = '';
+		if (v.status === 'pending') {
+			statusOptions = `
+                <option value="active">✅ Activate</option>
+                <option value="banned">🚫 Ban</option>
+            `;
+		} else if (v.status === 'active') {
+			statusOptions = `
+                <option value="inactive">⏸️ Suspend</option>
+                <option value="banned">🚫 Ban</option>
+            `;
+		} else if (v.status === 'inactive') {
+			statusOptions = `
+                <option value="active">✅ Reactivate</option>
+                <option value="banned">🚫 Ban</option>
+            `;
+		} else if (v.status === 'banned') {
+			statusOptions = `
+                <option value="active">✅ Unban (Reactivate)</option>
+            `;
+		}
+
+		return `
+        <tr>
+            <td class="b">${v.business_name || v.name || '—'}</td>
+            <td>${v.phone || '—'}</td>
+            <td>${v.email || '—'}</td>
+            <td>${v.service_region || '—'}</td>
+            <td>${v.total_jobs || 0}</td>
+            <td>⭐ ${v.rating || 0}</td>
+            <td>
+                <select onchange="updateVendorStatus(${v.id}, this.value)" class="vendor-status-select" style="padding: 5px 10px; border-radius: 6px; background: var(--dark3); color: var(--text); border: 1px solid var(--bdim);">
+                    <option value="${v.status}" selected disabled>${v.status}</option>
+                    ${statusOptions}
+                </select>
+            </td>
+        </tr>`;
+	}).join('');
 }
 
 async function renderApprovalTable(shipments) {
@@ -573,27 +594,29 @@ async function rejectShipment(shipmentId) {
 	}
 }
 
-async function updateVendorStatus(vendorId, status) {
+async function updateVendorStatus(vendorId, newStatus) {
+	const vendor = VENDORS.find((v) => v.id === vendorId);
+	if (!vendor) return;
+
+	if (!confirm(`Change ${vendor.business_name} status to ${newStatus}?`)) {
+		// Reset select to original value
+		renderVendorsTable();
+		return;
+	}
+
 	const result = await fetchAPI(`/api/admin/vendors/${vendorId}/status`, {
 		method: 'PUT',
-		body: JSON.stringify({ status }),
+		body: JSON.stringify({ status: newStatus }),
 	});
+
 	if (result.ok) {
-		toast(`Vendor status updated to ${status}`, 'green');
+		toast(`Vendor status updated to ${newStatus}`, 'green');
 		await loadVendors();
-		if (approvalFilter === 'pending') {
-			await loadPendingShipments();
-		} else {
-			await loadShipmentsByStatus(approvalFilter);
-		}
-		if (status === 'active') {
-			toast(
-				'Vendor activated! They can now log in and receive shipments.',
-				'green',
-			);
-		}
+		// Refresh pending approvals if needed
+		if (approvalFilter === 'pending') await loadPendingShipments();
 	} else {
-		toast('Failed to update vendor status', 'red');
+		toast(result.message || 'Failed to update vendor status', 'red');
+		renderVendorsTable(); // revert select
 	}
 }
 

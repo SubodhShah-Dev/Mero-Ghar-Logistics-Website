@@ -37,6 +37,8 @@ export const createShipment = async (req, res) => {
 			special_notes,
 			how_found_us,
 			final_quote,
+			distance_km, // ⬅️ Added
+			estimated_duration, // ⬅️ Added
 		} = req.body;
 
 		const userId = req.headers['x-user-id'] || null;
@@ -53,8 +55,8 @@ export const createShipment = async (req, res) => {
                 move_date, alternate_date, preferred_time_slot, move_reason,
                 first_name, last_name, mobile_number, alternate_mobile, email,
                 preferred_contact, payment_method, special_notes, how_found_us,
-                approval_status, status, transaction_id, payment_status, final_quote
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                approval_status, status, transaction_id, payment_status, final_quote, distance_km, estimated_duration
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			[
 				booking_id,
 				userId,
@@ -92,12 +94,14 @@ export const createShipment = async (req, res) => {
 				transactionId,
 				'pending',
 				final_quote || null,
+				distance_km || null, // ⬅️ Added
+				estimated_duration || null, // ⬅️ Added
 			],
 		);
 
 		console.log('✅ Insert successful, ID:', result.insertId);
 
-		// After successful insert, check if payment method is digital
+		// Payment handling (unchanged)
 		if (
 			payment_method &&
 			(payment_method === 'esewa' ||
@@ -123,7 +127,6 @@ export const createShipment = async (req, res) => {
 			});
 		}
 
-		// No payment (if final_quote is 0)
 		res.status(201).json({
 			success: true,
 			message: 'Shipment created successfully',

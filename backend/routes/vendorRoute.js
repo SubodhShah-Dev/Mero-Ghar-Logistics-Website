@@ -8,6 +8,7 @@ import {
 	startDelivery,
 	completeDelivery,
 	testVendorRoute,
+	rejectShipment,
 } from '../controllers/vendorController.js';
 
 const router = express.Router();
@@ -22,5 +23,6 @@ router.get('/shipments', getVendorShipments);
 router.put('/shipments/:id/accept', acceptShipment);
 router.put('/shipments/:id/start', startDelivery);
 router.put('/shipments/:id/complete', completeDelivery);
+router.put('/shipments/:id/reject', rejectShipment);
 
 export default router;

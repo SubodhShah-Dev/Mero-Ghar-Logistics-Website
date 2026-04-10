@@ -25,11 +25,13 @@ function addLogoutButton() {
 		logoutBtn.className =
 			'bg-red-600 hover:bg-red-700 text-white font-semibold text-sm px-6 py-3 rounded-sm transition-all ml-3';
 		logoutBtn.onclick = logout;
-		homeBtn.parentNode.appendChild(logoutBtn);
+		// Append to the same container as home button
+		const buttonContainer = homeBtn.parentNode;
+		if (buttonContainer) buttonContainer.appendChild(logoutBtn);
 	}
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 	const user = checkAuth();
 	if (user) {
 		addLogoutButton();
@@ -39,14 +41,75 @@ document.addEventListener('DOMContentLoaded', () => {
 		const homeBtn = document.getElementById('homeBtn');
 		if (homeBtn) homeBtn.parentNode.insertBefore(userNameSpan, homeBtn);
 	}
+
+	// Populate province dropdowns (hardcoded)
+	populateProvincesHardcoded('pu');
+	populateProvincesHardcoded('dr');
+
+	['puCity', 'puWard', 'drCity', 'drWard'].forEach((id) => {
+		const el = document.getElementById(id);
+		if (el) {
+			el.addEventListener('input', () => {
+				clearDistanceCache();
+				updatePriceDisplay();
+			});
+		}
+	});
+
+	// Restore saved form state
+	restoreFormState();
+
+	// Prevent past dates
+	const today = new Date().toISOString().split('T')[0];
+	document
+		.querySelectorAll('input[type="date"]')
+		.forEach((input) => input.setAttribute('min', today));
+
+	// Auto-save on any input/change
+	document.addEventListener('input', saveFormState);
+	document.addEventListener('change', saveFormState);
+	document.addEventListener('click', (e) => {
+		if (
+			e.target.closest('.item-chip') ||
+			e.target.closest('.pay-card') ||
+			e.target.closest('input[type="radio"]')
+		) {
+			saveFormState();
+		}
+	});
+
+	// Setup other listeners
+	document
+		.querySelectorAll('label.item-chip input[type=radio]')
+		.forEach((inp) => {
+			inp.addEventListener('change', () => {
+				const name = inp.name;
+				document
+					.querySelectorAll(`label.item-chip input[name="${name}"]`)
+					.forEach((r) => {
+						r.closest('label').classList.remove('on');
+						const cl = r
+							.closest('label')
+							.querySelector('.chip-lbl');
+						if (cl) cl.style.color = '';
+					});
+				inp.closest('label').classList.add('on');
+				const cl = inp.closest('label').querySelector('.chip-lbl');
+				if (cl) cl.style.color = '#f5a623';
+			});
+		});
+
+	document
+		.querySelectorAll('#fp3 input[type="checkbox"]')
+		.forEach((cb) => cb.addEventListener('change', updatePriceDisplay));
 });
 
 // ── HOME PAGE RETURN ─────────────────────────────────
 (function goHome() {
-	const homeBtn = document.querySelector('#homeBtn');
+	const homeBtn = document.getElementById('homeBtn');
 	if (homeBtn) {
 		homeBtn.addEventListener('click', () => {
-			window.location.href = 'index.html';
+			window.location.href = '/index.html'; // adjust if your index is elsewhere
 		});
 	}
 })();
@@ -56,20 +119,14 @@ let fCur = 1;
 const fTotal = 5;
 const fPW = { 1: '20%', 2: '40%', 3: '60%', 4: '80%', 5: '100%' };
 
-// ========== LOWER PRICES (matching the ranges shown in HTML) ==========
+// ========== PRICES ==========
 const PRICES = {
 	vehicle: {
-		cargo_tempo: 500, // matches "NPR 400-500"
-		tata_ace: 1000, // matches "NPR 800-1200"
-		mini_truck_407: 2000, // matches "NPR 1500-2000"
-		large_truck: 2500, // matches "NPR 2000+"
+		cargo_tempo: 500,
+		tata_ace: 1000,
+		mini_truck_407: 2000,
+		large_truck: 2500,
 		recommend: 0,
-	},
-	homeSize: {
-		'1_room': 1,
-		'2_bhk': 1.2,
-		'3_bhk': 1.5,
-		large_house: 1.8,
 	},
 	addOns: {
 		packing: 500,
@@ -78,7 +135,338 @@ const PRICES = {
 		insurance: 800,
 	},
 };
-// =====================================================
+
+// ========== HARDCODED NEPAL DATA ==========
+const NEPAL_DATA = {
+	provinces: [
+		{ id: '1', name: 'Province No. 1 (Koshi)' },
+		{ id: '2', name: 'Province No. 2 (Madhesh)' },
+		{ id: '3', name: 'Bagmati Province' },
+		{ id: '4', name: 'Gandaki Province' },
+		{ id: '5', name: 'Lumbini Province' },
+		{ id: '6', name: 'Karnali Province' },
+		{ id: '7', name: 'Sudurpashchim Province' },
+	],
+	districts: {
+		1: [
+			'Bhojpur',
+			'Dhankuta',
+			'Ilam',
+			'Jhapa',
+			'Khotang',
+			'Morang',
+			'Okhaldhunga',
+			'Panchthar',
+			'Sankhuwasabha',
+			'Solukhumbu',
+			'Sunsari',
+			'Taplejung',
+			'Terhathum',
+			'Udayapur',
+		],
+		2: [
+			'Bara',
+			'Dhanusha',
+			'Mahottari',
+			'Parsa',
+			'Rautahat',
+			'Saptari',
+			'Sarlahi',
+			'Siraha',
+		],
+		3: [
+			'Bhaktapur',
+			'Chitwan',
+			'Dhading',
+			'Dolakha',
+			'Kathmandu',
+			'Kavrepalanchok',
+			'Lalitpur',
+			'Makwanpur',
+			'Nuwakot',
+			'Ramechhap',
+			'Rasuwa',
+			'Sindhuli',
+			'Sindhupalchok',
+		],
+		4: [
+			'Baglung',
+			'Gorkha',
+			'Kaski',
+			'Lamjung',
+			'Manang',
+			'Mustang',
+			'Myagdi',
+			'Nawalpur',
+			'Parbat',
+			'Syangja',
+			'Tanahun',
+		],
+		5: [
+			'Arghakhanchi',
+			'Banke',
+			'Bardiya',
+			'Dang',
+			'Eastern Rukum',
+			'Gulmi',
+			'Kapilvastu',
+			'Nawalparasi West',
+			'Palpa',
+			'Pyuthan',
+			'Rolpa',
+			'Rupandehi',
+		],
+		6: [
+			'Dailekh',
+			'Dolpa',
+			'Humla',
+			'Jajarkot',
+			'Jumla',
+			'Kalikot',
+			'Mugu',
+			'Salyan',
+			'Surkhet',
+			'Western Rukum',
+		],
+		7: [
+			'Achham',
+			'Baitadi',
+			'Bajhang',
+			'Bajura',
+			'Dadeldhura',
+			'Darchula',
+			'Doti',
+			'Kailali',
+			'Kanchanpur',
+		],
+	},
+};
+
+// Province centroids for fallback (approx)
+const PROVINCE_CENTROIDS = {
+	1: [87.2843, 26.4537],
+	2: [85.9246, 26.7271],
+	3: [85.324, 27.7172],
+	4: [83.9856, 28.2096],
+	5: [83.451, 27.69],
+	6: [82.1739, 29.2753],
+	7: [80.59, 28.71],
+};
+
+function populateProvincesHardcoded(prefix) {
+	const select = document.getElementById(prefix + 'Prov');
+	if (!select) return;
+	select.innerHTML = '<option value="">— Select Province —</option>';
+	NEPAL_DATA.provinces.forEach((prov) => {
+		const option = document.createElement('option');
+		option.value = prov.id;
+		option.textContent = prov.name;
+		select.appendChild(option);
+	});
+}
+
+function populateDistrictsHardcoded(prefix, provinceId) {
+	const select = document.getElementById(prefix + 'Dist');
+	if (!select) return;
+	select.innerHTML = '<option value="">— Select District —</option>';
+	if (!provinceId || !NEPAL_DATA.districts[provinceId]) return;
+	NEPAL_DATA.districts[provinceId].forEach((district) => {
+		const option = document.createElement('option');
+		option.value = district;
+		option.textContent = district;
+		select.appendChild(option);
+	});
+}
+
+window.onProvinceChange = function (prefix) {
+	const provinceId = document.getElementById(prefix + 'Prov').value;
+	populateDistrictsHardcoded(prefix, provinceId);
+	document.getElementById(prefix + 'City').value = '';
+	document.getElementById(prefix + 'Ward').value = '';
+	clearDistanceCache();
+	updatePriceDisplay();
+};
+
+window.onDistrictChange = function (prefix) {
+	document.getElementById(prefix + 'City').value = '';
+	document.getElementById(prefix + 'Ward').value = '';
+	clearDistanceCache();
+	updatePriceDisplay();
+};
+
+window.onMunicipalityChange = function (prefix) {
+	clearDistanceCache();
+	updatePriceDisplay();
+};
+
+// ========== OPENROUTESERVICE CONFIG ==========
+const ORS_API_KEY =
+	'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjUxMDBmZmI4Y2U2NTQ4ZjliZDcyOWM2YmFkMzk2MGVjIiwiaCI6Im11cm11cjY0In0=';
+const PRICE_PER_KM = 10;
+
+let cachedDistanceData = null;
+let priceUpdateTimer = null;
+
+function clearDistanceCache() {
+	cachedDistanceData = null;
+}
+
+function schedulePriceUpdate() {
+	if (priceUpdateTimer) clearTimeout(priceUpdateTimer);
+	priceUpdateTimer = setTimeout(() => {
+		updatePriceDisplay();
+		priceUpdateTimer = null;
+	}, 100);
+}
+
+// ── DURATION FORMATTING ─────────────────────────────
+function formatDuration(seconds) {
+	if (!seconds || seconds <= 0) return '';
+	const mins = Math.round(seconds / 60);
+	if (mins < 60) return `${mins} mins`;
+	const hours = Math.floor(mins / 60);
+	const remainingMins = mins % 60;
+	if (remainingMins === 0) return `${hours} hour${hours > 1 ? 's' : ''}`;
+	return `${hours} hour${hours > 1 ? 's' : ''} ${remainingMins} mins`;
+}
+
+// ========== GEOCODING ==========
+const geocodeCache = new Map();
+
+async function tryGeocode(address) {
+	if (geocodeCache.has(address)) {
+		console.log('📍 Using cached geocode for:', address);
+		return geocodeCache.get(address);
+	}
+	const url = `https://api.openrouteservice.org/geocode/search?api_key=${ORS_API_KEY}&text=${encodeURIComponent(address)}&boundary.country=NP`;
+	try {
+		const response = await fetch(url);
+		const data = await response.json();
+		if (data.features && data.features.length > 0) {
+			const [lon, lat] = data.features[0].geometry.coordinates;
+			const coords = [lon, lat];
+			geocodeCache.set(address, coords);
+			return coords;
+		}
+	} catch (e) {
+		console.warn('ORS geocoding error:', e);
+	}
+	return null;
+}
+
+async function geocodeAddress(address, provinceId) {
+	let coords = await tryGeocode(address);
+	if (coords) return coords;
+	const parts = address.split(',').map((s) => s.trim());
+	if (parts.length >= 3) {
+		const district = parts[parts.length - 3] || parts[0];
+		const province = parts[parts.length - 2];
+		const simpleAddr = `${district}, ${province}, Nepal`;
+		coords = await tryGeocode(simpleAddr);
+		if (coords) return coords;
+	}
+	if (provinceId && PROVINCE_CENTROIDS[provinceId]) {
+		console.log(`Using fallback centroid for province ${provinceId}`);
+		return PROVINCE_CENTROIDS[provinceId];
+	}
+	return null;
+}
+
+function getPickupAddressString() {
+	const city = document.getElementById('puCity')?.value?.trim() || '';
+	const districtSelect = document.getElementById('puDist');
+	const district =
+		districtSelect?.options[districtSelect.selectedIndex]?.text || '';
+	const provinceSelect = document.getElementById('puProv');
+	const province =
+		provinceSelect?.options[provinceSelect.selectedIndex]?.text || '';
+	return `${city ? city + ', ' : ''}${district}, ${province}, Nepal`;
+}
+
+function getDropAddressString() {
+	const city = document.getElementById('drCity')?.value?.trim() || '';
+	const districtSelect = document.getElementById('drDist');
+	const district =
+		districtSelect?.options[districtSelect.selectedIndex]?.text || '';
+	const provinceSelect = document.getElementById('drProv');
+	const province =
+		provinceSelect?.options[provinceSelect.selectedIndex]?.text || '';
+	return `${city ? city + ', ' : ''}${district}, ${province}, Nepal`;
+}
+
+async function getDistance(originCoords, destinationCoords) {
+	if (!originCoords || !destinationCoords) return null;
+	const latDiff = Math.abs(originCoords[1] - destinationCoords[1]);
+	const lonDiff = Math.abs(originCoords[0] - destinationCoords[0]);
+	if (latDiff < 0.01 && lonDiff < 0.01) return null;
+	const url = 'https://api.openrouteservice.org/v2/matrix/driving-car';
+	const body = {
+		locations: [originCoords, destinationCoords],
+		metrics: ['distance', 'duration'],
+		units: 'km',
+	};
+	try {
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				Authorization: ORS_API_KEY,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(body),
+		});
+		if (!response.ok) throw new Error(`ORS error ${response.status}`);
+		const data = await response.json();
+		const distanceKm = data.distances[0][1];
+		const durationSec = data.durations[0][1];
+		return {
+			distanceKm,
+			durationSec,
+			durationText: formatDuration(durationSec),
+			originCoords,
+			destinationCoords,
+		};
+	} catch (error) {
+		console.error('Distance matrix failed:', error);
+		return null;
+	}
+}
+
+async function getDistanceCost() {
+	const pickupAddr = getPickupAddressString();
+	const dropAddr = getDropAddressString();
+	const puProv = document.getElementById('puProv')?.value;
+	const drProv = document.getElementById('drProv')?.value;
+	try {
+		const [pickupCoords, dropCoords] = await Promise.all([
+			geocodeAddress(pickupAddr, puProv),
+			geocodeAddress(dropAddr, drProv),
+		]);
+		const distData = await getDistance(pickupCoords, dropCoords);
+		if (distData) {
+			cachedDistanceData = {
+				...distData,
+				pickupAddress: pickupAddr,
+				dropAddress: dropAddr,
+			};
+			return distData.distanceKm * PRICE_PER_KM;
+		}
+	} catch (e) {
+		console.warn('Distance calculation error, using fallback:', e);
+	}
+	const diff = Math.abs(parseInt(puProv) - parseInt(drProv));
+	const fallbackKm = diff * 100 + 50;
+	cachedDistanceData = {
+		distanceKm: fallbackKm,
+		durationSec: fallbackKm * 90,
+		durationText: formatDuration(fallbackKm * 90),
+		originCoords: PROVINCE_CENTROIDS[puProv] || null,
+		destinationCoords: PROVINCE_CENTROIDS[drProv] || null,
+		pickupAddress: pickupAddr,
+		dropAddress: dropAddr,
+	};
+	console.log('📦 Fallback distance used:', fallbackKm, 'km');
+	return fallbackKm * PRICE_PER_KM;
+}
 
 function getSelectedVehiclePrice() {
 	const vehicleSelected = document.querySelector('input[name="veh"]:checked');
@@ -96,97 +484,385 @@ function getSelectedVehiclePrice() {
 	return 0;
 }
 
-function getHomeSizeMultiplier() {
-	const homeSizeSelected = document.querySelector(
-		'input[name="hSize"]:checked',
-	);
-	if (!homeSizeSelected) return 1;
-	const label = homeSizeSelected.closest('label')?.querySelector('.chip-lbl');
-	if (!label) return 1;
-	const text = label.innerText;
-	if (text.includes('1 Room')) return PRICES.homeSize['1_room'];
-	if (text.includes('2 BHK')) return PRICES.homeSize['2_bhk'];
-	if (text.includes('3 BHK')) return PRICES.homeSize['3_bhk'];
-	if (text.includes('Large House')) return PRICES.homeSize.large_house;
-	return 1;
-}
-
 function getAddOnsTotal() {
 	let total = 0;
 	document
 		.querySelectorAll('#fp3 input[type="checkbox"]:checked')
 		.forEach((cb) => {
-			const serviceText = cb
-				.closest('label')
-				?.querySelector('p:first-child')?.innerText;
-			if (serviceText) {
-				if (serviceText.includes('Packing'))
-					total += PRICES.addOns.packing;
-				if (serviceText.includes('Disassembly'))
-					total += PRICES.addOns.disassembly;
-				if (serviceText.includes('Porter'))
-					total += PRICES.addOns.porter;
-				if (serviceText.includes('Insurance'))
-					total += PRICES.addOns.insurance;
-			}
+			const service = cb.dataset.service;
+			if (service === 'packing') total += PRICES.addOns.packing;
+			else if (service === 'disassembly')
+				total += PRICES.addOns.disassembly;
+			else if (service === 'porter') total += PRICES.addOns.porter;
+			else if (service === 'insurance') total += PRICES.addOns.insurance;
 		});
 	return total;
 }
 
-function calculateTotalPrice() {
-	const vehicleBase = getSelectedVehiclePrice();
-	const multiplier = getHomeSizeMultiplier();
-	const addOns = getAddOnsTotal();
-	let total = vehicleBase * multiplier + addOns;
-	return Math.max(total, 200);
+async function calculateTotalPrice() {
+	const vehicleBase = getSelectedVehiclePrice() || 0;
+	const addOns = getAddOnsTotal() || 0;
+	let distanceCost = 0,
+		distanceKm = 0,
+		durationText = '';
+	if (
+		cachedDistanceData &&
+		typeof cachedDistanceData.distanceKm === 'number'
+	) {
+		distanceKm = cachedDistanceData.distanceKm;
+		distanceCost = distanceKm * PRICE_PER_KM;
+		durationText = cachedDistanceData.durationText || '';
+		console.log('📦 Using cached distance:', distanceKm, 'km');
+	} else {
+		console.log('🔄 Recalculating distance...');
+		distanceCost = await getDistanceCost();
+		distanceKm = cachedDistanceData?.distanceKm || 0;
+		durationText = cachedDistanceData?.durationText || '';
+	}
+	const total = vehicleBase + distanceCost + addOns;
+	console.log('💰 Price calc:', { vehicleBase, distanceCost, addOns, total });
+	return {
+		total: Math.max(total, 200) || 200,
+		vehicleBase,
+		distanceCost,
+		distanceKm,
+		durationText,
+		addOns,
+	};
 }
 
-function updatePriceDisplay() {
-	const vehicleBase = getSelectedVehiclePrice();
-	const multiplier = getHomeSizeMultiplier();
-	const addOns = getAddOnsTotal();
-	const total = calculateTotalPrice();
+let updatingPrice = false;
 
-	// Find the yellow price box in Panel 5
-	const priceBox = document.querySelector('#fp5 .bg-saffron-50');
-	if (priceBox) {
-		priceBox.innerHTML = `
-			<div class="space-y-1 text-sm">
-				<div class="flex justify-between"><span>🚛 Vehicle base:</span><span>रु ${vehicleBase.toLocaleString()}</span></div>
-				<div class="flex justify-between"><span>🏠 Home size factor:</span><span>${multiplier}x</span></div>
-				<div class="flex justify-between"><span>➕ Add‑on services:</span><span>रु ${addOns.toLocaleString()}</span></div>
-				<div class="border-t border-saffron-300 my-1"></div>
-				<div class="flex justify-between font-bold text-base"><span>💰 Total estimate:</span><span>रु ${total.toLocaleString()}</span></div>
-				<p class="text-xs text-gray-500 mt-2">* Final quote confirmed by coordinator</p>
-			</div>
-		`;
+async function updatePriceDisplay() {
+	if (priceUpdateTimer) {
+		clearTimeout(priceUpdateTimer);
+		priceUpdateTimer = null;
+	}
+	if (updatingPrice) return;
+	updatingPrice = true;
+	try {
+		const priceBox = document.querySelector('#fp5 .bg-saffron-50');
+		if (priceBox)
+			priceBox.innerHTML = `<div class="text-center py-2 text-sm">Calculating distance...</div>`;
+		let result;
+		try {
+			result = await calculateTotalPrice();
+		} catch (e) {
+			console.error('Price calculation failed:', e);
+			result = {
+				total: 0,
+				vehicleBase: 0,
+				distanceCost: 0,
+				distanceKm: 0,
+				durationText: '',
+				addOns: 0,
+			};
+		}
+		const {
+			total,
+			vehicleBase,
+			distanceCost,
+			distanceKm,
+			addOns,
+			durationText,
+		} = result;
+		if (priceBox) {
+			const displayDistance = distanceKm < 0.1 ? 0.1 : distanceKm;
+			const distanceDisplayHtml =
+				distanceKm > 0
+					? `<div class="flex justify-between"><span>🗺️ Distance (${displayDistance.toFixed(1)} km):</span><span>रु ${distanceCost.toLocaleString()}</span></div>`
+					: `<div class="flex justify-between"><span>🏢 Same Building / Locality:</span><span>रु 0</span></div>`;
+			const validTotal = isNaN(total) ? 0 : total;
+			const validDuration =
+				durationText && durationText !== 'NaN mins' ? durationText : '';
+			priceBox.innerHTML = `
+				<div class="space-y-1 text-sm">
+					<div class="flex justify-between"><span>🚛 Vehicle base:</span><span>रु ${vehicleBase.toLocaleString()}</span></div>
+					${distanceDisplayHtml}
+					<div class="flex justify-between"><span>➕ Add‑on services:</span><span>रु ${addOns.toLocaleString()}</span></div>
+					<div class="border-t border-saffron-300 my-1"></div>
+					<div class="flex justify-between font-bold text-base"><span>💰 Total estimate:</span><span>रु ${validTotal.toLocaleString()}</span></div>
+					${validDuration ? `<p class="text-xs text-gray-500 mt-1">⏱️ Estimated travel time: ${validDuration}</p>` : ''}
+					<p class="text-xs text-gray-500 mt-2">* Final quote confirmed by coordinator</p>
+				</div>
+			`;
+		}
+		const oldTotalSpan = document.getElementById('total-price-display');
+		if (oldTotalSpan)
+			oldTotalSpan.textContent = `रु ${(total || 0).toLocaleString()}`;
+	} finally {
+		updatingPrice = false;
+	}
+}
+
+// ========== FORM STATE PERSISTENCE ==========
+const STORAGE_KEY = 'meroGhar_booking_form';
+const USE_LOCAL_STORAGE = false;
+
+function saveFormState() {
+	try {
+		const formData = {
+			puProv: document.getElementById('puProv')?.value || '',
+			puDist: document.getElementById('puDist')?.value || '',
+			puCity: document.getElementById('puCity')?.value || '',
+			puWard: document.getElementById('puWard')?.value || '',
+			puFloor: document.getElementById('puFloor')?.value || '',
+			puLane:
+				document.querySelector('input[name="puLane"]:checked')
+					?.parentElement?.innerText || '',
+			drProv: document.getElementById('drProv')?.value || '',
+			drDist: document.getElementById('drDist')?.value || '',
+			drCity: document.getElementById('drCity')?.value || '',
+			drWard: document.getElementById('drWard')?.value || '',
+			drFloor: document.getElementById('drFloor')?.value || '',
+			homeSize:
+				document
+					.querySelector('input[name="hSize"]:checked')
+					?.closest('label')
+					?.querySelector('.chip-lbl')?.innerText || '',
+			selectedItems: Array.from(
+				document.querySelectorAll('#fp2 .item-chip.on .chip-lbl'),
+			).map((l) => l.innerText),
+			fragileItems: document.querySelector('#fp2 textarea')?.value || '',
+			vehicle:
+				document
+					.querySelector('input[name="veh"]:checked')
+					?.closest('label')
+					?.querySelector('.font-semibold')?.innerText || '',
+			addOns: Array.from(
+				document.querySelectorAll(
+					'#fp3 input[type="checkbox"]:checked',
+				),
+			).map((cb) => cb.dataset.service),
+			moveDate:
+				document.querySelectorAll('#fp4 input[type="date"]')[0]
+					?.value || '',
+			alternateDate:
+				document.querySelectorAll('#fp4 input[type="date"]')[1]
+					?.value || '',
+			timeSlot:
+				document
+					.querySelector('input[name="tSlot"]:checked')
+					?.closest('label')
+					?.querySelector('.chip-lbl')?.innerText || '',
+			moveReason: document.querySelector('#fp4 select')?.value || '',
+			specialNotes: document.querySelector('#fp4 textarea')?.value || '',
+			firstName:
+				document.querySelectorAll('#fp5 input[type="text"]')[0]
+					?.value || '',
+			lastName:
+				document.querySelectorAll('#fp5 input[type="text"]')[1]
+					?.value || '',
+			mobile:
+				document.querySelectorAll('#fp5 input[type="tel"]')[0]?.value ||
+				'',
+			alternateMobile:
+				document.querySelectorAll('#fp5 input[type="tel"]')[1]?.value ||
+				'',
+			email:
+				document.querySelector('#fp5 input[type="email"]')?.value || '',
+			preferredContact: Array.from(
+				document.querySelectorAll(
+					'#fp5 .flex-wrap input[type="checkbox"]:checked',
+				),
+			).map((cb) => cb.parentElement.innerText.trim()),
+			paymentMethod:
+				document
+					.querySelector('.pay-card.picked')
+					?.querySelector('.text-xs.font-semibold')?.innerText ||
+				'Cash',
+			howFound: document.querySelectorAll('#fp5 select')[1]?.value || '',
+			termsAccepted:
+				document.querySelector('#fp5 input[type="checkbox"]')
+					?.checked || false,
+			currentStep: fCur,
+			cachedDistanceData: cachedDistanceData
+				? JSON.stringify(cachedDistanceData)
+				: null,
+		};
+		const storage = USE_LOCAL_STORAGE ? localStorage : sessionStorage;
+		storage.setItem(STORAGE_KEY, JSON.stringify(formData));
+	} catch (e) {}
+}
+
+function restoreFormState() {
+	try {
+		const storage = USE_LOCAL_STORAGE ? localStorage : sessionStorage;
+		const saved = storage.getItem(STORAGE_KEY);
+		if (!saved) return;
+		const data = JSON.parse(saved);
+
+		if (data.cachedDistanceData) {
+			try {
+				cachedDistanceData = JSON.parse(data.cachedDistanceData);
+			} catch (e) {
+				cachedDistanceData = null;
+			}
+		}
+
+		const setValue = (id, value) => {
+			if (id && value) document.getElementById(id).value = value;
+		};
+		const setRadioByLabel = (name, labelText) => {
+			if (!labelText) return;
+			document
+				.querySelectorAll(`input[name="${name}"]`)
+				.forEach((radio) => {
+					const parent = radio.closest('label');
+					if (parent && parent.innerText.includes(labelText))
+						radio.checked = true;
+				});
+		};
+		const setChipsByLabels = (selector, labels) => {
+			document.querySelectorAll(selector).forEach((chip) => {
+				const lbl = chip.querySelector('.chip-lbl');
+				if (lbl && labels.includes(lbl.innerText))
+					chip.classList.add('on');
+			});
+		};
+
+		setValue('puProv', data.puProv);
+		if (data.puProv) {
+			populateDistrictsHardcoded('pu', data.puProv);
+			setValue('puDist', data.puDist);
+		}
+		setValue('puCity', data.puCity);
+		setValue('puWard', data.puWard);
+		setValue('puFloor', data.puFloor);
+		setRadioByLabel('puLane', data.puLane);
+
+		setValue('drProv', data.drProv);
+		if (data.drProv) {
+			populateDistrictsHardcoded('dr', data.drProv);
+			setValue('drDist', data.drDist);
+		}
+		setValue('drCity', data.drCity);
+		setValue('drWard', data.drWard);
+		setValue('drFloor', data.drFloor);
+
+		setRadioByLabel('hSize', data.homeSize);
+		setChipsByLabels('#fp2 .item-chip', data.selectedItems);
+		const fragileTextarea = document.querySelector('#fp2 textarea');
+		if (fragileTextarea) fragileTextarea.value = data.fragileItems;
+
+		if (data.vehicle) {
+			document.querySelectorAll('input[name="veh"]').forEach((radio) => {
+				const card = radio
+					.closest('label')
+					?.querySelector('.font-semibold');
+				if (card && card.innerText.includes(data.vehicle)) {
+					radio.checked = true;
+					pickVeh(radio);
+				}
+			});
+		}
+
+		document
+			.querySelectorAll('#fp3 input[type="checkbox"]')
+			.forEach((cb) => {
+				const service = cb.dataset.service;
+				cb.checked = !!(service && data.addOns.includes(service));
+			});
+
+		const moveDateInput = document.querySelectorAll(
+			'#fp4 input[type="date"]',
+		)[0];
+		if (moveDateInput) moveDateInput.value = data.moveDate;
+		const altDateInput = document.querySelectorAll(
+			'#fp4 input[type="date"]',
+		)[1];
+		if (altDateInput) altDateInput.value = data.alternateDate;
+		setRadioByLabel('tSlot', data.timeSlot);
+		const moveReasonSelect = document.querySelector('#fp4 select');
+		if (moveReasonSelect) moveReasonSelect.value = data.moveReason;
+		const specialNotesTextarea = document.querySelector('#fp4 textarea');
+		if (specialNotesTextarea)
+			specialNotesTextarea.value = data.specialNotes;
+
+		const firstNameInput = document.querySelectorAll(
+			'#fp5 input[type="text"]',
+		)[0];
+		if (firstNameInput) firstNameInput.value = data.firstName;
+		const lastNameInput = document.querySelectorAll(
+			'#fp5 input[type="text"]',
+		)[1];
+		if (lastNameInput) lastNameInput.value = data.lastName;
+		const mobileInput = document.querySelectorAll(
+			'#fp5 input[type="tel"]',
+		)[0];
+		if (mobileInput) mobileInput.value = data.mobile;
+		const altMobileInput = document.querySelectorAll(
+			'#fp5 input[type="tel"]',
+		)[1];
+		if (altMobileInput) altMobileInput.value = data.alternateMobile;
+		const emailInput = document.querySelector('#fp5 input[type="email"]');
+		if (emailInput) emailInput.value = data.email;
+
+		document
+			.querySelectorAll('#fp5 .flex-wrap input[type="checkbox"]')
+			.forEach((cb) => {
+				const txt = cb.parentElement.innerText.trim();
+				if (data.preferredContact.includes(txt)) cb.checked = true;
+			});
+		document.querySelectorAll('.pay-card').forEach((card) => {
+			const name = card.querySelector(
+				'.text-xs.font-semibold',
+			)?.innerText;
+			if (name === data.paymentMethod) pickPay(card);
+		});
+		const howFoundSelect = document.querySelectorAll('#fp5 select')[1];
+		if (howFoundSelect) howFoundSelect.value = data.howFound;
+		const termsCheckbox = document.querySelector(
+			'#fp5 input[type="checkbox"]',
+		);
+		if (termsCheckbox) termsCheckbox.checked = data.termsAccepted;
+
+		if (data.currentStep && data.currentStep > 1)
+			fGoTo(data.currentStep, true);
+		schedulePriceUpdate();
+	} catch (e) {
+		console.warn('Failed to restore form state:', e);
 	}
 
-	// Also update the old total display if it still exists somewhere (for safety)
-	const oldTotalSpan = document.getElementById('total-price-display');
-	if (oldTotalSpan) oldTotalSpan.textContent = `रु ${total.toLocaleString()}`;
+	[
+		'puProv',
+		'puDist',
+		'puCity',
+		'puWard',
+		'drProv',
+		'drDist',
+		'drCity',
+		'drWard',
+	].forEach((id) => {
+		const el = document.getElementById(id);
+		if (el && (el.value === '' || el.value === null)) {
+			if (el.tagName === 'SELECT') el.selectedIndex = 0;
+			else el.value = '';
+		}
+	});
 }
 
-// Validation rules (unchanged)
+function clearFormState() {
+	const storage = USE_LOCAL_STORAGE ? localStorage : sessionStorage;
+	storage.removeItem(STORAGE_KEY);
+}
+
+// ========== VALIDATION ==========
 const stepValidations = {
 	1: function () {
-		const puProv = document.getElementById('puProv')?.value;
-		const puDist = document.getElementById('puDist')?.value;
-		const puCity = document.querySelectorAll('#fp1 input[type="text"]')[0]
-			?.value;
-		const puWard = document.querySelectorAll('#fp1 input[type="text"]')[1]
-			?.value;
-		const drProv = document.getElementById('drProv')?.value;
-		const drDist = document.getElementById('drDist')?.value;
-		const drCity = document.querySelectorAll('#fp1 input[type="text"]')[2]
-			?.value;
-		const drWard = document.querySelectorAll('#fp1 input[type="text"]')[3]
-			?.value;
+		const puProv = document.getElementById('puProv')?.value,
+			puDist = document.getElementById('puDist')?.value,
+			puCity = document.getElementById('puCity')?.value,
+			puWard = document.getElementById('puWard')?.value;
+		const drProv = document.getElementById('drProv')?.value,
+			drDist = document.getElementById('drDist')?.value,
+			drCity = document.getElementById('drCity')?.value,
+			drWard = document.getElementById('drWard')?.value;
 		if (!puProv) {
 			alert('Please select pickup province');
 			return false;
 		}
-		if (!puDist || puDist === '— Select District —') {
+		if (!puDist) {
 			alert('Please select pickup district');
 			return false;
 		}
@@ -195,14 +871,14 @@ const stepValidations = {
 			return false;
 		}
 		if (!puWard) {
-			alert('Please enter pickup ward/locality');
+			alert('Please enter pickup ward number');
 			return false;
 		}
 		if (!drProv) {
 			alert('Please select drop province');
 			return false;
 		}
-		if (!drDist || drDist === '— Select District —') {
+		if (!drDist) {
 			alert('Please select drop district');
 			return false;
 		}
@@ -211,23 +887,15 @@ const stepValidations = {
 			return false;
 		}
 		if (!drWard) {
-			alert('Please enter drop ward/locality');
+			alert('Please enter drop ward number');
 			return false;
 		}
 		return true;
 	},
-	2: function () {
-		return (
-			!!document.querySelector('input[name="hSize"]:checked') ||
-			(alert('Please select your home size'), false)
-		);
-	},
-	3: function () {
-		return (
-			!!document.querySelector('input[name="veh"]:checked') ||
-			(alert('Please select a vehicle type'), false)
-		);
-	},
+	2: () => true,
+	3: () =>
+		!!document.querySelector('input[name="veh"]:checked') ||
+		(alert('Please select a vehicle type'), false),
 	4: function () {
 		const moveDate = document.querySelectorAll('#fp4 input[type="date"]')[0]
 			?.value;
@@ -250,9 +918,17 @@ const stepValidations = {
 			?.value;
 		const mobile = document.querySelectorAll('#fp5 input[type="tel"]')[0]
 			?.value;
-		const termsAccepted = document.querySelector(
+		const allCheckboxes = document.querySelectorAll(
 			'#fp5 input[type="checkbox"]',
-		)?.checked;
+		);
+		let termsAccepted = false;
+		for (let cb of allCheckboxes) {
+			const label = cb.closest('label');
+			if (label && label.innerText.includes('Terms of Service')) {
+				termsAccepted = cb.checked;
+				break;
+			}
+		}
 		if (!firstName) {
 			alert('Please enter your first name');
 			return false;
@@ -273,9 +949,13 @@ const stepValidations = {
 	},
 };
 
-function fGoTo(n) {
+function fGoTo(n, skipValidation = false) {
 	if (n < 1 || n > fTotal) return;
-	if (n > fCur && (!stepValidations[fCur] || !stepValidations[fCur]()))
+	if (
+		!skipValidation &&
+		n > fCur &&
+		(!stepValidations[fCur] || !stepValidations[fCur]())
+	)
 		return;
 	const cur = document.getElementById('fp' + fCur);
 	if (cur) cur.classList.add('hidden');
@@ -317,17 +997,21 @@ function fGoTo(n) {
 	document
 		.getElementById('booking')
 		?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	if (n === 5 && !skipValidation) updatePriceDisplay();
+	saveFormState();
 }
 
-// ── SUBMIT FORM WITH PAYMENT HANDLING (unchanged) ──
+// ── SUBMIT FORM ──
 async function submitForm() {
 	if (!stepValidations[5]()) return;
 	try {
 		const shipmentData = collectFormData();
-		shipmentData.final_quote = calculateTotalPrice();
+		const { total, distanceKm, durationText } = await calculateTotalPrice();
+		shipmentData.final_quote = total;
+		shipmentData.distance_km = distanceKm;
+		shipmentData.estimated_duration = durationText;
 		const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
 		if (user.id) shipmentData.user_id = user.id;
-
 		console.log('Submitting:', shipmentData);
 		const response = await fetch(
 			'http://localhost:5000/api/shipment/create',
@@ -342,14 +1026,69 @@ async function submitForm() {
 			alert(result.message || 'Failed to submit booking.');
 			return;
 		}
+
 		if (
 			result.payment_required &&
 			result.payment_data &&
 			result.payment_data.form_html
 		) {
+			if (cachedDistanceData)
+				sessionStorage.setItem(
+					'pendingMapData',
+					JSON.stringify(cachedDistanceData),
+				);
 			const bookingSection = document.getElementById('booking');
-			if (bookingSection) {
-				bookingSection.innerHTML = result.payment_data.form_html;
+			if (!bookingSection) return;
+			const originalBookingHTML = bookingSection.innerHTML;
+			bookingSection.innerHTML = result.payment_data.form_html;
+
+			const paymentForm = bookingSection.querySelector('#payment-form');
+			if (paymentForm) {
+				paymentForm.addEventListener('submit', async (e) => {
+					e.preventDefault();
+					const formData = new FormData(paymentForm);
+					const submitBtn = paymentForm.querySelector(
+						'button[type="submit"]',
+					);
+					if (submitBtn) {
+						submitBtn.disabled = true;
+						submitBtn.textContent = 'Processing...';
+					}
+					try {
+						const urlEncoded = new URLSearchParams(
+							formData,
+						).toString();
+						const response = await fetch(paymentForm.action, {
+							method: 'POST',
+							headers: {
+								'Content-Type':
+									'application/x-www-form-urlencoded',
+							},
+							body: urlEncoded,
+						});
+						const paymentResult = await response.json();
+						if (paymentResult.success) {
+							bookingSection.innerHTML = originalBookingHTML;
+							showSuccessMessage(paymentResult.booking_id);
+						} else {
+							alert(
+								'Payment failed: ' +
+									(paymentResult.message || 'Unknown error'),
+							);
+							if (submitBtn) {
+								submitBtn.disabled = false;
+								submitBtn.textContent = 'Pay Now';
+							}
+						}
+					} catch (error) {
+						console.error('Payment error:', error);
+						alert('Payment processing error. Please try again.');
+						if (submitBtn) {
+							submitBtn.disabled = false;
+							submitBtn.textContent = 'Pay Now';
+						}
+					}
+				});
 			}
 			return;
 		}
@@ -361,9 +1100,16 @@ async function submitForm() {
 }
 
 function showSuccessMessage(bookingId) {
-	document.getElementById('fp5').classList.add('hidden');
-	document.getElementById('fpConfirm').classList.remove('hidden');
-	document.getElementById('formProgress').style.width = '100%';
+	clearFormState();
+	const fp5 = document.getElementById('fp5');
+	const fpConfirm = document.getElementById('fpConfirm');
+	const formProgress = document.getElementById('formProgress');
+	const bookIdSpan = document.getElementById('bookId');
+	const mapContainer = document.getElementById('confirmation-map');
+	const bookingSection = document.getElementById('booking');
+	if (fp5) fp5.classList.add('hidden');
+	if (fpConfirm) fpConfirm.classList.remove('hidden');
+	if (formProgress) formProgress.style.width = '100%';
 	for (let i = 1; i <= fTotal; i++) {
 		const el = document.getElementById('sc' + i);
 		if (el) {
@@ -371,36 +1117,78 @@ function showSuccessMessage(bookingId) {
 			el.textContent = '✓';
 		}
 	}
-	const bookIdSpan = document.getElementById('bookId');
 	if (bookIdSpan) bookIdSpan.textContent = bookingId;
-	document
-		.getElementById('booking')
-		?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	if (mapContainer && cachedDistanceData)
+		showLeafletMap(mapContainer, cachedDistanceData);
+	if (bookingSection)
+		bookingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 	const bookings = JSON.parse(localStorage.getItem('myBookings') || '[]');
 	bookings.push({ bookingId, date: new Date().toISOString() });
 	localStorage.setItem('myBookings', JSON.stringify(bookings));
 }
 
-// ── COLLECT FORM DATA (unchanged) ──
+function showLeafletMap(container, distData) {
+	container.innerHTML = '';
+	const mapDiv = document.createElement('div');
+	mapDiv.style.height = '250px';
+	container.appendChild(mapDiv);
+	const map = L.map(mapDiv).setView([27.7172, 85.324], 7);
+	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		attribution: '&copy; OpenStreetMap contributors',
+	}).addTo(map);
+
+	if (
+		!distData.originCoords ||
+		!distData.destinationCoords ||
+		distData.distanceKm < 0.1
+	) {
+		if (distData.originCoords) {
+			map.setView(
+				[distData.originCoords[1], distData.originCoords[0]],
+				15,
+			);
+			L.marker([distData.originCoords[1], distData.originCoords[0]])
+				.addTo(map)
+				.bindPopup('Pickup & Drop (Same Location)')
+				.openPopup();
+		} else {
+			L.marker([27.7172, 85.324])
+				.addTo(map)
+				.bindPopup('Location not available')
+				.openPopup();
+		}
+		const etaP = document.createElement('p');
+		etaP.className = 'text-forest-700 font-semibold text-sm mt-2';
+		etaP.textContent = '📍 Pickup and drop are at the same location.';
+		container.appendChild(etaP);
+		return;
+	}
+
+	L.Routing.control({
+		waypoints: [
+			L.latLng(distData.originCoords[1], distData.originCoords[0]),
+			L.latLng(
+				distData.destinationCoords[1],
+				distData.destinationCoords[0],
+			),
+		],
+		router: L.Routing.osrmv1(),
+		lineOptions: { styles: [{ color: '#1a371a', weight: 6 }] },
+		show: false,
+	}).addTo(map);
+
+	const etaP = document.createElement('p');
+	etaP.className = 'text-forest-700 font-semibold text-sm mt-2';
+	etaP.textContent = `⏱️ Estimated travel time: ${distData.durationText || 'N/A'}`;
+	container.appendChild(etaP);
+}
+
 function collectFormData() {
-	const pickupCityInput = document.querySelectorAll(
-		'#fp1 input[type="text"]',
-	)[0];
-	const pickupWardInput = document.querySelectorAll(
-		'#fp1 input[type="text"]',
-	)[1];
-	const pickupFloorSelect = document.querySelectorAll('#fp1 select')[1];
+	const pickupFloorSelect = document.getElementById('puFloor');
 	const pickupLaneRadio = document.querySelector(
 		'input[name="puLane"]:checked',
 	);
-	const dropCityInput = document.querySelectorAll(
-		'#fp1 input[type="text"]',
-	)[2];
-	const dropWardInput = document.querySelectorAll(
-		'#fp1 input[type="text"]',
-	)[3];
-	const dropFloorSelect = document.querySelectorAll('#fp1 select')[2];
-
+	const dropFloorSelect = document.getElementById('drFloor');
 	const homeSizeSelected = document.querySelector(
 		'input[name="hSize"]:checked',
 	);
@@ -441,16 +1229,8 @@ function collectFormData() {
 	document
 		.querySelectorAll('#fp3 input[type="checkbox"]:checked')
 		.forEach((cb) => {
-			const txt = cb
-				.closest('label')
-				?.querySelector('p:first-child')?.innerText;
-			if (txt) {
-				if (txt.includes('Packing')) addOnServices.push('packing');
-				if (txt.includes('Disassembly'))
-					addOnServices.push('disassembly');
-				if (txt.includes('Porter')) addOnServices.push('porter');
-				if (txt.includes('Insurance')) addOnServices.push('insurance');
-			}
+			const service = cb.dataset.service;
+			if (service) addOnServices.push(service);
 		});
 	const moveDateInput = document.querySelectorAll(
 		'#fp4 input[type="date"]',
@@ -496,7 +1276,6 @@ function collectFormData() {
 			if (txt.includes('WhatsApp')) preferredContact.push('whatsapp');
 			if (txt.includes('Email')) preferredContact.push('email');
 		});
-
 	const paymentSelected = document.querySelector('.pay-card.picked');
 	let paymentMethod = 'cash';
 	if (paymentSelected) {
@@ -510,12 +1289,18 @@ function collectFormData() {
 	}
 	const howFoundSelect = document.querySelectorAll('#fp5 select')[1];
 	const specialNotesTextarea = document.querySelector('#fp4 textarea');
+	const puProvSelect = document.getElementById('puProv');
+	const puDistSelect = document.getElementById('puDist');
+	const drProvSelect = document.getElementById('drProv');
+	const drDistSelect = document.getElementById('drDist');
 
 	return {
-		pickup_province: document.getElementById('puProv')?.value || '',
-		pickup_district: document.getElementById('puDist')?.value || '',
-		pickup_city: pickupCityInput?.value || '',
-		pickup_ward: pickupWardInput?.value || '',
+		pickup_province:
+			puProvSelect?.options[puProvSelect.selectedIndex]?.text || '',
+		pickup_district:
+			puDistSelect?.options[puDistSelect.selectedIndex]?.text || '',
+		pickup_city: document.getElementById('puCity')?.value || '',
+		pickup_ward: document.getElementById('puWard')?.value || '',
 		pickup_floor: pickupFloorSelect?.value || '',
 		pickup_lane_access: pickupLaneRadio?.parentElement?.innerText.includes(
 			'Wide road',
@@ -524,10 +1309,12 @@ function collectFormData() {
 			: pickupLaneRadio?.parentElement?.innerText.includes('Narrow lane')
 				? 'narrow_lane'
 				: 'steps_only',
-		drop_province: document.getElementById('drProv')?.value || '',
-		drop_district: document.getElementById('drDist')?.value || '',
-		drop_city: dropCityInput?.value || '',
-		drop_ward: dropWardInput?.value || '',
+		drop_province:
+			drProvSelect?.options[drProvSelect.selectedIndex]?.text || '',
+		drop_district:
+			drDistSelect?.options[drDistSelect.selectedIndex]?.text || '',
+		drop_city: document.getElementById('drCity')?.value || '',
+		drop_ward: document.getElementById('drWard')?.value || '',
 		drop_floor: dropFloorSelect?.value || '',
 		home_size: homeSize,
 		selected_items: selectedItems,
@@ -551,9 +1338,60 @@ function collectFormData() {
 }
 
 function resetForm() {
+	clearFormState();
+	resetAllFormFields();
 	document.getElementById('fpConfirm').classList.add('hidden');
 	fCur = 1;
-	fGoTo(1);
+	fGoTo(1, true);
+	setTimeout(() => updatePriceDisplay(), 50);
+}
+
+function resetAllFormFields() {
+	document
+		.querySelectorAll(
+			'#fp1 input, #fp2 input, #fp3 input, #fp4 input, #fp5 input[type="text"], #fp5 input[type="tel"], #fp5 input[type="email"], #fp5 input[type="number"]',
+		)
+		.forEach((input) => {
+			if (input.type === 'radio' || input.type === 'checkbox') return;
+			input.value = '';
+		});
+	document
+		.querySelectorAll(
+			'#fp1 select, #fp2 select, #fp3 select, #fp4 select, #fp5 select',
+		)
+		.forEach((select) => (select.selectedIndex = 0));
+	document
+		.querySelectorAll('input[type="radio"]')
+		.forEach((radio) => (radio.checked = false));
+	document
+		.querySelectorAll('input[type="checkbox"]')
+		.forEach((cb) => (cb.checked = false));
+	document.querySelectorAll('#fp2 .item-chip.on').forEach((chip) => {
+		chip.classList.remove('on');
+		const lbl = chip.querySelector('.chip-lbl');
+		if (lbl) lbl.style.color = '';
+	});
+	document
+		.querySelectorAll('.v-card.chosen')
+		.forEach((card) => card.classList.remove('chosen'));
+	document
+		.querySelectorAll('.pay-card.picked')
+		.forEach((card) => card.classList.remove('picked'));
+	populateProvincesHardcoded('pu');
+	populateProvincesHardcoded('dr');
+	document.getElementById('puDist').innerHTML =
+		'<option value="">— Select District —</option>';
+	document.getElementById('drDist').innerHTML =
+		'<option value="">— Select District —</option>';
+	document.getElementById('puCity').value = '';
+	document.getElementById('puWard').value = '';
+	document.getElementById('drCity').value = '';
+	document.getElementById('drWard').value = '';
+	document.getElementById('puFloor').selectedIndex = 0;
+	document.getElementById('drFloor').selectedIndex = 0;
+	document
+		.querySelectorAll('#fp2 textarea, #fp4 textarea')
+		.forEach((ta) => (ta.value = ''));
 }
 
 // ── UI HELPERS ──
@@ -562,6 +1400,7 @@ function tChip(el) {
 	const lbl = el.querySelector('.chip-lbl');
 	if (lbl) lbl.style.color = el.classList.contains('on') ? '#f5a623' : '';
 	updatePriceDisplay();
+	saveFormState();
 }
 function pickVeh(inp) {
 	document
@@ -570,147 +1409,12 @@ function pickVeh(inp) {
 	const c = inp.closest('label').querySelector('.v-card');
 	if (c) c.classList.add('chosen');
 	updatePriceDisplay();
+	saveFormState();
 }
 function pickPay(card) {
 	document
 		.querySelectorAll('.pay-card')
 		.forEach((c) => c.classList.remove('picked'));
 	card.classList.add('picked');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-	document
-		.querySelectorAll('label.item-chip input[type=radio]')
-		.forEach((inp) => {
-			inp.addEventListener('change', () => {
-				const name = inp.name;
-				document
-					.querySelectorAll(`label.item-chip input[name="${name}"]`)
-					.forEach((r) => {
-						r.closest('label').classList.remove('on');
-						const cl = r
-							.closest('label')
-							.querySelector('.chip-lbl');
-						if (cl) cl.style.color = '';
-					});
-				inp.closest('label').classList.add('on');
-				const cl = inp.closest('label').querySelector('.chip-lbl');
-				if (cl) cl.style.color = '#f5a623';
-				updatePriceDisplay();
-			});
-		});
-	document
-		.querySelectorAll('#fp3 input[type="checkbox"]')
-		.forEach((cb) => cb.addEventListener('change', updatePriceDisplay));
-	updatePriceDisplay();
-});
-
-// ── DISTRICTS (unchanged) ──
-const DISTRICTS = {
-	1: [
-		'Bhojpur',
-		'Dhankuta',
-		'Ilam',
-		'Jhapa',
-		'Khotang',
-		'Morang',
-		'Okhaldhunga',
-		'Panchthar',
-		'Sankhuwasabha',
-		'Solukhumbu',
-		'Sunsari',
-		'Taplejung',
-		'Terhathum',
-		'Udayapur',
-	],
-	2: [
-		'Bara',
-		'Dhanusha',
-		'Mahottari',
-		'Parsa',
-		'Rautahat',
-		'Saptari',
-		'Sarlahi',
-		'Siraha',
-	],
-	3: [
-		'Bhaktapur',
-		'Chitwan',
-		'Dhading',
-		'Dolakha',
-		'Kathmandu',
-		'Kavrepalanchok',
-		'Lalitpur',
-		'Makwanpur',
-		'Nuwakot',
-		'Ramechhap',
-		'Rasuwa',
-		'Sindhuli',
-		'Sindhupalchok',
-	],
-	4: [
-		'Baglung',
-		'Gorkha',
-		'Kaski',
-		'Lamjung',
-		'Manang',
-		'Mustang',
-		'Myagdi',
-		'Nawalpur',
-		'Parbat',
-		'Syangja',
-		'Tanahun',
-	],
-	5: [
-		'Arghakhanchi',
-		'Banke',
-		'Bardiya',
-		'Dang',
-		'Eastern Rukum',
-		'Gulmi',
-		'Kapilvastu',
-		'Nawalparasi West',
-		'Palpa',
-		'Pyuthan',
-		'Rolpa',
-		'Rupandehi',
-	],
-	6: [
-		'Dailekh',
-		'Dolpa',
-		'Humla',
-		'Jajarkot',
-		'Jumla',
-		'Kalikot',
-		'Mugu',
-		'Salyan',
-		'Surkhet',
-		'Western Rukum',
-	],
-	7: [
-		'Achham',
-		'Baitadi',
-		'Bajhang',
-		'Bajura',
-		'Dadeldhura',
-		'Darchula',
-		'Doti',
-		'Kailali',
-		'Kanchanpur',
-	],
-};
-function loadDist(prefix) {
-	const pVal = document.getElementById(prefix + 'Prov').value;
-	const sel = document.getElementById(prefix + 'Dist');
-	if (sel) {
-		sel.innerHTML = '<option value="">— Select District —</option>';
-		if (pVal && DISTRICTS[pVal]) {
-			DISTRICTS[pVal].forEach((d) => {
-				const o = document.createElement('option');
-				o.value = d;
-				o.textContent = d;
-				sel.appendChild(o);
-			});
-		}
-	}
+	saveFormState();
 }

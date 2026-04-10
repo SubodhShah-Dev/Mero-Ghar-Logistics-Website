@@ -1,7 +1,7 @@
 // ==================================================
 // VENDOR PORTAL - COMPLETE WORKING VERSION
-// FIXED: Earnings NaN, Comprehensive Jobs Table
-// FIXED: Jobs sorted by id DESC (newest first)
+// FIXED: Job rejection, proper earnings display
+// FIXED: Status-aware UI (inactive/banned)
 // FIXED: Move Date simplified (YYYY-MM-DD)
 // ==================================================
 
@@ -12,6 +12,18 @@ let vehicles = [];
 let jobs = [];
 let statusCheckInterval = null;
 let currentJobFilter = 'all'; // 'all', 'active', 'completed'
+
+// ==================================================
+// UTILITIES
+// ==================================================
+
+function parseAmount(value) {
+	if (value === null || value === undefined) return 0;
+	if (typeof value === 'number') return value;
+	const cleaned = String(value).replace(/[^0-9.-]/g, '');
+	const num = parseFloat(cleaned);
+	return isNaN(num) ? 0 : num;
+}
 
 // ==================================================
 // AUTHENTICATION
@@ -85,6 +97,10 @@ async function checkVendorProfile() {
 		} else if (vendorData.status === 'pending') {
 			showPendingState();
 			startStatusCheck();
+		} else if (vendorData.status === 'inactive') {
+			showInactiveState();
+		} else if (vendorData.status === 'banned') {
+			showBannedState();
 		}
 	} else {
 		showRegistrationForm();
@@ -103,6 +119,94 @@ function showPendingState() {
 	document.getElementById('vendor-pending-state').style.display = 'block';
 	document.getElementById('dashboard-content').style.display = 'none';
 	document.getElementById('vendor-profile-card').style.display = 'none';
+	const pendingEl = document.getElementById('vendor-pending-state');
+	if (pendingEl) {
+		pendingEl.innerHTML = `
+            <div class="max-w-2xl mx-auto bg-[#111d16] border border-[rgba(248,192,106,0.18)] rounded-xl overflow-hidden">
+                <div class="bg-[#16261d] px-6 py-4 border-b border-[rgba(255,255,255,0.07)]">
+                    <h2 class="text-lg font-bold">Registration Under Review</h2>
+                    <p class="text-xs text-[rgba(238,242,238,0.5)] mt-1">Your profile is pending admin approval</p>
+                </div>
+                <div class="p-10 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[rgba(248,192,106,0.1)] flex items-center justify-center">
+                        <svg class="w-8 h-8 text-[#f8c06a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                    </div>
+                    <div class="font-semibold text-lg mb-1">Awaiting Admin Approval</div>
+                    <p class="text-sm text-[rgba(238,242,238,0.5)] max-w-sm mx-auto">
+                        Your vendor registration has been submitted. Our admin team will review and activate your account.
+                    </p>
+                    <button onclick="checkStatusManually()" class="mt-6 px-5 py-2 rounded-lg bg-[rgba(248,192,106,0.1)] border border-[rgba(248,192,106,0.2)] text-[#f8c06a] text-sm hover:bg-[rgba(248,192,106,0.15)]">
+                        Check Status
+                    </button>
+                </div>
+            </div>
+        `;
+	}
+}
+
+function showInactiveState() {
+	document.getElementById('vendor-reg-form').style.display = 'none';
+	document.getElementById('vendor-pending-state').style.display = 'block';
+	document.getElementById('dashboard-content').style.display = 'none';
+	document.getElementById('vendor-profile-card').style.display = 'none';
+	const pendingEl = document.getElementById('vendor-pending-state');
+	if (pendingEl) {
+		pendingEl.innerHTML = `
+            <div class="max-w-2xl mx-auto bg-[#111d16] border border-[rgba(224,94,94,0.3)] rounded-xl overflow-hidden">
+                <div class="bg-[#16261d] px-6 py-4 border-b border-[rgba(255,255,255,0.07)]">
+                    <h2 class="text-lg font-bold text-[#e05e5e]">Account Suspended</h2>
+                    <p class="text-xs text-[rgba(238,242,238,0.5)] mt-1">Your vendor account is currently inactive</p>
+                </div>
+                <div class="p-10 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[rgba(224,94,94,0.1)] flex items-center justify-center">
+                        <svg class="w-8 h-8 text-[#e05e5e]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <div class="font-semibold text-lg mb-1">Account Suspended</div>
+                    <p class="text-sm text-[rgba(238,242,238,0.5)] max-w-sm mx-auto">
+                        Your account has been suspended by the admin. Please contact support for more information.
+                    </p>
+                </div>
+            </div>
+        `;
+	}
+}
+
+function showBannedState() {
+	document.getElementById('vendor-reg-form').style.display = 'none';
+	document.getElementById('vendor-pending-state').style.display = 'block';
+	document.getElementById('dashboard-content').style.display = 'none';
+	document.getElementById('vendor-profile-card').style.display = 'none';
+	const pendingEl = document.getElementById('vendor-pending-state');
+	if (pendingEl) {
+		pendingEl.innerHTML = `
+            <div class="max-w-2xl mx-auto bg-[#111d16] border border-[rgba(224,94,94,0.5)] rounded-xl overflow-hidden">
+                <div class="bg-[#16261d] px-6 py-4 border-b border-[rgba(255,255,255,0.07)]">
+                    <h2 class="text-lg font-bold text-[#e05e5e]">Account Banned</h2>
+                    <p class="text-xs text-[rgba(238,242,238,0.5)] mt-1">Your vendor account has been permanently banned</p>
+                </div>
+                <div class="p-10 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[rgba(224,94,94,0.15)] flex items-center justify-center">
+                        <svg class="w-8 h-8 text-[#e05e5e]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </div>
+                    <div class="font-semibold text-lg mb-1">Permanently Banned</div>
+                    <p class="text-sm text-[rgba(238,242,238,0.5)] max-w-sm mx-auto">
+                        Your account has been banned for violating terms. This action is irreversible.
+                    </p>
+                </div>
+            </div>
+        `;
+	}
 }
 
 function showApprovedDashboard() {
@@ -386,20 +490,16 @@ function renderFleetList() {
 }
 
 // ==================================================
-// JOBS MANAGEMENT (Comprehensive Table)
+// JOBS MANAGEMENT
 // ==================================================
 
 async function loadJobs() {
 	const result = await fetchAPI('/api/vendor/shipments');
 	if (result.ok && result.shipments) {
-		// Parse amount and sort by id descending (newest first)
 		jobs = result.shipments
 			.map((job) => ({
 				...job,
-				final_quote:
-					parseFloat(
-						String(job.final_quote).replace(/[^0-9.-]/g, ''),
-					) || 0,
+				final_quote: parseAmount(job.final_quote),
 			}))
 			.sort((a, b) => b.id - a.id);
 		renderJobsTable();
@@ -473,14 +573,14 @@ function renderJobsTable() {
 				: '—';
 
 			return `<tr class="border-b border-[rgba(255,255,255,0.05)]">
-                    <td class="px-5 py-3 font-mono text-xs">${job.booking_id || `#MG-${job.id}`}</td>
-                    <td class="px-5 py-3">${job.customer_name || '—'}</td>
-                    <td class="px-5 py-3">${job.pickup_district || ''} → ${job.drop_district || ''}</td>
-                    <td class="px-5 py-3">${moveDateSimple}</td>
-                    <td class="px-5 py-3">Rs ${(job.final_quote || 0).toLocaleString()}</td>
-                    <td class="px-5 py-3"><span class="${statusClass}">${statusText}</span></td>
-                    <td class="px-5 py-3"><div class="flex gap-2">${actionButtons}</div></td>
-                  </tr>`;
+            <td class="px-5 py-3 font-mono text-xs">${job.booking_id || `#MG-${job.id}`}</td>
+            <td class="px-5 py-3">${job.customer_name || '—'}</td>
+            <td class="px-5 py-3">${job.pickup_district || ''} → ${job.drop_district || ''}</td>
+            <td class="px-5 py-3">${moveDateSimple}</td>
+            <td class="px-5 py-3">Rs ${(job.final_quote || 0).toLocaleString()}</td>
+            <td class="px-5 py-3"><span class="${statusClass}">${statusText}</span></td>
+            <td class="px-5 py-3"><div class="flex gap-2">${actionButtons}</div></td>
+        </tr>`;
 		})
 		.join('');
 }
@@ -500,10 +600,6 @@ function setupJobFilters() {
 	});
 }
 
-function renderJobs() {
-	renderJobsTable();
-}
-
 async function acceptJob(jobId) {
 	const result = await fetchAPI(`/api/vendor/shipments/${jobId}/accept`, {
 		method: 'PUT',
@@ -517,9 +613,16 @@ async function acceptJob(jobId) {
 }
 
 async function declineJob(jobId) {
-	if (confirm('Decline this job?')) {
-		toast('Job declined', 'red');
-		await loadJobs();
+	if (confirm('Decline this job? It will be returned to the admin pool.')) {
+		const result = await fetchAPI(`/api/vendor/shipments/${jobId}/reject`, {
+			method: 'PUT',
+		});
+		if (result.ok) {
+			toast('Job declined', 'red');
+			await loadJobs();
+		} else {
+			toast(result.message || 'Failed to decline job', 'red');
+		}
 	}
 }
 
@@ -621,47 +724,58 @@ function renderRecentCompletions() {
 }
 
 // ==================================================
-// STATS & EARNINGS (NaN fix)
+// STATS & EARNINGS
 // ==================================================
 
 function updateStats() {
 	const activeJobs = jobs.filter(
 		(j) => j.status === 'accepted' || j.status === 'in_transit',
 	).length;
-
-	const parseAmount = (val) => {
-		if (!val) return 0;
-		if (typeof val === 'number') return val;
-		const cleaned = String(val).replace(/[^0-9.-]/g, '');
-		const num = parseFloat(cleaned);
-		return isNaN(num) ? 0 : num;
-	};
-
-	const totalEarned = jobs
-		.filter((j) => j.status === 'delivered' || j.status === 'completed')
-		.reduce((sum, j) => sum + parseAmount(j.final_quote), 0);
-
-	const completedCount = jobs.filter(
+	const completedJobs = jobs.filter(
 		(j) => j.status === 'delivered' || j.status === 'completed',
-	).length;
-	const pendingJobs = jobs.filter((j) => j.status === 'pending');
+	);
+	const totalEarned = completedJobs.reduce(
+		(sum, j) => sum + parseAmount(j.final_quote),
+		0,
+	);
+
+	const now = new Date();
+	const currentMonth = now.getMonth();
+	const currentYear = now.getFullYear();
+	const thisMonthCompleted = completedJobs.filter((j) => {
+		if (!j.move_date) return false;
+		const d = new Date(j.move_date);
+		return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+	});
+	const monthEarnings = thisMonthCompleted.reduce(
+		(sum, j) => sum + parseAmount(j.final_quote),
+		0,
+	);
+
+	const pendingJobs = jobs.filter(
+		(j) => j.status === 'pending' || j.status === 'accepted',
+	);
 	const pendingPayout = pendingJobs.reduce(
 		(sum, j) => sum + parseAmount(j.final_quote),
 		0,
 	);
 
-	document.getElementById('active-jobs').textContent = activeJobs;
-	document.getElementById('fleet-size').textContent = vehicles.length;
-	document.getElementById('vendor-fleet').textContent = vehicles.length;
-	document.getElementById('earn-total').textContent =
-		`Rs ${(totalEarned / 1000).toFixed(0)}k`;
-	document.getElementById('earn-jobs').textContent = completedCount;
+	const setText = (id, value) => {
+		const el = document.getElementById(id);
+		if (el) el.textContent = value;
+	};
 
-	const monthlyEstimate = totalEarned > 0 ? Math.floor(totalEarned / 12) : 0;
-	document.getElementById('month-earning').textContent =
-		`Rs ${monthlyEstimate.toLocaleString()}`;
-	document.getElementById('earn-pending').textContent =
-		`Rs ${pendingPayout.toLocaleString()}`;
+	setText('active-jobs', activeJobs);
+	setText('fleet-size', vehicles.length);
+	setText('vendor-fleet', vehicles.length);
+	setText('vendor-jobs', vendorData?.total_jobs || completedJobs.length);
+	setText('month-earning', `Rs ${monthEarnings.toLocaleString()}`);
+	setText('earn-month', `Rs ${monthEarnings.toLocaleString()}`);
+	setText('earn-pending', `Rs ${pendingPayout.toLocaleString()}`);
+	setText('earn-total', `Rs ${totalEarned.toLocaleString()}`);
+	setText('earn-jobs', completedJobs.length);
+	setText('vendor-rating', (vendorData?.rating || 0) + '★');
+	setText('vendor-rating-val', (vendorData?.rating || 0).toFixed(1));
 }
 
 // ==================================================
@@ -710,6 +824,7 @@ function goPage(page) {
 			vendorData.address || '';
 	}
 	if (page === 'jobs') renderJobsTable();
+	if (page === 'earnings') updateStats();
 }
 
 function showNotifications() {
@@ -806,6 +921,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	setupJobFilters();
 });
 
+// Expose global functions
 window.goPage = goPage;
 window.logout = logout;
 window.openAddVehicle = openAddVehicle;

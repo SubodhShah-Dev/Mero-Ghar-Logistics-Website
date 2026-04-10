@@ -3,6 +3,7 @@ import {
 	approveShipment,
 	rejectShipment,
 	getShipmentsByApprovalStatus,
+	getActiveShipmentsCountForVendor,
 } from '../models/shipmentModel.js';
 import { getVendorById } from '../models/vendorModel.js';
 
@@ -40,6 +41,15 @@ export const approveShipmentRequest = async (req, res) => {
 				.json({ success: false, message: 'Vendor not found' });
 		}
 
+		// 🚫 Check if vendor already has an active shipment
+		const activeCount = await getActiveShipmentsCountForVendor(vendor_id);
+		if (activeCount > 0) {
+			return res.status(400).json({
+				success: false,
+				message: `${vendor.business_name} already has an active shipment. Please wait until it's completed.`,
+			});
+		}
+
 		const approved = await approveShipment(id, vendor_id, adminId);
 		if (!approved) {
 			return res
@@ -56,7 +66,6 @@ export const approveShipmentRequest = async (req, res) => {
 		res.status(500).json({ success: false, message: 'Server error' });
 	}
 };
-
 export const rejectShipmentRequest = async (req, res) => {
 	try {
 		const { id } = req.params;

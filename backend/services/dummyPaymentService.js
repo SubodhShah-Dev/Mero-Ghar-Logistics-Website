@@ -760,5 +760,6 @@ export const processDummyPayment = async (paymentData) => {
 		message: 'Payment successful!',
 		transaction_id: transaction_uuid,
 		pidx: `DUMMY_${Date.now()}`,
+		order_id: order_id, // ⬅️ ADD THIS LINE
 	};
 };

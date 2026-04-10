@@ -28,6 +28,17 @@ export const getAllShipments = async () => {
 	return rows;
 };
 
+// Get count of active (not delivered/cancelled) shipments for a vendor
+export const getActiveShipmentsCountForVendor = async (vendorId) => {
+	const [rows] = await pool.execute(
+		`SELECT COUNT(*) as count FROM shipments 
+         WHERE assigned_vendor_id = ? 
+         AND status NOT IN ('delivered', 'cancelled')`,
+		[vendorId],
+	);
+	return rows[0].count;
+};
+
 // Update shipment status
 export const updateShipmentStatus = async (id, status, finalQuote = null) => {
 	let query = 'UPDATE shipments SET status = ?';

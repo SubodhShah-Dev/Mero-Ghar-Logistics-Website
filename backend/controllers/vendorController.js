@@ -1,12 +1,16 @@
+import pool from '../config/db.js';
+
 import {
 	getAllVendors,
 	getActiveVendors,
+	getVendorById,
 	getVendorByUserId,
 	createVendor,
 	updateVendorStatus,
-	updateVendorRating,
 	updateVendorProfile,
+	updateVendorRating,
 } from '../models/vendorModel.js';
+
 import {
 	getShipmentsForVendor,
 	updateVendorShipmentStatus,
@@ -194,11 +198,38 @@ export const updateVendorStatusCtrl = async (req, res) => {
 		const { id } = req.params;
 		const { status } = req.body;
 
-		const updated = await updateVendorStatus(id, status);
-		if (!updated) {
+		// Allowed statuses for admin update
+		const allowedStatuses = ['pending', 'active', 'inactive', 'banned'];
+		if (!allowedStatuses.includes(status)) {
+			return res
+				.status(400)
+				.json({ success: false, message: 'Invalid status' });
+		}
+
+		// Get current vendor data
+		const vendor = await getVendorById(id);
+		if (!vendor) {
 			return res
 				.status(404)
 				.json({ success: false, message: 'Vendor not found' });
+		}
+
+		// Prevent reactivating a banned vendor (optional – can be allowed if needed)
+		if (vendor.status === 'banned' && status !== 'banned') {
+			return res.status(400).json({
+				success: false,
+				message:
+					'Banned vendors cannot be reactivated. Contact support.',
+			});
+		}
+
+		// Update status
+		const updated = await updateVendorStatus(id, status);
+		if (!updated) {
+			return res.status(500).json({
+				success: false,
+				message: 'Failed to update vendor status',
+			});
 		}
 
 		res.json({
@@ -325,4 +356,47 @@ export const testVendorRoute = async (req, res) => {
 		message: 'Vendor route is working!',
 		timestamp: new Date().toISOString(),
 	});
+};
+
+export const rejectShipment = async (req, res) => {
+	try {
+		const { id } = req.params;
+		let userId = req.headers['x-user-id'];
+		if (!userId) {
+			return res
+				.status(401)
+				.json({ success: false, message: 'User not authenticated' });
+		}
+
+		const vendor = await getVendorByUserId(userId);
+		if (!vendor) {
+			return res
+				.status(404)
+				.json({ success: false, message: 'Vendor not found' });
+		}
+
+		// Update the shipment: unassign vendor, reset status to pending approval
+		const [result] = await pool.execute(
+			`UPDATE shipments 
+             SET assigned_vendor_id = NULL, 
+                 status = 'pending', 
+                 approval_status = 'pending' 
+             WHERE id = ? AND assigned_vendor_id = ?`,
+			[id, vendor.id],
+		);
+
+		if (result.affectedRows === 0) {
+			return res
+				.status(404)
+				.json({
+					success: false,
+					message: 'Shipment not found or not assigned to you',
+				});
+		}
+
+		res.json({ success: true, message: 'Job rejected successfully' });
+	} catch (error) {
+		console.error('Error rejecting shipment:', error);
+		res.status(500).json({ success: false, message: 'Server error' });
+	}
 };
