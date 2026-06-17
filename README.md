@@ -48,8 +48,8 @@ A full-stack logistics platform built with Vite, Node.js, Express, and MySQL for
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/SubodhShah-Dev/Mero-Ghar-Logistics-Website.git
-cd Mero-Ghar-Logistics-Website
+git clone https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic.git
+cd Mero-Ghar-Logistic
 npm install
 ```
 
@@ -163,9 +163,9 @@ railway up --service backend
 
 ## Download Latest APK
 
-[**Download MeroGhar v1.7.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistics-Website/releases/download/v1.7.0/MeroGhar-v1.7.0.apk)
+[**Download MeroGhar v1.7.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v1.7.0.apk)
 
-All releases: https://github.com/SubodhShah-Dev/Mero-Ghar-Logistics-Website/releases
+All releases: https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases
 
 ## License
 

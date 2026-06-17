@@ -20,7 +20,7 @@ const API_BASE_URL = (() => {
 
 // ── In-App Update Check & Download ──
 const APP_VERSION = '1.7.0';
-const GITHUB_REPO = 'SubodhShah-Dev/Mero-Ghar-Logistics-Website';
+const GITHUB_REPO = 'SubodhShah-Dev/Mero-Ghar-Logistic';
 
 function compareVersions(a, b) {
   const pa = a.split('.').map(Number);
