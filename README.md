@@ -1,36 +1,42 @@
 # MeroGhar - Nepal's Trusted Household Movers
 
-A logistics platform connecting customers with verified household movers across all 7 provinces of Nepal.
+A logistics platform connecting customers with verified household movers across all 7 provinces of Nepal. Built as a responsive web app and wrapped as a native Android APK via Capacitor. Distributed via GitHub Releases with an in-app update checker.
 
 ## Tech Stack
 
 - **Frontend:** Vite + Tailwind CSS + vanilla JS
 - **Backend:** Express + MySQL (deployed on Railway)
-- **Android:** Capacitor (wraps web app into native Android APK)
+- **Android:** Capacitor 8 (wraps web app into native Android APK)
+- **Plugins:** `@capacitor/filesystem` (APK download), `@capacitor/share` (APK install trigger)
 - **Database:** MySQL (Railway free tier)
+- **Distribution:** GitHub Releases + in-app update check via GitHub API
 
 ## Project Structure
 
 ```
-├── index.html              # Landing page
+├── index.html                # Landing page (hero, services, provinces, FAQ)
+├── generate-icons.py         # App icon generator (Pillow)
+├── copy-pages.mjs            # Post-build script (copies pages + compiled CSS)
 ├── src/
-│   ├── main.js             # Navbar, mobile menu, FAQ logic
-│   ├── style.css           # Tailwind + custom styles
-│   ├── config.js           # API URL auto-detect
-│   ├── pages/              # login, signup, user, vendor, admin
-│   ├── js/                 # auth, guard, user, vendor, admin logic
-│   └── styles/             # admin.css, vendor.css
+│   ├── main.js               # Navbar scroll shadow, mobile menu, FAQ toggles
+│   ├── style.css             # Tailwind + custom styles (touch targets, steps, chips)
+│   ├── js/
+│   │   ├── config.js         # API URL auto-detect, APP_VERSION, in-app update logic
+│   │   ├── auth.js           # Login/signup API calls
+│   │   └── guard.js          # Auth redirect guard
+│   ├── pages/                # login, signup, user, vendor, admin HTML
+│   └── styles/               # admin.css (dashboard), vendor.css (portal)
 ├── backend/
-│   ├── server.js           # Express app entry
-│   ├── config/db.js        # MySQL connection pool
-│   ├── schema.sql          # Database table definitions
-│   ├── routes/             # API route definitions
-│   ├── controllers/        # Request handlers
-│   ├── models/             # Database queries
-│   └── services/           # Payment service
-├── android/                # Capacitor Android project
-├── capacitor.config.json   # Capacitor configuration
-└── railway.json            # Railway deployment config
+│   ├── server.js             # Express app entry
+│   ├── config/db.js          # MySQL connection pool (Railway)
+│   ├── schema.sql            # 46-column shipments table + users/vendors
+│   ├── routes/               # auth, shipment, payment, vendor routes
+│   ├── controllers/          # Request handlers
+│   ├── models/               # Database queries
+│   └── services/             # Nepal Payments, Esewa integration
+├── android/                  # Capacitor Android project (JDK 21)
+├── capacitor.config.json     # Capacitor configuration
+└── railway.json              # Railway deployment config
 ```
 
 ## Installation
@@ -50,7 +56,6 @@ npm install
 ### 2. Database Setup (Local)
 
 ```bash
-# Start MySQL, then create the database
 mysql -u root -e "CREATE DATABASE meroghar_db"
 mysql -u root meroghar_db < backend/schema.sql
 ```
@@ -81,29 +86,56 @@ Open http://localhost:5173 in your browser.
 ## Build Android APK
 
 ### Prerequisites
-- Java JDK 21+
-- Android SDK (command-line tools)
+- Java JDK 21+ (`JAVA_HOME` must point to it)
+- Android SDK (command-line tools, installed via `sdkmanager`)
+- Android platform 34+ installed
 
 ### Steps
 
 ```bash
-# 1. Build web app
+# 1. Build web app & copy pages/compiled CSS
 npm run build
 
-# 2. Sync with Capacitor
+# 2. Sync web assets + native plugins to Android project
 npx cap sync android
 
-# 3. Build APK
-cd android
-./gradlew assembleDebug
+# 3. Build debug APK
+JAVA_HOME=/path/to/jdk21 ./gradlew assembleDebug
 ```
 
 The APK will be at `android/app/build/outputs/apk/debug/app-debug.apk`.
 
 ### Install on Device
-Transfer the APK to your Android phone (via USB, Google Drive, etc.) and tap to install. Enable **"Install from unknown apps"** when prompted.
+Transfer the APK to your Android phone (USB, Google Drive, etc.) and tap to install. Enable **"Install from unknown apps"** when prompted.
 
-> **Note:** The APK is configured to connect to the production backend at `https://backend-production-d51a3.up.railway.app`. To change this, edit `src/js/config.js` and rebuild.
+> **Note:** The APK connects to `https://backend-production-d51a3.up.railway.app` by default. Edit `src/js/config.js` to change the backend URL and rebuild.
+
+## In-App Update System
+
+The app checks for new versions on every startup using the GitHub Releases API:
+
+1. **Check** — On page load, fetches `repos/SubodhShah-Dev/.../releases/latest`
+2. **Prompt** — If a newer version is found, shows an "Update Available" dialog
+3. **Download** — "Download Update" streams the APK bytes in-app via `fetch()` with a real-time progress spinner
+4. **Save** — APK is written to the device cache via `@capacitor/filesystem`
+5. **Install** — "Install Now" shares the cached APK via `@capacitor/share`, triggering Android's package installer (replaces old version)
+
+All logic is in `src/js/config.js` (no external service needed).
+
+## App Icon
+
+Generated by `generate-icons.py` (Python 3 + Pillow). Design:
+- **Background:** Forest green (#112018)
+- **Mountains:** 3 Himalayan peaks in light green with white snow caps
+- **Truck:** Bold saffron cargo box with 3 vertical ribs, Nepal flag badge, and a home icon ("Ghar")
+- **Cab:** Saffron-pale with window and mirror
+- **Wheels:** 2 wheels with detailed 5-spoke hubs
+- **Road:** White dashes at the bottom
+
+Regenerate all mipmap densities with:
+```bash
+python3 generate-icons.py
+```
 
 ## API Endpoints
 
@@ -112,31 +144,31 @@ Transfer the APK to your Android phone (via USB, Google Drive, etc.) and tap to 
 | `/api/auth/register` | POST | Register new user |
 | `/api/auth/login` | POST | Login |
 | `/api/auth/users` | GET | List users (admin) |
-| `/api/shipment/create` | POST | Create shipment |
+| `/api/shipment/create` | POST | Create shipment (46 columns) |
 | `/api/shipment/all` | GET | All shipments (admin) |
 | `/api/shipment/user/:userId` | GET | User's shipments |
 | `/api/shipment/:id` | GET | Single shipment |
-| `/api/payment/*` | - | Payment endpoints |
+| `/api/vendor/register` | POST | Vendor registration |
+| `/api/vendor/:id/jobs` | GET | Vendor job list |
+| `/api/payment/initiate` | POST | Initiate payment |
+| `/api/payment/verify` | POST | Verify payment |
 
 ## Deployment
 
 The backend is deployed on **Railway** at `https://backend-production-d51a3.up.railway.app`.
 
-### Redeploy
+### Redeploy Backend
 
 ```bash
 cd backend
 railway up --service backend
 ```
 
-## Direct APK Download
+## Download Latest APK
 
-**[Download MeroGhar v1.0.0 APK](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistics-Website/releases/download/v1.0.0/MeroGhar-v1.0.0.apk)**
+[**Download MeroGhar v1.6.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistics-Website/releases/download/v1.6.0/MeroGhar-v1.6.0.apk)
 
-On your Android phone, open this link and tap the downloaded APK to install. Enable **"Install from unknown apps"** when prompted.
-
-All future releases will be at:
-`https://github.com/SubodhShah-Dev/Mero-Ghar-Logistics-Website/releases`
+All releases: https://github.com/SubodhShah-Dev/Mero-Ghar-Logistics-Website/releases
 
 ## License
 
