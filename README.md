@@ -129,6 +129,15 @@ cd backend
 railway up --service backend
 ```
 
+## Direct APK Download
+
+**[Download MeroGhar v1.0.0 APK](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistics-Website/releases/download/v1.0.0/MeroGhar-v1.0.0.apk)**
+
+On your Android phone, open this link and tap the downloaded APK to install. Enable **"Install from unknown apps"** when prompted.
+
+All future releases will be at:
+`https://github.com/SubodhShah-Dev/Mero-Ghar-Logistics-Website/releases`
+
 ## License
 
 Private
