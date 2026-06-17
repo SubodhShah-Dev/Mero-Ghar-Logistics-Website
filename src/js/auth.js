@@ -3,7 +3,7 @@
 // ==================================================
 
 console.log('MeroGhar Auth System Loaded');
-const BASEURL = 'http://localhost:5000';
+const BASEURL = API_BASE_URL;
 
 // Role → redirect path mapping
 const ROLE_ROUTES = {

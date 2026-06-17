@@ -2,7 +2,7 @@
 export default {
 	content: [
 		'./*.html',
-		'./**/*.html', // This ensures subfolders like /auth/login.html are caught
+		'./src/**/*.html',
 		'./src/**/*.{js,ts,jsx,tsx}',
 	],
 	theme: {

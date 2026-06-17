@@ -4,7 +4,7 @@
 // FIXED: Move Date simplified (YYYY-MM-DD)
 // ==================================================
 
-const BASEURL = 'http://localhost:5000';
+const BASEURL = API_BASE_URL;
 let BOOKINGS = [];
 let CUSTOMERS = [];
 let VENDORS = [];

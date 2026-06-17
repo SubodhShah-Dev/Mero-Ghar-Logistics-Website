@@ -1014,7 +1014,7 @@ async function submitForm() {
 		if (user.id) shipmentData.user_id = user.id;
 		console.log('Submitting:', shipmentData);
 		const response = await fetch(
-			'http://localhost:5000/api/shipment/create',
+			API_BASE_URL + '/api/shipment/create',
 			{
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },

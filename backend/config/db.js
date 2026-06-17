@@ -4,10 +4,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const pool = mysql.createPool({
-	host: 'localhost',
-	user: 'root',
-	password: '',
-	database: 'meroghar_db',
+	host: process.env.MYSQLHOST || process.env.DB_HOST || 'localhost',
+	user: process.env.MYSQLUSER || process.env.DB_USER || 'root',
+	password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || '',
+	database: process.env.MYSQL_DATABASE || process.env.DB_NAME || 'meroghar_db',
+	port: parseInt(process.env.MYSQLPORT || process.env.DB_PORT || '3306'),
 	waitForConnections: true,
 	connectionLimit: 10,
 	queueLimit: 0,

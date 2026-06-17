@@ -1,0 +1,9 @@
+{
+  "appId": "com.meroghar.app",
+  "appName": "MeroGhar",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}
