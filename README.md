@@ -1,6 +1,6 @@
 # MeroGhar - Nepal's Trusted Household Movers
 
-A logistics platform connecting customers with verified household movers across all 7 provinces of Nepal. Built as a responsive web app and wrapped as a native Android APK via Capacitor. Distributed via GitHub Releases with an in-app update checker.
+A full-stack logistics platform built with Vite, Node.js, Express, and MySQL for an undergraduate minor project.
 
 ## Tech Stack
 
