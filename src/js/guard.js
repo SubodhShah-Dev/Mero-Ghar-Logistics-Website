@@ -7,14 +7,12 @@
 	const requiredRole = document.currentScript.getAttribute('data-role');
 
 	if (!session || !session.loggedIn) {
-		// Not logged in → back to login
-		window.location.href = '/login.html';
+		window.location.href = '/src/pages/login.html';
 		return;
 	}
 
 	if (requiredRole && session.role !== requiredRole) {
-		// Wrong role → back to login
 		alert("Access denied: You don't have permission to view this page.");
-		window.location.href = '/login.html';
+		window.location.href = '/src/pages/login.html';
 	}
 })();

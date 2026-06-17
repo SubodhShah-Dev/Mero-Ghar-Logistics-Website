@@ -56,11 +56,11 @@
 					required />
 
 					<input
-					type="number"
+					type="tel"
 					id="phone"
-					minlength="10"
-					maxlength="10"
-					placeholder="Contact"
+					pattern="[0-9]{10}"
+					title="10-digit phone number"
+					placeholder="98XXXXXXXX"
 					class="w-full px-4 py-3.5 border border-forest-200 rounded-sm focus:outline-none focus:ring-2 focus:ring-saffron-300"
 					required />
 
@@ -68,20 +68,14 @@
 				<div class="flex flex-col sm:flex-row justify-between gap-2 text-gray-400">
 					<label
 						class="flex items-center gap-2 border border-forest-200 px-3 py-3 rounded-sm w-full cursor-pointer font-normal opacity-100">
-						<input type="radio" name="role" value="user" required />
-						User
-					</label>
-
-					<label
-						class="flex items-center gap-2 border border-forest-200 px-3 py-3 rounded-sm w-full cursor-pointer font-normal opacity-100">
-						<input type="radio" name="role" value="admin" />
-						Admin
+						<input type="radio" name="role" value="user" checked required />
+						User (Booking Services)
 					</label>
 
 					<label
 						class="flex items-center gap-2 border border-forest-200 px-3 py-3 rounded-sm w-full cursor-pointer font-normal opacity-100">
 						<input type="radio" name="role" value="vendor" />
-						Vendor
+						Vendor (Service Provider)
 					</label>
 				</div>
 
