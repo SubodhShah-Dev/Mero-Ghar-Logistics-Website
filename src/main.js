@@ -5,12 +5,12 @@ window.addEventListener('scroll', () => {
 });
 
 // ── MOBILE MENU ───────────────────────────────────────
-function toggleMenu() {
+window.toggleMenu = function () {
 	document.getElementById('mobileMenu').classList.toggle('open');
-}
+};
 
 // ── FAQ ───────────────────────────────────────────────
-function toggleFaq(btn) {
+window.toggleFaq = function (btn) {
 	const body = btn.nextElementSibling;
 	const chev = btn.querySelector('.faq-chevron');
 	const isOpen = body.classList.contains('open');
