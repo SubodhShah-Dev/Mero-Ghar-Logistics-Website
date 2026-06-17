@@ -35,8 +35,8 @@
 				</div>
 
 				<!-- Step Indicator -->
-				<div class="mb-7">
-					<div class="flex items-center mb-4">
+				<div class="mb-5">
+					<div class="flex items-center mb-3" style="padding: 0 2px;">
 						<div class="flex-1 flex items-center">
 							<div id="sc1" class="s-circle s-active">1</div>
 							<div
@@ -63,39 +63,39 @@
 						</div>
 						<div id="sc5" class="s-circle s-idle">5</div>
 					</div>
-					<div class="flex justify-between text-center">
-						<div class="flex-1">
+					<div class="flex justify-between text-center" style="margin: 0 -2px;">
+						<div class="flex-1 min-w-0 px-0.5">
 							<p
 								id="fl1"
-								class="text-forest-800 text-[11px] font-bold uppercase tracking-wide">
+								class="text-forest-800 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide truncate">
 								Address
 							</p>
 						</div>
-						<div class="flex-1">
+						<div class="flex-1 min-w-0 px-0.5">
 							<p
 								id="fl2"
-								class="text-gray-400 text-[11px] font-bold uppercase tracking-wide">
+								class="text-gray-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide truncate">
 								Items
 							</p>
 						</div>
-						<div class="flex-1">
+						<div class="flex-1 min-w-0 px-0.5">
 							<p
 								id="fl3"
-								class="text-gray-400 text-[11px] font-bold uppercase tracking-wide">
+								class="text-gray-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide truncate">
 								Vehicle
 							</p>
 						</div>
-						<div class="flex-1">
+						<div class="flex-1 min-w-0 px-0.5">
 							<p
 								id="fl4"
-								class="text-gray-400 text-[11px] font-bold uppercase tracking-wide">
+								class="text-gray-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide truncate">
 								Schedule
 							</p>
 						</div>
-						<div class="flex-1">
+						<div class="flex-1 min-w-0 px-0.5">
 							<p
 								id="fl5"
-								class="text-gray-400 text-[11px] font-bold uppercase tracking-wide">
+								class="text-gray-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide truncate">
 								Contact
 							</p>
 						</div>
@@ -475,7 +475,7 @@
 									🪑 Furniture
 								</p>
 								<div
-									class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4">
+									class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
 									<div
 										class="item-chip rounded-sm py-3 px-2 text-center"
 										onclick="tChip(this)">
@@ -537,7 +537,7 @@
 									🍳 Kitchen Appliances
 								</p>
 								<div
-									class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4">
+									class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
 									<div
 										class="item-chip rounded-sm py-3 px-2 text-center"
 										onclick="tChip(this)">
@@ -590,7 +590,7 @@
 									🪔 Religious &amp; Cultural Items
 								</p>
 								<div
-									class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4">
+									class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
 									<div
 										class="item-chip rounded-sm py-3 px-2 text-center"
 										onclick="tChip(this)">
@@ -634,7 +634,7 @@
 									📦 Boxes &amp; Others
 								</p>
 								<div
-									class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+									class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
 									<div
 										class="item-chip rounded-sm py-3 px-2 text-center"
 										onclick="tChip(this)">
@@ -1240,35 +1240,35 @@
 									class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block mb-2"
 									>Preferred Contact Method</label
 								>
-								<div class="flex flex-wrap gap-4">
+								<div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-3">
 									<label
-										class="flex items-center gap-2 cursor-pointer text-sm text-forest-800 font-medium"
+										class="flex items-center gap-2 cursor-pointer text-sm text-forest-800 font-medium border border-cream-200 rounded-sm px-3 py-2.5 sm:border-0 sm:px-0 sm:py-0"
 										><input
 											type="checkbox"
 											checked
-											class="accent-forest-700 w-5 h-5" />
+											class="accent-forest-700 w-5 h-5 flex-shrink-0" />
 										📞 Phone Call</label
 									>
 									<label
-										class="flex items-center gap-2 cursor-pointer text-sm text-forest-800 font-medium"
+										class="flex items-center gap-2 cursor-pointer text-sm text-forest-800 font-medium border border-cream-200 rounded-sm px-3 py-2.5 sm:border-0 sm:px-0 sm:py-0"
 										><input
 											type="checkbox"
 											checked
-											class="accent-forest-700 w-5 h-5" />
+											class="accent-forest-700 w-5 h-5 flex-shrink-0" />
 										💬 Viber</label
 									>
 									<label
-										class="flex items-center gap-2 cursor-pointer text-sm text-forest-800 font-medium"
+										class="flex items-center gap-2 cursor-pointer text-sm text-forest-800 font-medium border border-cream-200 rounded-sm px-3 py-2.5 sm:border-0 sm:px-0 sm:py-0"
 										><input
 											type="checkbox"
-											class="accent-forest-700 w-5 h-5" />
+											class="accent-forest-700 w-5 h-5 flex-shrink-0" />
 										🟢 WhatsApp</label
 									>
 									<label
-										class="flex items-center gap-2 cursor-pointer text-sm text-forest-800 font-medium"
+										class="flex items-center gap-2 cursor-pointer text-sm text-forest-800 font-medium border border-cream-200 rounded-sm px-3 py-2.5 sm:border-0 sm:px-0 sm:py-0"
 										><input
 											type="checkbox"
-											class="accent-forest-700 w-5 h-5" />
+											class="accent-forest-700 w-5 h-5 flex-shrink-0" />
 										📧 Email</label
 									>
 								</div>
@@ -1411,10 +1411,10 @@
 							</div>
 
 							<label
-								class="flex items-start gap-3 cursor-pointer">
+								class="flex items-start gap-3 cursor-pointer py-1">
 								<input
 									type="checkbox"
-									class="accent-forest-700 w-4 h-4 mt-0.5 flex-shrink-0" />
+									class="accent-forest-700 w-5 h-5 mt-0.5 flex-shrink-0" />
 								<p
 									class="text-xs text-gray-500 leading-relaxed">
 									I agree to MeroGhar's
