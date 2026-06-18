@@ -42,6 +42,7 @@
   - HIGH fixes: Added null-safety guards to `onProvinceChange`, `getPickupAddressString`, `getDropAddressString`, `toggleOnline()`; fixed NaN fallback distance (`parseInt("")` → NaN); fixed Step 2 validation (was always `() => true`); added `connectips`/`banktransfer` payment method mapping; fixed mobile validation to require exactly 10 digits; added missing `saffron-50`/`saffron-200` to tailwind config; replaced all `alert()` calls in auth.js/guard.js with `showToast()`; added null checks in main.js (`#navbar`, `#mobileMenu`, FAQ elements); fixed vendor toggle knob 4px jump (translateX → left/right positioning).
   - Build/Meta: bumped `package.json` from `0.0.0` → `1.9.0`; bumped `APP_VERSION` in config.js to `1.9.0`; added reusable `showToast()` function to config.js.
   - Full list of 33+ bugs found during audit: [audit details remain stable].
+- v1.9.1: XSS protection (escapeHtml in admin.js/vendor.js), vendor.js null safety (34 fixes), vendor.html CDN→Vite pipeline, admin.js filter ordering fix, APK built & released.
 
 ### In Progress
 - (nothing)
@@ -58,12 +59,10 @@
 - **Flat M icon design** — user rejected detailed truck/mountain icons; simple letter-on-background approach (like Facebook).
 
 ## Next Steps
-- Build APK (`npm run build && npx cap sync android && JAVA_HOME=/home/subodh/jdk21 ./gradlew assembleDebug` from `android/`).
-- Create GitHub Release v1.9.0 with APK.
-- Fix remaining audit items: admin.js filter ordering, vendor.js full DOM null checks, `render.yaml` build command, `Procfile` location, vendor.html CDN Tailwind → Vite pipeline, backend XSS in admin logs.
+- (none — all items from previous session completed in v1.9.1)
 
 ## Critical Context
-- **Latest APK:** `https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/download/v1.9.0/MeroGhar-v1.9.0.apk`
+- **Latest APK:** `https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/download/v1.9.1/MeroGhar-v1.9.1.apk`
 - **Backend live:** `https://backend-production-d51a3.up.railway.app`
 - **Build:** `npm run build && npx cap sync android` then `JAVA_HOME=/home/subodh/jdk21 ./gradlew assembleDebug` from `android/` dir.
 - **Remote:** `https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic.git` (formerly `Mero-Ghar-Logistics-Website`).
@@ -71,7 +70,7 @@
 
 ## Relevant Files
 - `/home/subodh/workspace/Mero-Ghar-Logistics-Website/generate-icons.py`: App icon generator (Pillow) — current design is flat saffron M on forest green.
-- `/home/subodh/workspace/Mero-Ghar-Logistics-Website/src/js/config.js`: Central API URL, `APP_VERSION` (now `1.9.0`), `GITHUB_REPO`, `safeParse()`, `showToast()`, in-app update check + download logic.
+- `/home/subodh/workspace/Mero-Ghar-Logistics-Website/src/js/config.js`: Central API URL, `APP_VERSION` (now `1.9.1`), `GITHUB_REPO`, `safeParse()`, `showToast()`, in-app update check + download logic.
 - `/home/subodh/workspace/Mero-Ghar-Logistics-Website/src/pages/user.html`: Multi-step booking form — main mobile UI target.
 - `/home/subodh/workspace/Mero-Ghar-Logistics-Website/src/pages/admin.html`: Admin panel with tables, stats, modals.
 - `/home/subodh/workspace/Mero-Ghar-Logistics-Website/src/pages/vendor.html`: Vendor portal with fleet, jobs, modals.

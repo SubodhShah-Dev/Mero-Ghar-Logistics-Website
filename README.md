@@ -163,9 +163,27 @@ railway up --service backend
 
 ## Download Latest APK
 
-[**Download MeroGhar v1.9.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v1.9.0.apk)
+[**Download MeroGhar v1.9.1 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v1.9.1.apk)
 
-## What's New in v1.9.0
+## What's New in v1.9.1
+
+**Security & reliability release — XSS hardening, null safety, build pipeline cleanup.**
+
+### Security
+- **Stored XSS protection**: Added `escapeHtml()` helper to `admin.js` and `vendor.js` — all 33+ `innerHTML` template strings now sanitize user-supplied data (names, addresses, phone numbers, email, business names)
+- Vendor select dropdowns in admin approval table also escaped
+
+### Reliability
+- **Vendor portal null safety**: 34 missing DOM null checks added across `showRegistrationForm`, `showPendingState`, `showInactiveState`, `showBannedState`, `showApprovedDashboard`, `goPage()`, and `submitSupportTicket()`
+- **Admin dashboard**: Filter ordering fixed — `renderDashTable` was slicing to 6 rows *before* applying status/search filters, causing empty results when filtering older records
+
+### Build & Deployment
+- **Vendor page**: Removed CDN Tailwind (`cdn.tailwindcss.com`), now uses Vite PostCSS pipeline — consistent with all other pages, eliminates runtime download, enables tree-shaking
+- **APK**: v1.9.1 built & released (`7.5 MB`)
+
+---
+
+### What's New in v1.9.0
 
 **Comprehensive bug fix release — 33+ issues resolved across the full stack.**
 
