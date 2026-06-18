@@ -177,12 +177,8 @@ railway up --service backend
 - Self-contained vanilla JS — no external dependencies or CDN scripts
 - **APK**: v2.0.0 built & released
 
-### Setup Gemini (optional)
-For AI-powered responses, add your free API key to `backend/.env`:
-```
-GEMINI_API_KEY=your_key_here
-```
-Get one free at https://aistudio.google.com/apikey
+### Gemini AI
+The chatbot is live with Google Gemini 1.5 Flash — no setup needed. The API key is configured on the backend (Railway env var `GEMINI_API_KEY`).
 
 ---
 
