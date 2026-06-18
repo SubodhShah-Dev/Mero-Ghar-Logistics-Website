@@ -1146,7 +1146,7 @@ canvas.ec {
 	display: none;
 	align-items: center;
 	justify-content: center;
-	backdrop-filter: blur(3px);
+	/* backdrop-filter removed for Android WebView performance */
 }
 .overlay.open {
 	display: flex;

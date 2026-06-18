@@ -19,7 +19,7 @@ const API_BASE_URL = (() => {
 })();
 
 // ── In-App Update Check & Download ──
-const APP_VERSION = '1.7.0';
+const APP_VERSION = '1.9.1';
 const GITHUB_REPO = 'SubodhShah-Dev/Mero-Ghar-Logistic';
 
 function compareVersions(a, b) {
@@ -205,6 +205,39 @@ async function checkForUpdates() {
   } catch (e) {
     // Silently fail
   }
+}
+
+// ── Safe JSON parse helper ──
+function safeParse(str, fallback) {
+  if (typeof str !== 'string') return fallback;
+  try { return JSON.parse(str); } catch (e) { return fallback; }
+}
+
+// ── Shared toast notification ──
+function showToast(msg, color) {
+  var colors = { green: '#4caf7d', red: '#e05e5e', gold: '#f8c06a', blue: '#60a5fa' };
+  var wrap = document.getElementById('toast-wrap') || document.getElementById('toast-container');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'toast-wrap';
+    wrap.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:400px;pointer-events:none';
+    document.body.appendChild(wrap);
+  }
+  var el = document.createElement('div');
+  el.style.cssText = 'display:flex;align-items:center;gap:10px;background:#111d16;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 18px;font-size:14px;color:#eef2ee;box-shadow:0 8px 32px rgba(0,0,0,0.4);pointer-events:auto;opacity:0;transform:translateY(8px);transition:opacity 0.3s ease,transform 0.3s ease';
+  // trigger animation
+  requestAnimationFrame(function () {
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  });
+  var dotColor = colors[color] || colors.gold;
+  el.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:' + dotColor + ';flex-shrink:0"></span>' + msg;
+  wrap.appendChild(el);
+  setTimeout(function () {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.3s ease';
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+  }, 3000);
 }
 
 // Run check after page settles (don't block rendering)

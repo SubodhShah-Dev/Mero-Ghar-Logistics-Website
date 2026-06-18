@@ -180,7 +180,7 @@ body {
 /* Footer buttons - consistent with vendor */
 .sb-foot {
 	padding: 16px 14px;
-	border-top: 1px solid var(--bdim);
+	border-top: 1px solid var(--border-dim);
 	display: flex;
 	gap: 8px;
 }
@@ -189,7 +189,7 @@ body {
 	padding: 12px;
 	border-radius: 8px;
 	background: var(--dark3);
-	border: 1px solid var(--bdim);
+	border: 1px solid var(--border-dim);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -1009,7 +1009,7 @@ canvas.spark {
 	background: var(--dark3);
 	border: 1px solid var(--border-dim);
 	border-radius: 8px;
-	padding: 10px 13px;
+	padding: 11px 14px;
 	color: var(--text);
 	font-size: 14px;
 	font-family: var(--sans);

@@ -1,27 +1,29 @@
 // ── NAVBAR SCROLL ─────────────────────────────────────
 window.addEventListener('scroll', () => {
-	document.getElementById('navbar').style.boxShadow =
-		window.scrollY > 20 ? '0 4px 30px rgba(0,0,0,0.4)' : 'none';
+	var navbar = document.getElementById('navbar');
+	if (navbar) {
+		navbar.style.boxShadow =
+			window.scrollY > 20 ? '0 4px 30px rgba(0,0,0,0.4)' : 'none';
+	}
 });
 
 // ── MOBILE MENU ───────────────────────────────────────
 window.toggleMenu = function () {
-	document.getElementById('mobileMenu').classList.toggle('open');
+	var menu = document.getElementById('mobileMenu');
+	if (menu) menu.classList.toggle('open');
 };
 
 // ── FAQ ───────────────────────────────────────────────
 window.toggleFaq = function (btn) {
-	const body = btn.nextElementSibling;
-	const chev = btn.querySelector('.faq-chevron');
-	const isOpen = body.classList.contains('open');
-	document
-		.querySelectorAll('.faq-body')
-		.forEach((b) => b.classList.remove('open'));
-	document
-		.querySelectorAll('.faq-chevron')
-		.forEach((c) => c.classList.remove('rotated'));
+	if (!btn) return;
+	var body = btn.nextElementSibling;
+	var chev = btn.querySelector('.faq-chevron');
+	if (!body || !chev) return;
+	var isOpen = body.classList.contains('open');
+	document.querySelectorAll('.faq-body').forEach(function (b) { b.classList.remove('open'); });
+	document.querySelectorAll('.faq-chevron').forEach(function (c) { c.classList.remove('rotated'); });
 	if (!isOpen) {
 		body.classList.add('open');
 		chev.classList.add('rotated');
 	}
-}
+};

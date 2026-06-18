@@ -20,7 +20,7 @@ let currentEditingBookingId = null;
 // ==================================================
 
 function checkAuth() {
-	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	const user = safeParse(localStorage.getItem('meroGharUser'), {});
 	if (!user.loggedIn || user.role !== 'admin') {
 		window.location.href = '/src/pages/login.html';
 		return null;
@@ -263,11 +263,21 @@ function pillHtml(status) {
 	return `<span class="pill ${map[status] || 'pp'}">${status}</span>`;
 }
 
+function escapeHtml(str) {
+	if (!str) return '';
+	return String(str)
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+}
+
 function renderDashTable(filter, search) {
 	const tbody = document.getElementById('dash-tbody');
 	if (!tbody) return;
 
-	let data = [...BOOKINGS].slice(0, 6);
+	let data = [...BOOKINGS];
 	if (filter && filter !== 'all')
 		data = data.filter((r) => r.status === filter);
 	if (search)
@@ -276,6 +286,7 @@ function renderDashTable(filter, search) {
 				r.customer.toLowerCase().includes(search.toLowerCase()) ||
 				r.booking_id.toLowerCase().includes(search.toLowerCase()),
 		);
+	data = data.slice(0, 6);
 	if (!data.length) {
 		tbody.innerHTML = `<tr><td colspan="6" class="no-results">No bookings found</td></tr>`;
 		return;
@@ -284,14 +295,14 @@ function renderDashTable(filter, search) {
 		.map(
 			(r) => `
     <tr onclick="toggleDetail('d-${r.id}')">
-      <td class="m">${r.booking_id}</td><td class="b">${r.customer}</td>
-      <td>${r.route}</td><td>${r.date}</td>
+      <td class="m">${r.booking_id}</td><td class="b">${escapeHtml(r.customer)}</td>
+      <td>${escapeHtml(r.route)}</td><td>${r.date}</td>
       <td>${pillHtml(r.status)}</td><td class="b">Rs ${(r.amount || 0).toLocaleString()}</td>
     </tr>
     <tr class="row-detail" id="d-${r.id}">
       <td colspan="6"><div class="rd-inner">
-        <div class="rd-item"><div class="rd-lbl">Phone</div><div class="rd-val">${r.phone || '—'}</div></div>
-        <div class="rd-item"><div class="rd-lbl">Full Route</div><div class="rd-val">${r.full_route || r.route}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Phone</div><div class="rd-val">${escapeHtml(r.phone || '—')}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Full Route</div><div class="rd-val">${escapeHtml(r.full_route || r.route)}</div></div>
         <div class="rd-item"><div class="rd-lbl">Status</div><div class="rd-val">${r.status}</div></div>
         <div class="rd-item"><div class="rd-lbl">Approval</div><div class="rd-val">${pillHtml(r.approval_status)}</div></div>
         <div class="rd-item"><div class="rd-lbl">Amount</div><div class="rd-val">Rs ${(r.amount || 0).toLocaleString()}</div></div>
@@ -338,8 +349,8 @@ function renderBookTable(filter, search) {
 		.map(
 			(r) => `
     <tr onclick="toggleDetail('bd-${r.id}')">
-      <td class="m">${r.booking_id}</td><td class="b">${r.customer}</td>
-      <td>${r.route}</td><td>${r.date}</td>
+      <td class="m">${r.booking_id}</td><td class="b">${escapeHtml(r.customer)}</td>
+      <td>${escapeHtml(r.route)}</td><td>${r.date}</td>
       <td>${pillHtml(r.status)}</td><td class="b">Rs ${(r.amount || 0).toLocaleString()}</td>
       <td><div style="display:flex;gap:6px" onclick="event.stopPropagation()">
         <button class="btn-ghost btn-sm" onclick="openEditStatusModal(${r.id})">Edit</button>
@@ -347,8 +358,8 @@ function renderBookTable(filter, search) {
     </tr>
     <tr class="row-detail" id="bd-${r.id}">
       <td colspan="7"><div class="rd-inner">
-        <div class="rd-item"><div class="rd-lbl">Customer Phone</div><div class="rd-val">${r.phone || '—'}</div></div>
-        <div class="rd-item"><div class="rd-lbl">Route</div><div class="rd-val">${r.full_route || r.route}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Customer Phone</div><div class="rd-val">${escapeHtml(r.phone || '—')}</div></div>
+        <div class="rd-item"><div class="rd-lbl">Route</div><div class="rd-val">${escapeHtml(r.full_route || r.route)}</div></div>
         <div class="rd-item"><div class="rd-lbl">Status</div><div class="rd-val">${r.status}</div></div>
         <div class="rd-item"><div class="rd-lbl">Approval</div><div class="rd-val">${pillHtml(r.approval_status)}</div></div>
         <div class="rd-item"><div class="rd-lbl">Amount</div><div class="rd-val">Rs ${(r.amount || 0).toLocaleString()}</div></div>
@@ -372,8 +383,8 @@ function renderCustomers(search) {
 		.map(
 			(r) => `
       <tr>
-        <td class="b">${r.name}</td><td>${r.email}</td>
-        <td>${r.phone}</td><td>${r.bookings}</td>
+        <td class="b">${escapeHtml(r.name)}</td><td>${escapeHtml(r.email)}</td>
+        <td>${escapeHtml(r.phone)}</td><td>${r.bookings}</td>
         <td>${r.joined}</td><td>${pillHtml(r.status)}</td>
       </tr>`,
 		)
@@ -414,10 +425,10 @@ function renderVendorsTable() {
 
 		return `
         <tr>
-            <td class="b">${v.business_name || v.name || '—'}</td>
-            <td>${v.phone || '—'}</td>
-            <td>${v.email || '—'}</td>
-            <td>${v.service_region || '—'}</td>
+            <td class="b">${escapeHtml(v.business_name || v.name || '—')}</td>
+            <td>${escapeHtml(v.phone || '—')}</td>
+            <td>${escapeHtml(v.email || '—')}</td>
+            <td>${escapeHtml(v.service_region || '—')}</td>
             <td>${v.total_jobs || 0}</td>
             <td>⭐ ${v.rating || 0}</td>
             <td>
@@ -449,14 +460,14 @@ async function renderApprovalTable(shipments) {
 			return `
       <tr id="approval-row-${shipment.id}">
         <td class="m">${shipment.booking_id || `#MG-${shipment.id}`}</td>
-        <td class="b">${shipment.customer_name || `${shipment.first_name} ${shipment.last_name}`}</td>
-        <td>${shipment.pickup_district || ''} → ${shipment.drop_district || ''}</td>
+        <td class="b">${escapeHtml(shipment.customer_name || `${shipment.first_name} ${shipment.last_name}`)}</td>
+        <td>${escapeHtml(shipment.pickup_district || '')} → ${escapeHtml(shipment.drop_district || '')}</td>
         <td>${moveDateSimple}</td>
         <td class="b">Rs ${(shipment.final_quote || 0).toLocaleString()}</td>
         <td>
           <select id="vendor-select-${shipment.id}" class="vendor-select" ${shipment.approval_status !== 'pending' ? 'disabled' : ''} style="padding: 6px 10px; border-radius: 6px; background: var(--dark3); color: var(--text); border: 1px solid var(--bdim); min-width: 180px;">
             <option value="">-- Select Vendor --</option>
-            ${activeVendors.map((v) => `<option value="${v.id}">${v.business_name} (⭐ ${v.rating || 0}) - ${v.service_region || ''}</option>`).join('')}
+            ${activeVendors.map((v) => `<option value="${v.id}">${escapeHtml(v.business_name)} (⭐ ${v.rating || 0}) - ${escapeHtml(v.service_region || '')}</option>`).join('')}
           </select>
         </td>
         <td>
@@ -782,23 +793,34 @@ function closeModal(id) {
 
 async function submitBooking() {
 	const name = document.getElementById('nb-name')?.value.trim();
+	const phone = document.getElementById('nb-phone')?.value.trim();
 	const from = document.getElementById('nb-from')?.value.trim();
 	const to = document.getElementById('nb-to')?.value.trim();
+	const amount = document.getElementById('nb-amount')?.value.trim();
+	const notes = document.getElementById('nb-notes')?.value.trim();
 	if (!name || !from || !to) {
 		toast('Please fill all required fields', 'red');
 		return;
 	}
-	toast('Booking created successfully', 'green');
+	const result = await fetchAPI('/api/shipment/create', {
+		method: 'POST',
+		body: JSON.stringify({
+			first_name: name,
+			pickup_address: from,
+			drop_address: to,
+			mobile_number: phone || '',
+			final_quote: amount ? parseFloat(amount) : 0,
+			special_notes: notes || '',
+		}),
+	});
+	if (!result.ok) {
+		toast(result.message || 'Failed to create booking', 'red');
+		return;
+	}
+	toast('Booking #' + (result.booking_id || '') + ' created', 'green');
 	closeModal('modal-new');
 	await loadBookings();
-	[
-		'nb-name',
-		'nb-phone',
-		'nb-from',
-		'nb-to',
-		'nb-amount',
-		'nb-notes',
-	].forEach((id) => {
+	['nb-name','nb-phone','nb-from','nb-to','nb-amount','nb-notes'].forEach((id) => {
 		const el = document.getElementById(id);
 		if (el) el.value = '';
 	});

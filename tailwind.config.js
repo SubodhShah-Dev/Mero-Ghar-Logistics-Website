@@ -26,7 +26,9 @@ export default {
 					500: '#e08f1a',
 					400: '#f5a623',
 					300: '#f8c06a',
+					200: '#f5d89e',
 					100: '#fef6e4',
+					50: '#fefaf0',
 				},
 				cream: {
 					50: '#fdfaf4',

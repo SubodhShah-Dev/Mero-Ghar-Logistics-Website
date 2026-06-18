@@ -163,7 +163,42 @@ railway up --service backend
 
 ## Download Latest APK
 
-[**Download MeroGhar v1.7.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v1.7.0.apk)
+[**Download MeroGhar v1.9.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v1.9.0.apk)
+
+## What's New in v1.9.0
+
+**Comprehensive bug fix release — 33+ issues resolved across the full stack.**
+
+### CRITICAL fixes
+- **Booking form**: Terms checkbox now saves `termsAccepted` correctly (was saving "Phone Call" preference instead)
+- **Admin panel**: `submitBooking()` now actually POSTs to the API — bookings were being silently dropped
+- **Data loss**: `pickup_address`/`drop_address` columns in the database were never populated by the backend INSERT query — now properly mapped
+- **XSS vulnerability**: Dummy payment form now HTML-escapes all user-supplied fields (`customerName`, `customerEmail`, `customerPhone`)
+- **CSS crash**: `var(--bdim)` typo in admin.css (undefined variable); `backdrop-filter: blur(3px)` in vendor.css (breaks Android WebView rendering)
+- **JSON safety**: All pages now use `safeParse()` instead of raw `JSON.parse(localStorage.getItem(...))` — prevents crashes on corrupted localStorage
+
+### HIGH priority
+- **Null-safety everywhere**: `onProvinceChange()`, address builders, `toggleOnline()` — all guarded against missing DOM elements
+- **NaN pricing**: Fallback distance calculation guarded against `parseInt("")` producing `NaN`
+- **Step 2 validation**: Was `() => true` (always passed) — now checks that user selected a home size or at least one item
+- **Payment method mapping**: Added missing `connectips` and `banktransfer` options
+- **Mobile validation**: Now requires exactly 10 digits
+- **Tailwind config**: Added missing `saffron-50` and `saffron-200` color shades (used in user form chips)
+- **Auth UX**: Replaced all 10 `alert()` calls with native toast notifications
+- **Guard redirect**: Authorization denial now shows a toast with 1.5s delay before redirect
+- **Toggle knob**: Vendor online toggle no longer jumps 4px when toggling (uses `left`/`right` instead of `translateX`)
+
+### Meta
+- `package.json` version bumped from `0.0.0` → `1.9.0`
+- In-app update checker now reports `1.9.0`
+
+---
+
+### What's New in v1.8.1
+
+- **Payment processing fixed**: Replaced broken HTML injection (`innerHTML` of full `<html>` document) with a native payment overlay — `<script>` tags are no longer stripped, the form always submits to the correct API URL, and the user gets inline validation feedback
+- **"How Did You Find Us?" dropdown fixed**: Wrong `querySelectorAll()[1]` index corrected to `querySelector()` — the value is now properly saved, restored, and submitted
+- **Map rendering hardened**: Graceful fallback if Leaflet library fails to load; try-catch wrapping prevents uncaught errors from breaking the confirmation page; sessionStorage fallback retrieves map data after payment flow
 
 All releases: https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases
 

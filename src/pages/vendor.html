@@ -6,41 +6,6 @@
 		<title>Vendor Portal — Mero Ghar</title>
 		<link rel="stylesheet" href="/src/styles/vendor.css" />
 		<link rel="stylesheet" href="/src/style.css" />
-		<script src="https://cdn.tailwindcss.com"></script>
-		<script>
-			tailwind.config = {
-				theme: {
-					extend: {
-						colors: {
-							forest: {
-								50: '#eef2ee',
-								100: '#d4e0d4',
-								200: '#a9c1a9',
-								300: '#7ea27e',
-								400: '#538353',
-								500: '#2b5e2b',
-								600: '#224a22',
-								700: '#1a371a',
-								800: '#112411',
-								900: '#091209',
-							},
-							saffron: {
-								50: '#fef8ed',
-								100: '#fdf0db',
-								200: '#fbe1b7',
-								300: '#f9d293',
-								400: '#f7c36f',
-								500: '#f5b44b',
-								600: '#c4903c',
-								700: '#936c2d',
-								800: '#62481e',
-								900: '#31240f',
-							},
-						},
-					},
-				},
-			};
-		</script>
 	</head>
 	<body class="bg-[#0b1510] text-[#eef2ee] font-sans">
 		<div class="flex h-screen overflow-hidden">
@@ -76,7 +41,7 @@
 								Mero Ghar
 							</div>
 							<div
-								class="font-mono text-[11px] text-[#f8c06a] tracking-wider uppercase">
+								class="font-mono text-xs text-[#f8c06a] tracking-wider uppercase">
 								Vendor Portal
 							</div>
 						</div>
@@ -114,7 +79,7 @@
 								0★
 							</div>
 							<div
-								class="text-[11px] text-[rgba(238,242,238,0.28)] uppercase">
+								class="text-xs text-[rgba(238,242,238,0.28)] uppercase">
 								Rating
 							</div>
 						</div>
@@ -125,7 +90,7 @@
 								0
 							</div>
 							<div
-								class="text-[11px] text-[rgba(238,242,238,0.28)] uppercase">
+								class="text-xs text-[rgba(238,242,238,0.28)] uppercase">
 								Vehicles
 							</div>
 						</div>
@@ -136,7 +101,7 @@
 								0
 							</div>
 							<div
-								class="text-[11px] text-[rgba(238,242,238,0.28)] uppercase">
+								class="text-xs text-[rgba(238,242,238,0.28)] uppercase">
 								Jobs Done
 							</div>
 						</div>
@@ -157,7 +122,7 @@
 							style="background-color: #2d5a3d">
 							<span
 								id="online-toggle-knob"
-								class="absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-transform duration-300"></span>
+								class="absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-all duration-300"></span>
 						</button>
 					</div>
 				</div>
@@ -165,7 +130,7 @@
 				<nav class="flex-1 p-4 overflow-y-auto">
 					<div class="mb-6">
 						<div
-							class="font-mono text-[11px] tracking-wider text-[rgba(238,242,238,0.28)] px-3 pb-2 uppercase">
+							class="font-mono text-xs tracking-wider text-[rgba(238,242,238,0.28)] px-3 pb-2 uppercase">
 							Workspace
 						</div>
 						<a
@@ -202,7 +167,7 @@
 							Assigned Jobs
 							<span
 								id="job-badge"
-								class="ml-auto bg-[#e05e5e] text-white text-[11px] font-bold px-2 py-0.5 rounded-full hidden"
+								class="ml-auto bg-[#e05e5e] text-white text-xs font-bold px-2 py-0.5 rounded-full hidden"
 								>0</span
 							>
 						</a>
@@ -243,7 +208,7 @@
 					</div>
 					<div class="mb-6">
 						<div
-							class="font-mono text-[11px] tracking-wider text-[rgba(238,242,238,0.28)] px-3 pb-2 uppercase">
+							class="font-mono text-xs tracking-wider text-[rgba(238,242,238,0.28)] px-3 pb-2 uppercase">
 							Account
 						</div>
 						<a
@@ -300,7 +265,7 @@
 						Alerts
 						<span
 							id="alert-badge"
-							class="ml-auto bg-[#e05e5e] text-white text-[11px] font-bold px-2 py-0.5 rounded-full hidden"
+							class="ml-auto bg-[#e05e5e] text-white text-xs font-bold px-2 py-0.5 rounded-full hidden"
 							>0</span
 						>
 					</button>
@@ -350,7 +315,7 @@
 					<div class="flex items-center gap-3">
 						<button
 							onclick="openAddVehicle()"
-							class="bg-[#f8c06a] text-[#0b1510] text-sm font-semibold px-4 py-3 rounded-lg hover:opacity-85 transition">
+							class="bg-[#f8c06a] text-[#0b1510] text-sm font-semibold px-4 py-3 min-h-[44px] rounded-lg hover:opacity-85 transition">
 							+ Add Vehicle
 						</button>
 					</div>
@@ -441,7 +406,7 @@
 								</div>
 								<button
 									onclick="submitVendorRegistration()"
-									class="w-full bg-[#f8c06a] text-[#0b1510] font-semibold py-3 rounded-lg hover:opacity-85 transition">
+									class="w-full bg-[#f8c06a] text-[#0b1510] font-semibold py-3 min-h-[44px] rounded-lg hover:opacity-85 transition">
 									Submit for Approval
 								</button>
 							</div>
@@ -521,7 +486,7 @@
 										</svg>
 									</div>
 									<div
-										class="text-[11px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										class="text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase">
 										This Month
 									</div>
 									<div
@@ -546,7 +511,7 @@
 										</svg>
 									</div>
 									<div
-										class="text-[11px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										class="text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase">
 										Active Jobs
 									</div>
 									<div
@@ -583,7 +548,7 @@
 										</svg>
 									</div>
 									<div
-										class="text-[11px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										class="text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase">
 										Fleet Size
 									</div>
 									<div
@@ -607,7 +572,7 @@
 										</svg>
 									</div>
 									<div
-										class="text-[11px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										class="text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase">
 										Rating
 									</div>
 									<div
@@ -626,7 +591,7 @@
 											>New Job Requests</span
 										><span
 											id="new-jobs-badge"
-											class="ml-2 px-2 py-0.5 rounded-full text-[11px] font-mono bg-[#f8c06a] text-[#0b1510] hidden"
+											class="ml-2 px-2 py-0.5 rounded-full text-xs font-mono bg-[#f8c06a] text-[#0b1510] hidden"
 											>0</span
 										>
 									</div>
@@ -698,7 +663,7 @@
 										<thead
 											class="border-b border-[rgba(255,255,255,0.07)]">
 											<tr
-												class="text-left text-[11px] font-mono text-[rgba(238,242,238,0.28)] uppercase">
+												class="text-left text-xs font-mono text-[rgba(238,242,238,0.28)] uppercase">
 												<th class="px-5 py-3">
 													Booking ID
 												</th>
@@ -756,7 +721,7 @@
 								<div
 									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
 									<div
-										class="text-[11px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										class="text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase">
 										This Month
 									</div>
 									<div
@@ -768,7 +733,7 @@
 								<div
 									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
 									<div
-										class="text-[11px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										class="text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase">
 										Pending Payout
 									</div>
 									<div
@@ -780,7 +745,7 @@
 								<div
 									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
 									<div
-										class="text-[11px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										class="text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase">
 										Total Earned
 									</div>
 									<div
@@ -792,7 +757,7 @@
 								<div
 									class="bg-[#111d16] border border-[rgba(255,255,255,0.07)] rounded-xl p-5">
 									<div
-										class="text-[11px] font-mono text-[rgba(238,242,238,0.5)] uppercase">
+										class="text-xs font-mono text-[rgba(238,242,238,0.5)] uppercase">
 										Jobs Completed
 									</div>
 									<div
@@ -869,7 +834,7 @@
 									</div>
 									<button
 										onclick="updateVendorProfile()"
-										class="bg-[#f8c06a] text-[#0b1510] font-semibold px-6 py-2 rounded-lg">
+										class="bg-[#f8c06a] text-[#0b1510] font-semibold px-6 py-3 min-h-[44px] rounded-lg">
 										Save Changes
 									</button>
 								</div>
@@ -924,7 +889,7 @@
 									</div>
 									<button
 										onclick="submitSupportTicket()"
-										class="bg-[#f8c06a] text-[#0b1510] font-semibold px-6 py-2 rounded-lg">
+										class="bg-[#f8c06a] text-[#0b1510] font-semibold px-6 py-3 min-h-[44px] rounded-lg">
 										Submit Ticket
 									</button>
 								</div>

@@ -1,6 +1,6 @@
 // ── AUTH CHECK AND LOGOUT FOR USER ──
 function checkAuth() {
-	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	const user = safeParse(localStorage.getItem('meroGharUser'), {});
 	if (!user.loggedIn) {
 		window.location.href = '/src/pages/login.html';
 		return null;
@@ -279,17 +279,22 @@ function populateDistrictsHardcoded(prefix, provinceId) {
 }
 
 window.onProvinceChange = function (prefix) {
-	const provinceId = document.getElementById(prefix + 'Prov').value;
-	populateDistrictsHardcoded(prefix, provinceId);
-	document.getElementById(prefix + 'City').value = '';
-	document.getElementById(prefix + 'Ward').value = '';
+	var provEl = document.getElementById(prefix + 'Prov');
+	if (!provEl) return;
+	populateDistrictsHardcoded(prefix, provEl.value);
+	var cityEl = document.getElementById(prefix + 'City');
+	if (cityEl) cityEl.value = '';
+	var wardEl = document.getElementById(prefix + 'Ward');
+	if (wardEl) wardEl.value = '';
 	clearDistanceCache();
 	updatePriceDisplay();
 };
 
 window.onDistrictChange = function (prefix) {
-	document.getElementById(prefix + 'City').value = '';
-	document.getElementById(prefix + 'Ward').value = '';
+	var cityEl = document.getElementById(prefix + 'City');
+	if (cityEl) cityEl.value = '';
+	var wardEl = document.getElementById(prefix + 'Ward');
+	if (wardEl) wardEl.value = '';
 	clearDistanceCache();
 	updatePriceDisplay();
 };
@@ -373,25 +378,21 @@ async function geocodeAddress(address, provinceId) {
 }
 
 function getPickupAddressString() {
-	const city = document.getElementById('puCity')?.value?.trim() || '';
-	const districtSelect = document.getElementById('puDist');
-	const district =
-		districtSelect?.options[districtSelect.selectedIndex]?.text || '';
-	const provinceSelect = document.getElementById('puProv');
-	const province =
-		provinceSelect?.options[provinceSelect.selectedIndex]?.text || '';
-	return `${city ? city + ', ' : ''}${district}, ${province}, Nepal`;
+	var city = document.getElementById('puCity')?.value?.trim() || '';
+	var districtSelect = document.getElementById('puDist');
+	var district = districtSelect ? (districtSelect.options[districtSelect.selectedIndex]?.text || '') : '';
+	var provinceSelect = document.getElementById('puProv');
+	var province = provinceSelect ? (provinceSelect.options[provinceSelect.selectedIndex]?.text || '') : '';
+	return (city ? city + ', ' : '') + district + ', ' + province + ', Nepal';
 }
 
 function getDropAddressString() {
-	const city = document.getElementById('drCity')?.value?.trim() || '';
-	const districtSelect = document.getElementById('drDist');
-	const district =
-		districtSelect?.options[districtSelect.selectedIndex]?.text || '';
-	const provinceSelect = document.getElementById('drProv');
-	const province =
-		provinceSelect?.options[provinceSelect.selectedIndex]?.text || '';
-	return `${city ? city + ', ' : ''}${district}, ${province}, Nepal`;
+	var city = document.getElementById('drCity')?.value?.trim() || '';
+	var districtSelect = document.getElementById('drDist');
+	var district = districtSelect ? (districtSelect.options[districtSelect.selectedIndex]?.text || '') : '';
+	var provinceSelect = document.getElementById('drProv');
+	var province = provinceSelect ? (provinceSelect.options[provinceSelect.selectedIndex]?.text || '') : '';
+	return (city ? city + ', ' : '') + district + ', ' + province + ', Nepal';
 }
 
 async function getDistance(originCoords, destinationCoords) {
@@ -453,8 +454,10 @@ async function getDistanceCost() {
 	} catch (e) {
 		console.warn('Distance calculation error, using fallback:', e);
 	}
-	const diff = Math.abs(parseInt(puProv) - parseInt(drProv));
-	const fallbackKm = diff * 100 + 50;
+	var puVal = parseInt(puProv) || 0;
+	var drVal = parseInt(drProv) || 0;
+	var diff = Math.abs(puVal - drVal);
+	var fallbackKm = diff * 100 + 50;
 	cachedDistanceData = {
 		distanceKm: fallbackKm,
 		durationSec: fallbackKm * 90,
@@ -671,9 +674,9 @@ function saveFormState() {
 					.querySelector('.pay-card.picked')
 					?.querySelector('.text-xs.font-semibold')?.innerText ||
 				'Cash',
-			howFound: document.querySelectorAll('#fp5 select')[1]?.value || '',
+			howFound: document.querySelector('#fp5 select')?.value || '',
 			termsAccepted:
-				document.querySelector('#fp5 input[type="checkbox"]')
+				document.getElementById('termsCheckbox')
 					?.checked || false,
 			currentStep: fCur,
 			cachedDistanceData: cachedDistanceData
@@ -810,11 +813,9 @@ function restoreFormState() {
 			)?.innerText;
 			if (name === data.paymentMethod) pickPay(card);
 		});
-		const howFoundSelect = document.querySelectorAll('#fp5 select')[1];
+		const howFoundSelect = document.querySelector('#fp5 select');
 		if (howFoundSelect) howFoundSelect.value = data.howFound;
-		const termsCheckbox = document.querySelector(
-			'#fp5 input[type="checkbox"]',
-		);
+		const termsCheckbox = document.getElementById('termsCheckbox');
 		if (termsCheckbox) termsCheckbox.checked = data.termsAccepted;
 
 		if (data.currentStep && data.currentStep > 1)
@@ -892,7 +893,15 @@ const stepValidations = {
 		}
 		return true;
 	},
-	2: () => true,
+	2: function () {
+		const hasHomeSize = !!document.querySelector('input[name="hSize"]:checked');
+		const hasItems = !!document.querySelector('#fp2 .item-chip.on');
+		if (!hasHomeSize && !hasItems) {
+			alert('Please select your home size or at least one item to move');
+			return false;
+		}
+		return true;
+	},
 	3: () =>
 		!!document.querySelector('input[name="veh"]:checked') ||
 		(alert('Please select a vehicle type'), false),
@@ -1010,7 +1019,7 @@ async function submitForm() {
 		shipmentData.final_quote = total;
 		shipmentData.distance_km = distanceKm;
 		shipmentData.estimated_duration = durationText;
-		const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+		const user = safeParse(localStorage.getItem('meroGharUser'), {});
 		if (user.id) shipmentData.user_id = user.id;
 		console.log('Submitting:', shipmentData);
 		const response = await fetch(
@@ -1027,69 +1036,13 @@ async function submitForm() {
 			return;
 		}
 
-		if (
-			result.payment_required &&
-			result.payment_data &&
-			result.payment_data.form_html
-		) {
+		if (result.payment_required && result.payment_data) {
 			if (cachedDistanceData)
 				sessionStorage.setItem(
 					'pendingMapData',
 					JSON.stringify(cachedDistanceData),
 				);
-			const bookingSection = document.getElementById('booking');
-			if (!bookingSection) return;
-			const originalBookingHTML = bookingSection.innerHTML;
-			bookingSection.innerHTML = result.payment_data.form_html;
-
-			const paymentForm = bookingSection.querySelector('#payment-form');
-			if (paymentForm) {
-				paymentForm.addEventListener('submit', async (e) => {
-					e.preventDefault();
-					const formData = new FormData(paymentForm);
-					const submitBtn = paymentForm.querySelector(
-						'button[type="submit"]',
-					);
-					if (submitBtn) {
-						submitBtn.disabled = true;
-						submitBtn.textContent = 'Processing...';
-					}
-					try {
-						const urlEncoded = new URLSearchParams(
-							formData,
-						).toString();
-						const response = await fetch(paymentForm.action, {
-							method: 'POST',
-							headers: {
-								'Content-Type':
-									'application/x-www-form-urlencoded',
-							},
-							body: urlEncoded,
-						});
-						const paymentResult = await response.json();
-						if (paymentResult.success) {
-							bookingSection.innerHTML = originalBookingHTML;
-							showSuccessMessage(paymentResult.booking_id);
-						} else {
-							alert(
-								'Payment failed: ' +
-									(paymentResult.message || 'Unknown error'),
-							);
-							if (submitBtn) {
-								submitBtn.disabled = false;
-								submitBtn.textContent = 'Pay Now';
-							}
-						}
-					} catch (error) {
-						console.error('Payment error:', error);
-						alert('Payment processing error. Please try again.');
-						if (submitBtn) {
-							submitBtn.disabled = false;
-							submitBtn.textContent = 'Pay Now';
-						}
-					}
-				});
-			}
+			showPaymentOverlay(result);
 			return;
 		}
 		showSuccessMessage(result.booking_id);
@@ -1118,69 +1071,168 @@ function showSuccessMessage(bookingId) {
 		}
 	}
 	if (bookIdSpan) bookIdSpan.textContent = bookingId;
-	if (mapContainer && cachedDistanceData)
-		showLeafletMap(mapContainer, cachedDistanceData);
+	var mapData = cachedDistanceData;
+	if (!mapData) {
+		try {
+			var pending = sessionStorage.getItem('pendingMapData');
+			if (pending) mapData = JSON.parse(pending);
+	} catch (e) {
+		console.warn('Failed to save form state:', e);
+	}
+	}
+	if (mapContainer && mapData) {
+		try { showLeafletMap(mapContainer, mapData); }
+		catch (e) { console.warn('Map render failed:', e); }
+	}
 	if (bookingSection)
 		bookingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-	const bookings = JSON.parse(localStorage.getItem('myBookings') || '[]');
+	const bookings = safeParse(localStorage.getItem('myBookings'), []);
 	bookings.push({ bookingId, date: new Date().toISOString() });
 	localStorage.setItem('myBookings', JSON.stringify(bookings));
 }
 
 function showLeafletMap(container, distData) {
-	container.innerHTML = '';
-	const mapDiv = document.createElement('div');
-	mapDiv.style.height = '250px';
-	container.appendChild(mapDiv);
-	const map = L.map(mapDiv).setView([27.7172, 85.324], 7);
-	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		attribution: '&copy; OpenStreetMap contributors',
-	}).addTo(map);
-
-	if (
-		!distData.originCoords ||
-		!distData.destinationCoords ||
-		distData.distanceKm < 0.1
-	) {
-		if (distData.originCoords) {
-			map.setView(
-				[distData.originCoords[1], distData.originCoords[0]],
-				15,
-			);
-			L.marker([distData.originCoords[1], distData.originCoords[0]])
-				.addTo(map)
-				.bindPopup('Pickup & Drop (Same Location)')
-				.openPopup();
-		} else {
-			L.marker([27.7172, 85.324])
-				.addTo(map)
-				.bindPopup('Location not available')
-				.openPopup();
-		}
-		const etaP = document.createElement('p');
-		etaP.className = 'text-forest-700 font-semibold text-sm mt-2';
-		etaP.textContent = '📍 Pickup and drop are at the same location.';
-		container.appendChild(etaP);
+	if (typeof L === 'undefined') {
+		container.innerHTML = '<p class="text-sm text-gray-500">Map unavailable — Leaflet library not loaded</p>';
 		return;
 	}
+	try {
+		container.innerHTML = '';
+		var mapDiv = document.createElement('div');
+		mapDiv.style.height = '250px';
+		container.appendChild(mapDiv);
+		var map = L.map(mapDiv).setView([27.7172, 85.324], 7);
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution: '&copy; OpenStreetMap contributors',
+		}).addTo(map);
 
-	L.Routing.control({
-		waypoints: [
-			L.latLng(distData.originCoords[1], distData.originCoords[0]),
-			L.latLng(
-				distData.destinationCoords[1],
-				distData.destinationCoords[0],
-			),
-		],
-		router: L.Routing.osrmv1(),
-		lineOptions: { styles: [{ color: '#1a371a', weight: 6 }] },
-		show: false,
-	}).addTo(map);
+		if (
+			!distData.originCoords ||
+			!distData.destinationCoords ||
+			distData.distanceKm < 0.1
+		) {
+			if (distData.originCoords) {
+				map.setView([distData.originCoords[1], distData.originCoords[0]], 15);
+				L.marker([distData.originCoords[1], distData.originCoords[0]])
+					.addTo(map)
+					.bindPopup('Pickup & Drop (Same Location)')
+					.openPopup();
+			} else {
+				L.marker([27.7172, 85.324])
+					.addTo(map)
+					.bindPopup('Location not available')
+					.openPopup();
+			}
+			var etaP = document.createElement('p');
+			etaP.className = 'text-forest-700 font-semibold text-sm mt-2';
+			etaP.textContent = '\uD83D\uDCCD Pickup and drop are at the same location.';
+			container.appendChild(etaP);
+			return;
+		}
 
-	const etaP = document.createElement('p');
-	etaP.className = 'text-forest-700 font-semibold text-sm mt-2';
-	etaP.textContent = `⏱️ Estimated travel time: ${distData.durationText || 'N/A'}`;
-	container.appendChild(etaP);
+		L.Routing.control({
+			waypoints: [
+				L.latLng(distData.originCoords[1], distData.originCoords[0]),
+				L.latLng(distData.destinationCoords[1], distData.destinationCoords[0]),
+			],
+			router: L.Routing.osrmv1(),
+			lineOptions: { styles: [{ color: '#1a371a', weight: 6 }] },
+			show: false,
+		}).addTo(map);
+
+		var etaP = document.createElement('p');
+		etaP.className = 'text-forest-700 font-semibold text-sm mt-2';
+		etaP.textContent = '\u23F1\uFE0F Estimated travel time: ' + (distData.durationText || 'N/A');
+		container.appendChild(etaP);
+	} catch (e) {
+		console.warn('Leaflet map error:', e);
+		container.innerHTML = '<p class="text-sm text-gray-500">Could not load map</p>';
+	}
+}
+
+// ── PAYMENT OVERLAY ──
+function showPaymentOverlay(result) {
+	const overlay = document.getElementById('payOverlay');
+	if (!overlay) return;
+
+	document.getElementById('payAmount').value = result.payment_data.amount || '';
+	document.getElementById('payTxnUuid').value = result.payment_data.transaction_uuid || '';
+	document.getElementById('payOrderId').value = result.payment_data.order_id || result.booking_id || '';
+	document.getElementById('payCustomerName').value = result.payment_data.customer_name || '';
+	document.getElementById('payCustomerEmail').value = result.payment_data.customer_email || '';
+	document.getElementById('payCustomerPhone').value = result.payment_data.customer_phone || '';
+
+	const amt = parseFloat(result.payment_data.amount || 0);
+	document.getElementById('payAmountDisplay').textContent = 'Rs ' + amt.toLocaleString();
+
+	document.getElementById('payMobile').value = '';
+	document.getElementById('payPassword').value = '';
+	hidePayError();
+
+	overlay.classList.remove('hidden');
+
+	const payForm = document.getElementById('payForm');
+	const existingHandler = payForm._submitHandler;
+	if (existingHandler) {
+		payForm.removeEventListener('submit', existingHandler);
+	}
+
+	const handler = async function (e) {
+		e.preventDefault();
+		const mobile = document.getElementById('payMobile').value.trim();
+		const password = document.getElementById('payPassword').value.trim();
+		if (!/^\d{10}$/.test(mobile)) { showPayError('Please enter a valid 10-digit mobile number.'); return; }
+		if (!password) { showPayError('Please enter your password.'); return; }
+
+		const submitBtn = document.getElementById('paySubmit');
+		submitBtn.disabled = true;
+		submitBtn.innerHTML = '<span class="animate-spin">&#9696;</span> Processing...';
+		hidePayError();
+		try {
+			const formData = new FormData(payForm);
+			const response = await fetch(
+				API_BASE_URL + '/api/payment/dummy/process',
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: new URLSearchParams(formData).toString(),
+				},
+			);
+			const paymentResult = await response.json();
+			if (paymentResult.success) {
+				overlay.classList.add('hidden');
+				showSuccessMessage(paymentResult.booking_id || result.booking_id);
+			} else {
+				showPayError(paymentResult.message || 'Payment failed. Please try again.');
+				submitBtn.disabled = false;
+				submitBtn.innerHTML = 'Pay Now';
+			}
+		} catch (error) {
+			console.error('Payment error:', error);
+			showPayError('Payment processing error. Please check your connection and try again.');
+			submitBtn.disabled = false;
+			submitBtn.innerHTML = 'Pay Now';
+		}
+	};
+
+	payForm._submitHandler = handler;
+	payForm.addEventListener('submit', handler);
+
+	document.getElementById('payCancel').onclick = function () {
+		overlay.classList.add('hidden');
+	};
+}
+
+function showPayError(msg) {
+	const el = document.getElementById('payError');
+	if (!el) return;
+	el.textContent = msg;
+	el.classList.remove('hidden');
+}
+
+function hidePayError() {
+	const el = document.getElementById('payError');
+	if (el) el.classList.add('hidden');
 }
 
 function collectFormData() {
@@ -1286,8 +1338,11 @@ function collectFormData() {
 		if (lower.includes('esewa')) paymentMethod = 'esewa';
 		else if (lower.includes('khalti')) paymentMethod = 'khalti';
 		else if (lower.includes('ime pay')) paymentMethod = 'imepay';
+		else if (lower.includes('connectips')) paymentMethod = 'connectips';
+		else if (lower.includes('bank transfer')) paymentMethod = 'banktransfer';
+		else if (lower.includes('bank to bank')) paymentMethod = 'banktransfer';
 	}
-	const howFoundSelect = document.querySelectorAll('#fp5 select')[1];
+	const howFoundSelect = document.querySelector('#fp5 select');
 	const specialNotesTextarea = document.querySelector('#fp4 textarea');
 	const puProvSelect = document.getElementById('puProv');
 	const puDistSelect = document.getElementById('puDist');

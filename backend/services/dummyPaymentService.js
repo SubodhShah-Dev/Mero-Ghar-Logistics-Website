@@ -600,7 +600,7 @@ export const initiateDummyPayment = async (
                                 </div>
                                 <div class="meta-row">
                                     <span class="meta-key">Email</span>
-                                    <span class="meta-val">${customerEmail}</span>
+                                    <span class="meta-val">${customerEmail.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
                                 </div>
                             </div>
 
@@ -630,9 +630,9 @@ export const initiateDummyPayment = async (
                             <input type="hidden" name="amount"           value="${amount}" />
                             <input type="hidden" name="transaction_uuid" value="${transactionUuid}" />
                             <input type="hidden" name="order_id"         value="${orderId}" />
-                            <input type="hidden" name="customer_name"    value="${customerName.replace(/'/g, "\\'")}" />
-                            <input type="hidden" name="customer_email"   value="${customerEmail}" />
-                            <input type="hidden" name="customer_phone"   value="${customerPhone}" />
+                            <input type="hidden" name="customer_name"    value="${customerName.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;')}" />
+                            <input type="hidden" name="customer_email"   value="${customerEmail.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}" />
+                            <input type="hidden" name="customer_phone"   value="${customerPhone.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}" />
 
                             <div class="right-inner">
                                 <div class="form-heading">Payment Details</div>

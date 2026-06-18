@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			console.log('Login attempt with:', { email, role });
 
 			if (!email || !password) {
-				alert('Please enter email and password');
+				showToast('Please enter email and password', 'red');
 				return;
 			}
 
@@ -79,14 +79,14 @@ document.addEventListener('DOMContentLoaded', function () {
 				console.log('Login response:', res);
 
 				if (!res.ok) {
-					alert(res.message || 'Login failed');
+					showToast(res.message || 'Login failed', 'red');
 					return;
 				}
 
 				// Check if user data exists in response
 				if (!res.user) {
 					console.error('No user data in response:', res);
-					alert('Login failed: No user data received');
+					showToast('Login failed: No user data received', 'red');
 					return;
 				}
 
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				window.location.href = redirectPath;
 			} catch (err) {
 				console.error('Login error:', err);
-				alert('Server error. Try again.');
+				showToast('Server error. Try again.', 'red');
 			}
 		});
 	}
@@ -144,17 +144,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			// Validation
 			if (!name || !email || !password || !confirmPassword) {
-				alert('Please fill in all fields.');
+				showToast('Please fill in all fields.', 'red');
 				return;
 			}
 
 			if (password !== confirmPassword) {
-				alert('Passwords do not match.');
+				showToast('Passwords do not match.', 'red');
 				return;
 			}
 
 			if (password.length < 6) {
-				alert('Password must be at least 6 characters long.');
+				showToast('Password must be at least 6 characters long.', 'red');
 				return;
 			}
 
@@ -176,15 +176,17 @@ document.addEventListener('DOMContentLoaded', function () {
 				console.log('Register response:', res);
 
 				if (!res.ok) {
-					alert(res.message || 'Signup failed');
+					showToast(res.message || 'Signup failed', 'red');
 					return;
 				}
 
-				alert('Signup successful! Please login.');
-				window.location.href = '/src/pages/login.html';
+				showToast('Signup successful! Please login.', 'green');
+				setTimeout(function () {
+					window.location.href = '/src/pages/login.html';
+				}, 1500);
 			} catch (err) {
 				console.error('Signup error:', err);
-				alert('Server error. Try again.');
+				showToast('Server error. Try again.', 'red');
 			}
 		});
 	}
@@ -203,7 +205,7 @@ window.logout = function () {
 // CHECK AUTH STATUS
 // ==================================================
 window.checkAuth = function () {
-	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	const user = safeParse(localStorage.getItem('meroGharUser'), {});
 	if (!user.loggedIn) {
 		console.log('User not authenticated, redirecting to login');
 		window.location.href = '/src/pages/login.html';
@@ -217,7 +219,7 @@ window.checkAuth = function () {
 // GET AUTH HEADERS FOR API CALLS
 // ==================================================
 window.getAuthHeaders = function () {
-	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	const user = safeParse(localStorage.getItem('meroGharUser'), {});
 	return {
 		'Content-Type': 'application/json',
 		Authorization: user.loggedIn ? `Bearer ${user.id}` : '',

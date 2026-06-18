@@ -25,12 +25,22 @@ function parseAmount(value) {
 	return isNaN(num) ? 0 : num;
 }
 
+function escapeHtml(str) {
+	if (!str) return '';
+	return String(str)
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+}
+
 // ==================================================
 // AUTHENTICATION
 // ==================================================
 
 function checkAuth() {
-	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	const user = safeParse(localStorage.getItem('meroGharUser'), {});
 	if (!user.loggedIn || user.role !== 'vendor') {
 		window.location.href = '/src/pages/login.html';
 		return null;
@@ -53,7 +63,7 @@ function logout() {
 // ==================================================
 
 async function fetchAPI(url, options = {}) {
-	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	const user = safeParse(localStorage.getItem('meroGharUser'), {});
 	const headers = {
 		'Content-Type': 'application/json',
 		...options.headers,
@@ -79,7 +89,7 @@ async function fetchAPI(url, options = {}) {
 // ==================================================
 
 async function checkVendorProfile() {
-	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	const user = safeParse(localStorage.getItem('meroGharUser'), {});
 	if (!user.id) {
 		window.location.href = '/src/pages/login.html';
 		return;
@@ -108,17 +118,25 @@ async function checkVendorProfile() {
 }
 
 function showRegistrationForm() {
-	document.getElementById('vendor-reg-form').style.display = 'block';
-	document.getElementById('vendor-pending-state').style.display = 'none';
-	document.getElementById('dashboard-content').style.display = 'none';
-	document.getElementById('vendor-profile-card').style.display = 'none';
+	const el1 = document.getElementById('vendor-reg-form');
+	const el2 = document.getElementById('vendor-pending-state');
+	const el3 = document.getElementById('dashboard-content');
+	const el4 = document.getElementById('vendor-profile-card');
+	if (el1) el1.style.display = 'block';
+	if (el2) el2.style.display = 'none';
+	if (el3) el3.style.display = 'none';
+	if (el4) el4.style.display = 'none';
 }
 
 function showPendingState() {
-	document.getElementById('vendor-reg-form').style.display = 'none';
-	document.getElementById('vendor-pending-state').style.display = 'block';
-	document.getElementById('dashboard-content').style.display = 'none';
-	document.getElementById('vendor-profile-card').style.display = 'none';
+	const el1 = document.getElementById('vendor-reg-form');
+	const el2 = document.getElementById('vendor-pending-state');
+	const el3 = document.getElementById('dashboard-content');
+	const el4 = document.getElementById('vendor-profile-card');
+	if (el1) el1.style.display = 'none';
+	if (el2) el2.style.display = 'block';
+	if (el3) el3.style.display = 'none';
+	if (el4) el4.style.display = 'none';
 	const pendingEl = document.getElementById('vendor-pending-state');
 	if (pendingEl) {
 		pendingEl.innerHTML = `
@@ -148,10 +166,14 @@ function showPendingState() {
 }
 
 function showInactiveState() {
-	document.getElementById('vendor-reg-form').style.display = 'none';
-	document.getElementById('vendor-pending-state').style.display = 'block';
-	document.getElementById('dashboard-content').style.display = 'none';
-	document.getElementById('vendor-profile-card').style.display = 'none';
+	const el1 = document.getElementById('vendor-reg-form');
+	const el2 = document.getElementById('vendor-pending-state');
+	const el3 = document.getElementById('dashboard-content');
+	const el4 = document.getElementById('vendor-profile-card');
+	if (el1) el1.style.display = 'none';
+	if (el2) el2.style.display = 'block';
+	if (el3) el3.style.display = 'none';
+	if (el4) el4.style.display = 'none';
 	const pendingEl = document.getElementById('vendor-pending-state');
 	if (pendingEl) {
 		pendingEl.innerHTML = `
@@ -179,10 +201,14 @@ function showInactiveState() {
 }
 
 function showBannedState() {
-	document.getElementById('vendor-reg-form').style.display = 'none';
-	document.getElementById('vendor-pending-state').style.display = 'block';
-	document.getElementById('dashboard-content').style.display = 'none';
-	document.getElementById('vendor-profile-card').style.display = 'none';
+	const el1 = document.getElementById('vendor-reg-form');
+	const el2 = document.getElementById('vendor-pending-state');
+	const el3 = document.getElementById('dashboard-content');
+	const el4 = document.getElementById('vendor-profile-card');
+	if (el1) el1.style.display = 'none';
+	if (el2) el2.style.display = 'block';
+	if (el3) el3.style.display = 'none';
+	if (el4) el4.style.display = 'none';
 	const pendingEl = document.getElementById('vendor-pending-state');
 	if (pendingEl) {
 		pendingEl.innerHTML = `
@@ -210,14 +236,20 @@ function showBannedState() {
 }
 
 function showApprovedDashboard() {
-	document.getElementById('vendor-reg-form').style.display = 'none';
-	document.getElementById('vendor-pending-state').style.display = 'none';
-	document.getElementById('dashboard-content').style.display = 'block';
-	document.getElementById('vendor-profile-card').style.display = 'block';
+	const el1 = document.getElementById('vendor-reg-form');
+	const el2 = document.getElementById('vendor-pending-state');
+	const el3 = document.getElementById('dashboard-content');
+	const el4 = document.getElementById('vendor-profile-card');
+	if (el1) el1.style.display = 'none';
+	if (el2) el2.style.display = 'none';
+	if (el3) el3.style.display = 'block';
+	if (el4) el4.style.display = 'block';
 
-	document.getElementById('vendor-name-display').textContent =
+	const nameEl = document.getElementById('vendor-name-display');
+	if (nameEl) nameEl.textContent =
 		vendorData.business_name || vendorData.name;
-	document.getElementById('vendor-region-display').textContent =
+	const regionEl = document.getElementById('vendor-region-display');
+	if (regionEl) regionEl.textContent =
 		vendorData.service_region || 'Kathmandu Valley';
 	const initials = (vendorData.business_name || vendorData.name)
 		.split(' ')
@@ -225,11 +257,15 @@ function showApprovedDashboard() {
 		.join('')
 		.toUpperCase()
 		.slice(0, 2);
-	document.getElementById('vendor-avatar').textContent = initials;
-	document.getElementById('vendor-rating').textContent =
+	const avatarEl = document.getElementById('vendor-avatar');
+	if (avatarEl) avatarEl.textContent = initials;
+	const ratingEl = document.getElementById('vendor-rating');
+	if (ratingEl) ratingEl.textContent =
 		(vendorData.rating || 0) + '★';
-	document.getElementById('vendor-fleet').textContent = vehicles.length;
-	document.getElementById('vendor-jobs').textContent =
+	const fleetEl = document.getElementById('vendor-fleet');
+	if (fleetEl) fleetEl.textContent = vehicles.length;
+	const jobsEl = document.getElementById('vendor-jobs');
+	if (jobsEl) jobsEl.textContent =
 		vendorData.total_jobs || 0;
 }
 
@@ -260,7 +296,7 @@ async function checkStatusManually() {
 }
 
 async function submitVendorRegistration() {
-	const user = JSON.parse(localStorage.getItem('meroGharUser') || '{}');
+	const user = safeParse(localStorage.getItem('meroGharUser'), {});
 	const business_name = document
 		.getElementById('vendor-business-name')
 		?.value.trim();
@@ -457,12 +493,12 @@ function renderFleet() {
 			(v) => `
         <div class="bg-[#16261d] border border-[rgba(255,255,255,0.07)] rounded-xl overflow-hidden">
             <div class="p-4 border-b border-[rgba(255,255,255,0.07)] flex justify-between items-start">
-                <div><div class="font-semibold">${v.name}</div><div class="text-xs font-mono text-[#f8c06a]">${v.plate}</div></div>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono ${v.status === 'Available' ? 'bg-[rgba(76,175,125,0.15)] text-[#4caf7d]' : 'bg-[rgba(248,192,106,0.15)] text-[#f8c06a]'}">${v.status}</span>
+                <div><div class="font-semibold">${escapeHtml(v.name)}</div><div class="text-xs font-mono text-[#f8c06a]">${escapeHtml(v.plate)}</div></div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono ${v.status === 'Available' ? 'bg-[rgba(76,175,125,0.15)] text-[#4caf7d]' : 'bg-[rgba(248,192,106,0.15)] text-[#f8c06a]'}">${escapeHtml(v.status)}</span>
             </div>
             <div class="p-4 space-y-2">
-                <div class="flex justify-between text-sm"><span class="text-[rgba(238,242,238,0.5)]">Type:</span><span>${v.type}</span></div>
-                <div class="flex justify-between text-sm"><span class="text-[rgba(238,242,238,0.5)]">Driver:</span><span>${v.driver}</span></div>
+                <div class="flex justify-between text-sm"><span class="text-[rgba(238,242,238,0.5)]">Type:</span><span>${escapeHtml(v.type)}</span></div>
+                <div class="flex justify-between text-sm"><span class="text-[rgba(238,242,238,0.5)]">Driver:</span><span>${escapeHtml(v.driver)}</span></div>
             </div>
             <div class="p-4 border-t border-[rgba(255,255,255,0.07)] flex gap-2">
                 <select onchange="updateVehicleStatus(${v.id}, this.value)" class="flex-1 bg-[#1d3327] border border-[rgba(255,255,255,0.07)] rounded-lg px-3 py-1.5 text-xs">
@@ -486,7 +522,7 @@ function renderFleetList() {
 			'<div class="p-4 text-center text-[rgba(238,242,238,0.5)]">No vehicles in fleet</div>';
 		return;
 	}
-	container.innerHTML = `<div class="overflow-x-auto"><table class="w-full"><thead class="border-b border-[rgba(255,255,255,0.07)]"><tr class="text-left text-[10px] font-mono text-[rgba(238,242,238,0.28)] uppercase"><th class="px-5 py-3">Vehicle</th><th class="px-5 py-3">Plate</th><th class="px-5 py-3">Type</th><th class="px-5 py-3">Driver</th><th class="px-5 py-3">Status</th></tr></thead><tbody>${vehicles.map((v) => `<tr class="border-b border-[rgba(255,255,255,0.05)]"><td class="px-5 py-3 font-medium">${v.name}</td><td class="px-5 py-3 font-mono text-xs">${v.plate}</td><td class="px-5 py-3">${v.type}</td><td class="px-5 py-3">${v.driver}</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-mono ${v.status === 'Available' ? 'bg-[rgba(76,175,125,0.15)] text-[#4caf7d]' : 'bg-[rgba(248,192,106,0.15)] text-[#f8c06a]'}">${v.status}</span></td></tr>`).join('')}</tbody></table></div>`;
+	container.innerHTML = `<div class="overflow-x-auto"><table class="w-full"><thead class="border-b border-[rgba(255,255,255,0.07)]"><tr class="text-left text-[10px] font-mono text-[rgba(238,242,238,0.28)] uppercase"><th class="px-5 py-3">Vehicle</th><th class="px-5 py-3">Plate</th><th class="px-5 py-3">Type</th><th class="px-5 py-3">Driver</th><th class="px-5 py-3">Status</th></tr></thead><tbody>${vehicles.map((v) => `<tr class="border-b border-[rgba(255,255,255,0.05)]"><td class="px-5 py-3 font-medium">${escapeHtml(v.name)}</td><td class="px-5 py-3 font-mono text-xs">${escapeHtml(v.plate)}</td><td class="px-5 py-3">${escapeHtml(v.type)}</td><td class="px-5 py-3">${escapeHtml(v.driver)}</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-mono ${v.status === 'Available' ? 'bg-[rgba(76,175,125,0.15)] text-[#4caf7d]' : 'bg-[rgba(248,192,106,0.15)] text-[#f8c06a]'}">${escapeHtml(v.status)}</span></td></tr>`).join('')}</tbody></table></div>`;
 }
 
 // ==================================================
@@ -573,9 +609,9 @@ function renderJobsTable() {
 				: '—';
 
 			return `<tr class="border-b border-[rgba(255,255,255,0.05)]">
-            <td class="px-5 py-3 font-mono text-xs">${job.booking_id || `#MG-${job.id}`}</td>
-            <td class="px-5 py-3">${job.customer_name || '—'}</td>
-            <td class="px-5 py-3">${job.pickup_district || ''} → ${job.drop_district || ''}</td>
+            <td class="px-5 py-3 font-mono text-xs">${escapeHtml(job.booking_id || `#MG-${job.id}`)}</td>
+            <td class="px-5 py-3">${escapeHtml(job.customer_name || '—')}</td>
+            <td class="px-5 py-3">${escapeHtml(job.pickup_district || '')} → ${escapeHtml(job.drop_district || '')}</td>
             <td class="px-5 py-3">${moveDateSimple}</td>
             <td class="px-5 py-3">Rs ${(job.final_quote || 0).toLocaleString()}</td>
             <td class="px-5 py-3"><span class="${statusClass}">${statusText}</span></td>
@@ -688,8 +724,8 @@ function renderNewJobsList() {
         <div class="p-4 hover:bg-[rgba(248,192,106,0.05)]">
             <div class="flex justify-between items-start">
                 <div>
-                    <div class="font-medium text-sm">${job.pickup_district} → ${job.drop_district}</div>
-                    <div class="text-xs text-[rgba(238,242,238,0.5)] mt-1">${job.customer_name} · ${moveDateSimple}</div>
+                    <div class="font-medium text-sm">${escapeHtml(job.pickup_district)} → ${escapeHtml(job.drop_district)}</div>
+                    <div class="text-xs text-[rgba(238,242,238,0.5)] mt-1">${escapeHtml(job.customer_name)} · ${moveDateSimple}</div>
                 </div>
                 <div class="text-right">
                     <div class="text-[#f8c06a] font-semibold">Rs ${(job.final_quote || 0).toLocaleString()}</div>
@@ -718,7 +754,7 @@ function renderRecentCompletions() {
 			const moveDateSimple = job.move_date
 				? job.move_date.split('T')[0]
 				: '—';
-			return `<tr class="border-b border-[rgba(255,255,255,0.05)]"><td class="px-5 py-3 text-sm font-mono">${job.booking_id}</td><td class="px-5 py-3 text-sm">${job.pickup_district} → ${job.drop_district}</td><td class="px-5 py-3 text-sm text-[#4caf7d]">+Rs ${(job.final_quote || 0).toLocaleString()}</td><td class="px-5 py-3 text-sm">${moveDateSimple}</td></tr>`;
+			return `<tr class="border-b border-[rgba(255,255,255,0.05)]"><td class="px-5 py-3 text-sm font-mono">${escapeHtml(job.booking_id)}</td><td class="px-5 py-3 text-sm">${escapeHtml(job.pickup_district)} → ${escapeHtml(job.drop_district)}</td><td class="px-5 py-3 text-sm text-[#4caf7d]">+Rs ${(job.final_quote || 0).toLocaleString()}</td><td class="px-5 py-3 text-sm">${moveDateSimple}</td></tr>`;
 		})
 		.join('')}</tbody></table></div>`;
 }
@@ -811,17 +847,19 @@ function goPage(page) {
 		profile: 'Profile & Docs',
 		support: 'Help & Support',
 	};
-	document.getElementById('page-title').textContent = titles[page] || page;
+	const pageTitleEl = document.getElementById('page-title');
+	if (pageTitleEl) pageTitleEl.textContent = titles[page] || page;
 	if (page === 'profile' && vendorData) {
-		document.getElementById('profile-business-name').value =
-			vendorData.business_name || '';
-		document.getElementById('profile-owner-name').value =
-			vendorData.owner_name || '';
-		document.getElementById('profile-phone').value = vendorData.phone || '';
-		document.getElementById('profile-region').value =
-			vendorData.service_region || '';
-		document.getElementById('profile-address').value =
-			vendorData.address || '';
+		const pb = document.getElementById('profile-business-name');
+		const po = document.getElementById('profile-owner-name');
+		const pp = document.getElementById('profile-phone');
+		const pr = document.getElementById('profile-region');
+		const pa = document.getElementById('profile-address');
+		if (pb) pb.value = vendorData.business_name || '';
+		if (po) po.value = vendorData.owner_name || '';
+		if (pp) pp.value = vendorData.phone || '';
+		if (pr) pr.value = vendorData.service_region || '';
+		if (pa) pa.value = vendorData.address || '';
 	}
 	if (page === 'jobs') renderJobsTable();
 	if (page === 'earnings') updateStats();
@@ -842,18 +880,19 @@ function toggleOnline() {
 	const dotSpan = document.getElementById('online-dot');
 	const toggleBtn = document.getElementById('online-toggle-btn');
 	const toggleKnob = document.getElementById('online-toggle-knob');
+	if (!statusSpan) return;
 	const isOnline = statusSpan.textContent === 'Online & Available';
 	if (isOnline) {
 		statusSpan.textContent = 'Offline';
 		if (dotSpan) dotSpan.style.backgroundColor = '#9ca3af';
 		if (toggleBtn) toggleBtn.style.backgroundColor = '#6b7280';
-		if (toggleKnob) toggleKnob.style.transform = 'translateX(0px)';
+		if (toggleKnob) { toggleKnob.style.left = '3px'; toggleKnob.style.right = 'auto'; }
 		toast('You are now offline', 'red');
 	} else {
 		statusSpan.textContent = 'Online & Available';
 		if (dotSpan) dotSpan.style.backgroundColor = '#4caf7d';
 		if (toggleBtn) toggleBtn.style.backgroundColor = '#2d5a3d';
-		if (toggleKnob) toggleKnob.style.transform = 'translateX(20px)';
+		if (toggleKnob) { toggleKnob.style.left = 'auto'; toggleKnob.style.right = '3px'; }
 		toast('You are now online', 'green');
 	}
 }
@@ -884,8 +923,10 @@ function submitSupportTicket() {
 		return;
 	}
 	toast('Ticket submitted!', 'green');
-	document.getElementById('support-subject').value = '';
-	document.getElementById('support-message').value = '';
+	const subEl = document.getElementById('support-subject');
+	const msgEl = document.getElementById('support-message');
+	if (subEl) subEl.value = '';
+	if (msgEl) msgEl.value = '';
 }
 
 function toast(msg, color = 'gold') {
