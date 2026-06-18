@@ -24,9 +24,8 @@ dist-ssr
 *.sw?
 
 # Environment
-.env
-.env.local
-*.env
+.env*
+!.env.example
 
 # APK builds
 *.apk
