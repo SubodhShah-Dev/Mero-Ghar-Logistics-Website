@@ -6,8 +6,8 @@
   var isSending = false;
 
   function getBaseUrl() {
-    if (typeof API_BASE_URL !== 'undefined') return API_BASE_URL;
-    if (typeof window.API_BASE_URL !== 'undefined') return window.API_BASE_URL;
+    if (typeof window.API_BASE_URL !== 'undefined' && window.API_BASE_URL) return window.API_BASE_URL;
+    if (typeof API_BASE_URL !== 'undefined' && API_BASE_URL) return API_BASE_URL;
     return 'http://localhost:5000';
   }
 
@@ -116,17 +116,149 @@
 
   function getLocalFallback(msg) {
     var m = (msg || '').toLowerCase().trim();
-    if (m.includes('hello') || m.includes('hi ') || m === 'hi' || m === 'hey' || m.includes('namaste')) return 'Namaste! 🙏 How can I help you with your move today?';
-    if (m.includes('price') || m.includes('cost') || m.includes('rate') || m.includes('quote')) return 'Our pricing is based on distance, item volume, and special handling needs. Get an instant quote by filling out the booking form.';
-    if (m.includes('book') || m.includes('order') || m.includes('move') || m.includes('shift')) return 'To book: open the app, fill in pickup/drop locations, select items, and confirm. You\'ll get a distance-based quote.';
-    if (m.includes('track') || m.includes('status') || m.includes('where') || m.includes('delivery')) return 'Track your shipment in real-time via the app — go to "My Bookings" and tap the shipment.';
-    if (m.includes('payment') || m.includes('pay') || m.includes('khalti') || m.includes('esewa')) return 'We accept Cash on Delivery, Bank Transfer, ConnectIPS, Khalti, and eSewa.';
+    m = m.replace(/[^a-z0-9\s]/g, '').trim();
+    if (!m) return 'Please type a message! I can help with bookings, tracking, pricing, and more.';
+    if (m.includes('hello') || m.startsWith('hi') || m === 'hey' || m.includes('namaste') || m.includes('hy') || m.includes('hlo')) return 'Namaste! 🙏 How can I help you with your move today?';
+    if (m.includes('price') || m.includes('cost') || m.includes('rate') || m.includes('quote') || m.includes('how much')) return 'Our pricing is based on distance, item volume, and special handling needs. Get an instant quote by filling out the booking form.';
+    if (m.includes('book') || m.includes('order') || m.includes('move') || m.includes('shift') || m.includes('schedule')) return 'To book: open the app, fill in pickup/drop locations, select items, and confirm. You\'ll get a distance-based quote.';
+    if (m.includes('track') || m.includes('status') || m.includes('where') || m.includes('delivery') || m.includes('location')) return 'Track your shipment in real-time via the app — go to "My Bookings" and tap the shipment.';
+    if (m.includes('payment') || m.includes('pay') || m.includes('khalti') || m.includes('esewa') || m.includes('cash')) return 'We accept Cash on Delivery, Bank Transfer, ConnectIPS, Khalti, and eSewa.';
     if (m.includes('cancel') || m.includes('refund')) return 'To cancel a booking, please contact our support team. Refunds are case-by-case.';
     if (m.includes('vehicle') || m.includes('truck')) return 'We have mini trucks to large trucks for full household shifting. The right vehicle is assigned based on your items.';
     if (m.includes('fragile') || m.includes('glass') || m.includes('breakable')) return 'Yes! Mark items as fragile during booking — our team will handle them with extra care.';
-    if (m.includes('contact') || m.includes('support') || m.includes('phone')) return 'Reach support via the app\'s Help section or contact admin. We respond within 24 hours.';
+    if (m.includes('contact') || m.includes('support') || m.includes('phone') || m.includes('help')) return 'Reach support via the app\'s Help section or contact admin. We respond within 24 hours.';
     if (m.includes('thank') || m.includes('thanks')) return 'You\'re welcome! 😊 Happy moving with MeroGhar!';
-    return 'I\'m here to help with MeroGhar Logistics — bookings, tracking, pricing, and more. Could you be more specific?';
+    if (m.includes('yes') || m.includes('ok') || m.includes('okay') || m.includes('sure')) return 'Great! Let me know if you have any specific questions about booking, pricing, or tracking.';
+    if (m === 'help' || m.includes('commands') || m.includes('capabilities') || m.includes('what can you do') || m.includes('available') && (m.includes('option') || m.includes('command')) || m.includes('show options') || m.includes('menu') || m.includes('what can i ask')) {
+      return 'Here\'s what I can help you with:\n\n📦 BOOKING — "Book a move"\n' +
+        '   Redirects you to the booking form\n\n' +
+        '📍 TRACKING — "Track my shipment"\n' +
+        '   Shows your shipment status\n\n' +
+        '💰 PRICING — "What are the prices?"\n' +
+        '   Explains pricing (distance + items)\n\n' +
+        '💳 PAYMENTS — "Payment options"\n' +
+        '   Lists accepted payment methods\n\n' +
+        '🔐 ACCOUNT — "Login" / "Sign up"\n' +
+        '   Go to login or registration page\n\n' +
+        '🚚 VEHICLES — "What trucks do you have?"\n' +
+        '   Info about our fleet\n\n' +
+        '📞 SUPPORT — "Contact support"\n' +
+        '   Reach our help team\n\n' +
+        '❓ Just type any question naturally — I\'ll do my best to help!';
+    }
+    if (m.includes('what') || m.includes('who') || m.includes('which') || m.includes('how')) return 'I can help with questions about bookings, pricing, tracking, payments, vehicles, and more. What would you like to know?';
+    return 'I\'m here to help with MeroGhar Logistics — bookings, tracking, pricing, and more. Try asking "How to book?" or "What are the prices?"';
+  }
+
+  var ACTIONS = [
+    {
+      patterns: ['book a move', 'booking form', 'go to booking', 'start booking', 'new booking', 'schedule move', 'shift my items', 'want to move', 'open booking'],
+      intent: 'redirect', target: '/src/pages/user.html',
+      requiresAuth: false, message: 'Opening the booking form...'
+    },
+    {
+      patterns: ['my bookings', 'my orders', 'track', 'tracking', 'my shipment', 'where is my shipment', 'shipment status', 'my moves', 'my booking'],
+      intent: 'redirect', target: '/src/pages/user.html',
+      requiresAuth: true, role: 'user',
+      message: 'Redirecting to your dashboard...'
+    },
+    {
+      patterns: ['login', 'sign in', 'log in', 'login page', 'go to login'],
+      intent: 'redirect', target: '/src/pages/login.html',
+      requiresAuth: false, message: 'Redirecting to login...'
+    },
+    {
+      patterns: ['sign up', 'register', 'create account', 'new account', 'signup'],
+      intent: 'redirect', target: '/src/pages/signup.html',
+      requiresAuth: false, message: 'Redirecting to signup...'
+    },
+    {
+      patterns: ['admin panel', 'go to admin', 'admin dashboard', 'admin page'],
+      intent: 'redirect', target: '/src/pages/admin.html',
+      requiresAuth: true, role: 'admin',
+      message: 'Redirecting to admin panel...'
+    },
+    {
+      patterns: ['vendor portal', 'vendor dashboard', 'vendor page', 'my vendor'],
+      intent: 'redirect', target: '/src/pages/vendor.html',
+      requiresAuth: true, role: 'vendor',
+      message: 'Redirecting to vendor portal...'
+    }
+  ];
+
+  function validateAction(action) {
+    if (!action.requiresAuth) return { valid: true };
+    try {
+      var userData = localStorage.getItem('meroGharUser');
+      if (!userData) return { valid: false, message: 'Please log in first. Type "Login" to go to the login page.' };
+      var user = JSON.parse(userData);
+      if (!user || !user.role) return { valid: false, message: 'Session expired. Please log in again.' };
+      if (action.role && user.role !== action.role) return { valid: false, message: 'This feature requires a ' + action.role + ' account. Your current role is ' + user.role + '.' };
+      return { valid: true };
+    } catch (e) {
+      return { valid: false, message: 'Session error. Please log in again.' };
+    }
+  }
+
+  function matchAction(text) {
+    var m = (text || '').toLowerCase().trim();
+    for (var i = 0; i < ACTIONS.length; i++) {
+      var action = ACTIONS[i];
+      for (var j = 0; j < action.patterns.length; j++) {
+        if (m.includes(action.patterns[j])) return action;
+      }
+    }
+    return null;
+  }
+
+  function renderChips() {
+    var msgs = document.getElementById('mg-chat-msgs');
+    if (!msgs) return;
+    var chips = [
+      { label: '📖 Book a Move', text: 'Book a move' },
+      { label: '📍 Track', text: 'Track my shipment' },
+      { label: '💰 Pricing', text: 'What are the prices' },
+      { label: '💳 Payments', text: 'Payment options' },
+      { label: '🔐 Login', text: 'Login' },
+      { label: '❓ Help', text: 'help' }
+    ];
+    var container = document.createElement('div');
+    container.id = 'mg-chips';
+    container.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 6px';
+    for (var i = 0; i < chips.length; i++) {
+      var btn = document.createElement('button');
+      btn.textContent = chips[i].label;
+      btn.dataset.text = chips[i].text;
+      btn.style.cssText = 'padding:5px 12px;border-radius:16px;border:1px solid rgba(248,192,106,0.25);background:rgba(248,192,106,0.06);color:#eef2ee;font-size:11px;cursor:pointer;white-space:nowrap;transition:background 0.15s';
+      btn.addEventListener('mouseenter', function () { this.style.background = 'rgba(248,192,106,0.15)'; });
+      btn.addEventListener('mouseleave', function () { this.style.background = 'rgba(248,192,106,0.06)'; });
+      btn.addEventListener('click', function () {
+        var input = document.getElementById('mg-chat-input');
+        if (!input) return;
+        input.value = this.dataset.text;
+        sendMessage();
+      });
+      container.appendChild(btn);
+    }
+    msgs.appendChild(container);
+    scrollToBottom();
+  }
+
+  function renderChatHistory() {
+    var msgs = document.getElementById('mg-chat-msgs');
+    if (!msgs) return;
+    msgs.innerHTML = '';
+    var greeting = document.createElement('div');
+    greeting.className = 'mg-msg mg-bot';
+    greeting.style.cssText = 'align-self:flex-start;max-width:85%;background:rgba(255,255,255,0.06);border-radius:12px 12px 12px 4px;padding:10px 14px;font-size:13px;line-height:1.5;color:rgba(238,242,238,0.9)';
+    greeting.textContent = 'Namaste! 🙏 I\'m MeroBot, your AI assistant for MeroGhar Logistics. Ask me about booking, tracking, pricing, or anything else!';
+    msgs.appendChild(greeting);
+    if (chatHistory.length === 0) {
+      renderChips();
+    }
+    for (var i = 0; i < chatHistory.length; i++) {
+      addMessage(chatHistory[i].text, chatHistory[i].role === 'user' ? 'user' : 'bot');
+    }
   }
 
   function sendMessage() {
@@ -137,11 +269,29 @@
     if (!text) return;
 
     input.value = '';
+
+    var action = matchAction(text);
+    if (action) {
+      var validation = validateAction(action);
+      if (!validation.valid) {
+        addMessage(text, 'user');
+        addMessage(validation.message, 'bot');
+        return;
+      }
+      addMessage(text, 'user');
+      addMessage(action.message, 'bot');
+      setTimeout(function () {
+        window.location.href = action.target;
+      }, 800);
+      return;
+    }
+
     addMessage(text, 'user');
     chatHistory.push({ role: 'user', text: text });
     isSending = true;
     showTyping();
 
+    console.log('[MeroBot] Sending:', text);
     var url = getBaseUrl() + '/api/chatbot/message';
     fetch(url, {
       method: 'POST',
@@ -155,15 +305,17 @@
       .then(function (data) {
         hideTyping();
         isSending = false;
-        var reply = data.response || 'Sorry, I couldn\'t process that. Please try again.';
+        console.log('[MeroBot] Response:', data);
+        var reply = data.response || data.reply || data.message || getLocalFallback(text);
         addMessage(reply, 'bot');
         chatHistory.push({ role: 'model', text: reply });
       })
       .catch(function (err) {
         hideTyping();
         isSending = false;
+        console.warn('[MeroBot] Fetch failed, using local fallback:', err);
         var fallback = getLocalFallback(text);
-        addMessage(fallback + '\n\n(offline mode — replies may be limited)', 'bot');
+        addMessage(fallback, 'bot');
         chatHistory.push({ role: 'model', text: fallback });
       });
   }
@@ -177,25 +329,24 @@
     if (!btn || !panel) return;
 
     btn.addEventListener('click', function () {
-      isOpen = !isOpen;
-      if (isOpen) {
-        panel.style.display = 'flex';
-        btn.style.display = 'none';
-        setTimeout(function () {
-          if (input) input.focus();
-        }, 300);
-      } else {
-        panel.style.display = 'none';
-        btn.style.display = 'flex';
-      }
+      isOpen = true;
+      panel.style.display = 'flex';
+      btn.style.display = 'none';
+      renderChatHistory();
+      setTimeout(function () {
+        if (input) input.focus();
+      }, 300);
     });
 
+    function closePanel() {
+      isOpen = false;
+      panel.style.display = 'none';
+      btn.style.display = 'flex';
+      chatHistory = [];
+    }
+
     if (close) {
-      close.addEventListener('click', function () {
-        isOpen = false;
-        panel.style.display = 'none';
-        btn.style.display = 'flex';
-      });
+      close.addEventListener('click', closePanel);
     }
 
     if (send) {

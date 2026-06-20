@@ -4,6 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Admin Panel — Mero Ghar</title>
+		<link rel="icon" type="image/png" href="/favicon.png" />
 		<link rel="stylesheet" href="/src/styles/admin.css" />
 		<style>
 			@media (max-width:1023px) {
@@ -243,6 +244,7 @@
 				<button
 					class="sb-toggle"
 					onclick="toggleAdminSidebar()"
+					aria-label="Toggle sidebar"
 					style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:8px;background:#16261d;border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#eef2ee">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px">
 						<line x1="3" y1="6" x2="21" y2="6"/>
@@ -1004,11 +1006,11 @@
 								<label>Customer Name</label
 								><input
 									placeholder="e.g. Sita Rai"
-									id="nb-name" />
+									id="nb-name" required />
 							</div>
 							<div>
 								<label>Phone</label
-								><input placeholder="+977-98…" id="nb-phone" />
+								><input placeholder="+977-98…" id="nb-phone" required />
 							</div>
 						</div>
 						<label>Pickup Address</label
@@ -1029,7 +1031,7 @@
 								><input
 									type="number"
 									placeholder="3500"
-									id="nb-amount" />
+									id="nb-amount" required />
 							</div>
 						</div>
 						<label>Special Instructions</label

@@ -2,7 +2,6 @@
 // MeroGhar Authentication System
 // ==================================================
 
-console.log('MeroGhar Auth System Loaded');
 const BASEURL = API_BASE_URL;
 
 // Role → redirect path mapping
@@ -16,9 +15,6 @@ const ROLE_ROUTES = {
 // For Fetching Data
 //==================
 async function fetchData(url, req, httpMethod, contentType) {
-	console.log(`Fetching: ${BASEURL}${url}`);
-	console.log('Request data:', req);
-
 	try {
 		const response = await fetch(`${BASEURL}${url}`, {
 			method: httpMethod,
@@ -29,8 +25,6 @@ async function fetchData(url, req, httpMethod, contentType) {
 		});
 
 		const data = await response.json();
-		console.log('Response from server:', data);
-		console.log('Response OK:', response.ok);
 
 		return { ok: response.ok, ...data };
 	} catch (error) {
@@ -43,11 +37,9 @@ async function fetchData(url, req, httpMethod, contentType) {
 // LOGIN HANDLER
 // ==================================================
 document.addEventListener('DOMContentLoaded', function () {
-	console.log('DOM loaded, checking for login form...');
 	const loginForm = document.getElementById('loginForm');
 
 	if (loginForm) {
-		console.log('Login page detected, setting up handler');
 
 		loginForm.addEventListener('submit', async function (e) {
 			e.preventDefault();
@@ -55,8 +47,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			const email = document.getElementById('email')?.value.trim();
 			const password = document.getElementById('password')?.value;
 			const role = document.getElementById('role')?.value;
-
-			console.log('Login attempt with:', { email, role });
 
 			if (!email || !password) {
 				showToast('Please enter email and password', 'red');
@@ -75,8 +65,6 @@ document.addEventListener('DOMContentLoaded', function () {
 					'POST',
 					'application/json',
 				);
-
-				console.log('Login response:', res);
 
 				if (!res.ok) {
 					showToast(res.message || 'Login failed', 'red');
@@ -100,10 +88,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				};
 
 				localStorage.setItem('meroGharUser', JSON.stringify(userData));
-				console.log('Stored user data:', userData);
-
-				console.log('User role:', res.user.role);
-				console.log('Redirecting to:', ROLE_ROUTES[res.user.role]);
 
 				// Redirect based on role
 				const redirectPath =
@@ -124,7 +108,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	const signupForm = document.getElementById('signupForm');
 
 	if (signupForm) {
-		console.log('Signup page detected');
 
 		signupForm.addEventListener('submit', async function (e) {
 			e.preventDefault();
@@ -139,8 +122,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			const role =
 				document.querySelector('input[name="role"]:checked')?.value ||
 				'user';
-
-			console.log('Signup attempt:', { name, email, role });
 
 			// Validation
 			if (!name || !email || !password || !confirmPassword) {
@@ -173,8 +154,6 @@ document.addEventListener('DOMContentLoaded', function () {
 					'application/json',
 				);
 
-				console.log('Register response:', res);
-
 				if (!res.ok) {
 					showToast(res.message || 'Signup failed', 'red');
 					return;
@@ -197,7 +176,6 @@ document.addEventListener('DOMContentLoaded', function () {
 // ==================================================
 window.logout = function () {
 	localStorage.removeItem('meroGharUser');
-	console.log('User logged out');
 	window.location.href = '/src/pages/login.html';
 };
 
@@ -207,11 +185,9 @@ window.logout = function () {
 window.checkAuth = function () {
 	const user = safeParse(localStorage.getItem('meroGharUser'), {});
 	if (!user.loggedIn) {
-		console.log('User not authenticated, redirecting to login');
 		window.location.href = '/src/pages/login.html';
 		return null;
 	}
-	console.log('Authenticated user:', user);
 	return user;
 };
 
@@ -225,5 +201,3 @@ window.getAuthHeaders = function () {
 		Authorization: user.loggedIn ? `Bearer ${user.id}` : '',
 	};
 };
-
-console.log('Authentication system ready');

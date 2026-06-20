@@ -18,8 +18,11 @@ const API_BASE_URL = (() => {
   return PROD_URL;
 })();
 
+// Expose on window so other scripts (chatbot.js, etc.) can reliably find it
+window.API_BASE_URL = API_BASE_URL;
+
 // ── In-App Update Check & Download ──
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.3.0';
 const GITHUB_REPO = 'SubodhShah-Dev/Mero-Ghar-Logistic';
 
 function compareVersions(a, b) {
@@ -231,7 +234,10 @@ function showToast(msg, color) {
     el.style.transform = 'translateY(0)';
   });
   var dotColor = colors[color] || colors.gold;
-  el.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:' + dotColor + ';flex-shrink:0"></span>' + msg;
+  var dot = document.createElement('span');
+  dot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:' + dotColor + ';flex-shrink:0';
+  el.appendChild(dot);
+  el.appendChild(document.createTextNode(msg));
   wrap.appendChild(el);
   setTimeout(function () {
     el.style.opacity = '0';

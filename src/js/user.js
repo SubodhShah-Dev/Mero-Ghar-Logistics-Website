@@ -110,6 +110,16 @@ let fCur = 1;
 const fTotal = 5;
 const fPW = { 1: '20%', 2: '40%', 3: '60%', 4: '80%', 5: '100%' };
 
+// ── Android back button / browser back handling ──
+history.replaceState({ step: 1 }, '');
+window.addEventListener('popstate', function onFormBack(e) {
+  if (fCur > 1) {
+    var prev = fCur - 1;
+    fGoTo(prev, true);
+    history.pushState({ step: fCur }, '');
+  }
+});
+
 // ========== PRICES ==========
 const PRICES = {
 	vehicle: {
@@ -641,20 +651,11 @@ function saveFormState() {
 					?.querySelector('.chip-lbl')?.innerText || '',
 			moveReason: document.querySelector('#fp4 select')?.value || '',
 			specialNotes: document.querySelector('#fp4 textarea')?.value || '',
-			firstName:
-				document.querySelectorAll('#fp5 input[type="text"]')[0]
-					?.value || '',
-			lastName:
-				document.querySelectorAll('#fp5 input[type="text"]')[1]
-					?.value || '',
-			mobile:
-				document.querySelectorAll('#fp5 input[type="tel"]')[0]?.value ||
-				'',
-			alternateMobile:
-				document.querySelectorAll('#fp5 input[type="tel"]')[1]?.value ||
-				'',
-			email:
-				document.querySelector('#fp5 input[type="email"]')?.value || '',
+			firstName: document.getElementById('firstName')?.value || '',
+			lastName: document.getElementById('lastName')?.value || '',
+			mobile: document.getElementById('mobile')?.value || '',
+			alternateMobile: document.getElementById('altMobile')?.value || '',
+			email: document.getElementById('email')?.value || '',
 			preferredContact: Array.from(
 				document.querySelectorAll(
 					'#fp5 .flex-wrap input[type="checkbox"]:checked',
@@ -665,7 +666,7 @@ function saveFormState() {
 					.querySelector('.pay-card.picked')
 					?.querySelector('.text-xs.font-semibold')?.innerText ||
 				'Cash',
-			howFound: document.querySelector('#fp5 select')?.value || '',
+			howFound: document.getElementById('howFound')?.value || '',
 			termsAccepted:
 				document.getElementById('termsCheckbox')
 					?.checked || false,
@@ -773,23 +774,15 @@ function restoreFormState() {
 		if (specialNotesTextarea)
 			specialNotesTextarea.value = data.specialNotes;
 
-		const firstNameInput = document.querySelectorAll(
-			'#fp5 input[type="text"]',
-		)[0];
+		const firstNameInput = document.getElementById('firstName');
 		if (firstNameInput) firstNameInput.value = data.firstName;
-		const lastNameInput = document.querySelectorAll(
-			'#fp5 input[type="text"]',
-		)[1];
+		const lastNameInput = document.getElementById('lastName');
 		if (lastNameInput) lastNameInput.value = data.lastName;
-		const mobileInput = document.querySelectorAll(
-			'#fp5 input[type="tel"]',
-		)[0];
+		const mobileInput = document.getElementById('mobile');
 		if (mobileInput) mobileInput.value = data.mobile;
-		const altMobileInput = document.querySelectorAll(
-			'#fp5 input[type="tel"]',
-		)[1];
+		const altMobileInput = document.getElementById('altMobile');
 		if (altMobileInput) altMobileInput.value = data.alternateMobile;
-		const emailInput = document.querySelector('#fp5 input[type="email"]');
+		const emailInput = document.getElementById('email');
 		if (emailInput) emailInput.value = data.email;
 
 		document
@@ -804,7 +797,7 @@ function restoreFormState() {
 			)?.innerText;
 			if (name === data.paymentMethod) pickPay(card);
 		});
-		const howFoundSelect = document.querySelector('#fp5 select');
+		const howFoundSelect = document.getElementById('howFound');
 		if (howFoundSelect) howFoundSelect.value = data.howFound;
 		const termsCheckbox = document.getElementById('termsCheckbox');
 		if (termsCheckbox) termsCheckbox.checked = data.termsAccepted;
@@ -851,35 +844,35 @@ const stepValidations = {
 			drCity = document.getElementById('drCity')?.value,
 			drWard = document.getElementById('drWard')?.value;
 		if (!puProv) {
-			alert('Please select pickup province');
+			showToast('Please select pickup province', 'red');
 			return false;
 		}
 		if (!puDist) {
-			alert('Please select pickup district');
+			showToast('Please select pickup district', 'red');
 			return false;
 		}
 		if (!puCity) {
-			alert('Please enter pickup city/municipality');
+			showToast('Please enter pickup city/municipality', 'red');
 			return false;
 		}
 		if (!puWard) {
-			alert('Please enter pickup ward number');
+			showToast('Please enter pickup ward number', 'red');
 			return false;
 		}
 		if (!drProv) {
-			alert('Please select drop province');
+			showToast('Please select drop province', 'red');
 			return false;
 		}
 		if (!drDist) {
-			alert('Please select drop district');
+			showToast('Please select drop district', 'red');
 			return false;
 		}
 		if (!drCity) {
-			alert('Please enter drop city/municipality');
+			showToast('Please enter drop city/municipality', 'red');
 			return false;
 		}
 		if (!drWard) {
-			alert('Please enter drop ward number');
+			showToast('Please enter drop ward number', 'red');
 			return false;
 		}
 		return true;
@@ -888,36 +881,32 @@ const stepValidations = {
 		const hasHomeSize = !!document.querySelector('input[name="hSize"]:checked');
 		const hasItems = !!document.querySelector('#fp2 .item-chip.on');
 		if (!hasHomeSize && !hasItems) {
-			alert('Please select your home size or at least one item to move');
+			showToast('Please select your home size or at least one item to move', 'red');
 			return false;
 		}
 		return true;
 	},
 	3: () =>
 		!!document.querySelector('input[name="veh"]:checked') ||
-		(alert('Please select a vehicle type'), false),
+		(showToast('Please select a vehicle type', 'red'), false),
 	4: function () {
 		const moveDate = document.querySelectorAll('#fp4 input[type="date"]')[0]
 			?.value;
 		const timeSlot = document.querySelector('input[name="tSlot"]:checked');
 		if (!moveDate) {
-			alert('Please select your move date');
+			showToast('Please select your move date', 'red');
 			return false;
 		}
 		if (!timeSlot) {
-			alert('Please select your preferred time slot');
+			showToast('Please select your preferred time slot', 'red');
 			return false;
 		}
 		return true;
 	},
 	5: function () {
-		const firstName = document.querySelectorAll(
-			'#fp5 input[type="text"]',
-		)[0]?.value;
-		const lastName = document.querySelectorAll('#fp5 input[type="text"]')[1]
-			?.value;
-		const mobile = document.querySelectorAll('#fp5 input[type="tel"]')[0]
-			?.value;
+		const firstName = document.getElementById('firstName')?.value;
+		const lastName = document.getElementById('lastName')?.value;
+		const mobile = document.getElementById('mobile')?.value;
 		const allCheckboxes = document.querySelectorAll(
 			'#fp5 input[type="checkbox"]',
 		);
@@ -930,19 +919,19 @@ const stepValidations = {
 			}
 		}
 		if (!firstName) {
-			alert('Please enter your first name');
+			showToast('Please enter your first name', 'red');
 			return false;
 		}
 		if (!lastName) {
-			alert('Please enter your last name');
+			showToast('Please enter your last name', 'red');
 			return false;
 		}
 		if (!mobile || mobile.length < 10) {
-			alert('Please enter a valid mobile number (at least 10 digits)');
+			showToast('Please enter a valid mobile number (at least 10 digits)', 'red');
 			return false;
 		}
 		if (!termsAccepted) {
-			alert('Please accept the Terms of Service and Privacy Policy');
+			showToast('Please accept the Terms of Service and Privacy Policy', 'red');
 			return false;
 		}
 		return true;
@@ -957,9 +946,11 @@ function fGoTo(n, skipValidation = false) {
 		(!stepValidations[fCur] || !stepValidations[fCur]())
 	)
 		return;
+	var goingForward = n > fCur;
 	const cur = document.getElementById('fp' + fCur);
 	if (cur) cur.classList.add('hidden');
 	fCur = n;
+	if (goingForward) history.pushState({ step: n }, '');
 	const next = document.getElementById('fp' + n);
 	if (next) {
 		next.classList.remove('hidden');
@@ -1304,17 +1295,11 @@ function collectFormData() {
 		}
 	}
 	const moveReasonSelect = document.querySelector('#fp4 select');
-	const firstNameInput = document.querySelectorAll(
-		'#fp5 input[type="text"]',
-	)[0];
-	const lastNameInput = document.querySelectorAll(
-		'#fp5 input[type="text"]',
-	)[1];
-	const mobileInput = document.querySelectorAll('#fp5 input[type="tel"]')[0];
-	const alternateMobileInput = document.querySelectorAll(
-		'#fp5 input[type="tel"]',
-	)[1];
-	const emailInput = document.querySelector('#fp5 input[type="email"]');
+	const firstNameInput = document.getElementById('firstName');
+	const lastNameInput = document.getElementById('lastName');
+	const mobileInput = document.getElementById('mobile');
+	const alternateMobileInput = document.getElementById('altMobile');
+	const emailInput = document.getElementById('email');
 	const preferredContact = [];
 	document
 		.querySelectorAll('#fp5 .flex-wrap input[type="checkbox"]:checked')
@@ -1339,7 +1324,7 @@ function collectFormData() {
 		else if (lower.includes('bank transfer')) paymentMethod = 'banktransfer';
 		else if (lower.includes('bank to bank')) paymentMethod = 'banktransfer';
 	}
-	const howFoundSelect = document.querySelector('#fp5 select');
+	const howFoundSelect = document.getElementById('howFound');
 	const specialNotesTextarea = document.querySelector('#fp4 textarea');
 	const puProvSelect = document.getElementById('puProv');
 	const puDistSelect = document.getElementById('puDist');

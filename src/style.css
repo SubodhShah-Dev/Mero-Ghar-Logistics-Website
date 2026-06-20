@@ -267,6 +267,11 @@ textarea:focus {
 	color: #f8c06a;
 }
 
+@keyframes slideIn {
+	0% { opacity: 0; transform: translateY(8px); }
+	100% { opacity: 1; transform: translateY(0); }
+}
+
 .panel-active {
 	animation: slideIn 0.35s ease both;
 }
@@ -281,3 +286,4 @@ textarea:focus {
 	background: #2f6b34;
 	border-radius: 3px;
 }
+* { scrollbar-width: thin; }

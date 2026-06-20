@@ -65,7 +65,7 @@ async function fetchAPI(url, options = {}) {
 	};
 
 	if (token) {
-		const user = JSON.parse(token);
+		const user = safeParse(token, {});
 		headers['Authorization'] = `Bearer ${user.id}`;
 	}
 
@@ -905,7 +905,11 @@ function toast(msg, color = 'gold') {
 	if (!wrap) return;
 	const el = document.createElement('div');
 	el.className = 'toast';
-	el.innerHTML = `<span class="toast-dot" style="background:${colors[color] || colors.gold}"></span>${msg}`;
+	var dot = document.createElement('span');
+	dot.className = 'toast-dot';
+	dot.style.background = colors[color] || colors.gold;
+	el.appendChild(dot);
+	el.appendChild(document.createTextNode(msg));
 	wrap.appendChild(el);
 	setTimeout(() => {
 		el.classList.add('out');

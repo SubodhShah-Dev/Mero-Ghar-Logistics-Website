@@ -85,20 +85,24 @@ export const sendMessage = async (req, res) => {
 
 function getFallbackResponse(message) {
   var msg = (message || '').toLowerCase().trim();
+  msg = msg.replace(/[^a-z0-9\s]/g, '').trim();
 
-  if (msg.includes('hello') || msg.includes('hi ') || msg === 'hi' || msg === 'hey' || msg.includes('namaste')) {
+  if (!msg) {
+    return 'Please type a message! I can help with bookings, tracking, pricing, and more.';
+  }
+  if (msg.includes('hello') || msg.startsWith('hi') || msg === 'hey' || msg.includes('namaste') || msg.includes('hy') || msg.includes('hlo')) {
     return 'Namaste! 🙏 How can I help you with your move today?';
   }
-  if (msg.includes('price') || msg.includes('cost') || msg.includes('rate') || msg.includes('quote')) {
+  if (msg.includes('price') || msg.includes('cost') || msg.includes('rate') || msg.includes('quote') || msg.includes('how much')) {
     return 'Our pricing is based on distance, item volume, and special handling needs. You can get an instant quote by filling out the booking form in the app — just select pickup/drop locations and your items.';
   }
-  if (msg.includes('book') || msg.includes('order') || msg.includes('move') || msg.includes('shift')) {
+  if (msg.includes('book') || msg.includes('order') || msg.includes('move') || msg.includes('shift') || msg.includes('schedule')) {
     return 'To book a move: open the app, fill in pickup/drop locations, select your items, and confirm. You\'ll get a distance-based quote and can choose your preferred payment method.';
   }
-  if (msg.includes('track') || msg.includes('status') || msg.includes('where') || msg.includes('delivery')) {
+  if (msg.includes('track') || msg.includes('status') || msg.includes('where') || msg.includes('delivery') || msg.includes('location')) {
     return 'You can track your shipment in real-time through the app. Go to "My Bookings" and tap on the shipment you want to track. The map shows your driver\'s current location.';
   }
-  if (msg.includes('payment') || msg.includes('pay') || msg.includes('khalti') || msg.includes('esewa') || msg.includes('connectips')) {
+  if (msg.includes('payment') || msg.includes('pay') || msg.includes('khalti') || msg.includes('esewa') || msg.includes('connectips') || msg.includes('cash')) {
     return 'We accept Cash on Delivery, Bank Transfer, ConnectIPS, Khalti, and eSewa. You can choose your preferred method during checkout.';
   }
   if (msg.includes('area') || msg.includes('location') || msg.includes('province') || msg.includes('service') && (msg.includes('area') || msg.includes('cover'))) {
@@ -122,6 +126,15 @@ function getFallbackResponse(message) {
   if (msg.includes('thank') || msg.includes('thanks') || msg.includes('dhanyabad')) {
     return 'You\'re welcome! 😊 If you need anything else, just ask. Happy moving with MeroGhar!';
   }
+  if (msg.includes('yes') || msg.includes('ok') || msg.includes('okay') || msg.includes('sure')) {
+    return 'Great! Let me know if you have any specific questions about booking, pricing, or tracking.';
+  }
+  if (msg === 'help' || msg.includes('commands') || msg.includes('capabilities') || msg.includes('what can you do') || (msg.includes('available') && (msg.includes('option') || msg.includes('command'))) || msg.includes('show options') || msg.includes('menu') || msg.includes('what can i ask')) {
+    return 'Here\'s what I can help you with:\n\n📦 BOOKING — "Book a move" — opens the booking form\n📍 TRACKING — "Track my shipment" — shows shipment status\n💰 PRICING — "What are the prices?" — pricing info\n💳 PAYMENTS — "Payment options" — accepted methods\n🔐 ACCOUNT — "Login" / "Sign up" — account pages\n🚚 VEHICLES — "What trucks do you have?" — fleet info\n📞 SUPPORT — "Contact support" — reach our team\n\nJust type what you need!';
+  }
+  if (msg.includes('what') || msg.includes('who') || msg.includes('which') || msg.includes('how')) {
+    return 'I can help with questions about bookings, pricing, tracking, payments, vehicles, and more. What would you like to know?';
+  }
 
-  return 'I\'m here to help with your MeroGhar Logistics questions — bookings, tracking, pricing, payments, and more. Could you please be more specific about what you need?';
+  return 'I\'m here to help with your MeroGhar Logistics questions — bookings, tracking, pricing, payments, and more. Try asking "How to book?" or "What are the prices?"';
 }

@@ -45,6 +45,44 @@
 - v1.9.1: XSS protection (escapeHtml in admin.js/vendor.js), vendor.js null safety (34 fixes), vendor.html CDN→Vite pipeline, admin.js filter ordering fix, APK built & released.
 - v2.0.0: AI Chatbot (MeroBot) — floating widget bottom-left on all pages, Gemini 1.5 Flash backend with rule-based fallback, no external deps.
 - v2.1.0: UX overhaul — sticky nav topbar on user.html (MeroGhar brand + logout), session-aware index.html (Dashboard link when logged in), loading overlay on form submit, alert()→showToast() in user.js, responsive form buttons (smaller on mobile), frontend rule-based fallback in chatbot.js for offline mode. Chatbot moved from left→right.
+- **v2.1.0 fixes (multistep form audit):**
+  - Chatbot: added `renderChatHistory()` to restore messages on panel reopen; `chatHistory` resets on close to prevent hidden context; error handling fallback chain: `data.response || data.reply || data.message || getLocalFallback()`
+  - Step 1 alignment: Pickup/drop grids `grid-cols-2` → `grid-cols-1 sm:grid-cols-2` so inputs stack vertically on mobile
+  - Step 5 overlap: Phone containers `flex` → `flex min-w-[160px]` to prevent `+977` prefix from over-shrinking inputs
+  - README updated with full changelog; APK v2.1.0 built (7.5 MB)
+- **v2.1.0 hotfix (chatbot still generic):**
+  - Broader keyword matching in both frontend `getLocalFallback()` and backend `getFallbackResponse()` — added `startsWith('hi')`, `includes('hy')`, `includes('hlo')`, `includes('how much')`, `includes('cash')`, yes/ok/sure/what/how responses, punctuation stripping via `replace(/[^a-z0-9\s]/g, '')`
+  - Fixed `getBaseUrl()` priority: `window.API_BASE_URL` first (config.js now does `window.API_BASE_URL = API_BASE_URL`)
+  - Added `console.log('[MeroBot]')` debug logging to frontend sendMessage
+  - Removed misleading "(offline mode)" suffix from local fallback messages
+  - Deployed updated backend to Railway; released v2.1.0 APK on GitHub Releases
+- **v2.2.0: Chatbot action system + quick-action chips + help command:**
+  - Added `ACTIONS` array with 6 action intents (book, track, login, signup, admin, vendor) — `chatbot.js:153`
+  - Added `matchAction()` to detect user intent before API call — `chatbot.js:203`
+  - Added `validateAction()` to check auth/role via `meroGharUser` in localStorage — `chatbot.js:189`
+  - Non‑auth actions (book, login, signup) redirect immediately; auth‑gated actions require matching role
+  - Added `renderChips()` showing 6 tappable suggestion pills on chat open — `chatbot.js:214`
+  - Chips: Book a Move, Track, Pricing, Payments, Login, Help — styled as saffron‑bordered pills
+  - Added structured `help` command showing all capabilities grouped by category — `chatbot.js:132`
+  - Added same `help` handler to backend `getFallbackResponse()` for consistency
+- **v2.2.0 fixes (comprehensive codebase audit — 50+ issues fixed):**
+  - **CRITICAL SECURITY:** Fixed XSS in all 3 toast() functions — replaced `innerHTML` concatenation with `createTextNode()` + `appendChild()` in config.js, admin.js, vendor.js
+  - **CRITICAL:** Replaced bare `JSON.parse()` with `safeParse()` in admin.js:68 and vendor.js:452 — prevents page crash on corrupted localStorage
+  - **HIGH:** Removed 20+ PII-leaking `console.log()` statements in auth.js (email, name, role exposed to devtools); removed debug console.logs from chatbot.js and user.js
+  - **HIGH:** Replaced all 16 `alert()` calls in user.js step validators with `showToast()` for consistent UX
+  - **HIGH:** Added missing `id` attributes to 11 form inputs (fragileItems, moveDate, altDate, moveReason, specialNotes, firstName, lastName, mobile, altMobile, email, howFound) — JS no longer relies on fragile `querySelectorAll` index
+  - **HIGH:** Added `pattern="[0-9]{10}" maxlength="10"` to mobile/altMobile inputs
+  - **MEDIUM:** Fixed broken `.panel-active` slideIn animation — added `@keyframes slideIn` to style.css (Tailwind JIT never generated it)
+  - **MEDIUM:** Fixed `--bdim` → `--border-dim` CSS variable inconsistency in vendor.css (27 occurrences)
+  - **MEDIUM:** Removed `backdrop-blur-sm` from vendor.html modal (Android perf issue)
+  - **MEDIUM:** Added `scrollbar-width: thin` for Firefox support
+  - **MEDIUM:** Replaced all `py-3.5` with `py-3 min-h-[44px]` on login/signup inputs for proper touch targets
+  - **MEDIUM:** Replaced all `min-h-[36px]` with `min-h-[44px]` on user.html buttons for mobile touch targets
+  - **LOW:** Added favicon (`<link rel="icon">`) to all 6 HTML pages + copy-pages.mjs
+  - **LOW:** Added `aria-label="Toggle sidebar"` to admin/vendor hamburger buttons
+  - **LOW:** Added `id` and `for` attributes to signup role radio buttons
+  - **LOW:** Added `required` attribute to admin modal inputs (nb-name, nb-phone, nb-amount)
+  - **LOW:** Bumped package.json version to 2.2.0 to match config.js
 
 ### In Progress
 - (nothing)
@@ -61,10 +99,10 @@
 - **Flat M icon design** — user rejected detailed truck/mountain icons; simple letter-on-background approach (like Facebook).
 
 ## Next Steps
-- (none — all items from previous session completed in v1.9.1)
+- (none — v2.2.0 complete with audit fixes)
 
 ## Critical Context
-- **Latest APK:** `https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/download/v2.1.0/MeroGhar-v2.1.0.apk` (right-side chatbot, session-aware nav, loading overlay, offline fallback)
+- **Latest APK:** `https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/download/v2.2.0/MeroGhar-v2.2.0.apk` (chatbot action system, comprehensive audit fixes, XSS/security fixes, improved UX)
 - **Backend live:** `https://backend-production-d51a3.up.railway.app`
 - **Build:** `npm run build && npx cap sync android` then `JAVA_HOME=/home/subodh/jdk21 ./gradlew assembleDebug` from `android/` dir.
 - **Remote:** `https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic.git` (formerly `Mero-Ghar-Logistics-Website`).

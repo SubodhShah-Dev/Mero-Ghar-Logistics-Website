@@ -15,6 +15,13 @@ for (const dir of dirs) {
   }
 }
 
+// Copy favicon
+const favicon = 'public/favicon.png';
+if (fs.existsSync(favicon)) {
+  fs.copyFileSync(favicon, path.join(dist, 'favicon.png'));
+  console.log(`Copied ${favicon} -> dist/favicon.png`);
+}
+
 // Copy compiled CSS from assets/index-*.css -> dist/src/style.css
 const assets = fs.readdirSync(path.join(dist, 'assets'));
 const builtCss = assets.find(f => f.startsWith('index-') && f.endsWith('.css'));

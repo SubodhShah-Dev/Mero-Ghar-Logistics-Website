@@ -449,7 +449,7 @@ function updateVehicleStatus(vehicleId, status) {
 function loadFleet() {
 	const savedFleet = localStorage.getItem('vendorFleet');
 	if (savedFleet) {
-		vehicles = JSON.parse(savedFleet);
+		vehicles = safeParse(savedFleet, []);
 	} else {
 		vehicles = [
 			{
@@ -941,7 +941,11 @@ function toast(msg, color = 'gold') {
 	const el = document.createElement('div');
 	el.className =
 		'bg-[#16261d] border border-[rgba(248,192,106,0.3)] rounded-lg px-4 py-3 text-sm flex items-center gap-2 mb-2';
-	el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full" style="background:${colors[color] || colors.gold}"></span>${msg}`;
+	var dot = document.createElement('span');
+	dot.className = 'w-1.5 h-1.5 rounded-full';
+	dot.style.background = colors[color] || colors.gold;
+	el.appendChild(dot);
+	el.appendChild(document.createTextNode(msg));
 	container.appendChild(el);
 	setTimeout(() => {
 		el.style.opacity = '0';
