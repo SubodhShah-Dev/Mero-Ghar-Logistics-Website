@@ -4,9 +4,13 @@ Full-stack logistics platform (Vite + Tailwind + vanilla JS, Express + MySQL, An
 
 ## Download APK
 
-[**Download MeroGhar v2.2.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v2.2.0.apk)
+[**Download MeroGhar v2.3.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v2.3.0.apk)
 
 ## Changelog
+
+### v2.3.0 — Session-aware UI fixes + Android back button handling
+- **Session-aware login detection** `src/js/session-ui.js`: Replaced native `confirm()` with a styled logout modal; added `pageshow` event listener so login→Dashboard replacement re-applies on back/forward cache restore
+- **Android back button** `src/js/user.js`: Added `history.pushState()` on forward form steps + `popstate` listener — pressing back on steps 2–5 goes to previous step instead of exiting the app
 
 ### v2.2.0 — Chatbot action system + comprehensive audit fixes
 - **MeroBot action system** `src/js/chatbot.js`:
