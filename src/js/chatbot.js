@@ -114,40 +114,158 @@
     if (el && el.parentNode) el.parentNode.removeChild(el);
   }
 
+  var KNOWLEDGE = {
+    site: {
+      name: 'MeroGhar Logistics',
+      tagline: "Nepal's Trusted Household Moving Service",
+      description: 'Household moving service covering all 7 provinces of Nepal with verified movers.',
+      phone: '+977 980-000-000',
+      email: 'info@meroghar.com.np',
+      stats: '8,000+ moves, 77 districts, 4.8 stars, 250+ providers'
+    },
+    howItWorks: [
+      'Step 1: Fill the Form — Province, district, items, vehicle type, and preferred date in under 3 minutes.',
+      'Step 2: Get Matched — We match you with a verified mover in your district within 2 hours.',
+      'Step 3: Confirm & Pay — Review quote over Viber or phone. Pay token via eSewa, Khalti, or cash.',
+      'Step 4: Move Day! — Crew arrives on time, even for early auspicious timings.'
+    ],
+    services: [
+      { name: 'Full-Service Moving', desc: 'Complete door-to-door service with crew and truck.', price: 'From NPR 15,000' },
+      { name: 'Pack & Load Only', desc: 'We pack and load your vehicle efficiently.', price: 'From NPR 7,500' },
+      { name: 'Cargo Tempo / Valley Move', desc: 'Narrow lane-friendly tempo for Kathmandu Valley intra-city moves.', price: 'From NPR 2,500' },
+      { name: 'Furniture Disassembly', desc: 'Furniture taken apart and reassembled at new home.', price: 'From NPR 2,500' },
+      { name: 'Storage / Warehouse', desc: 'Secure short or long-term storage facilities.', price: 'From NPR 3,000/month' },
+      { name: 'Item Insurance', desc: 'Full-replacement coverage on all items moved.', price: 'From NPR 1,200' }
+    ],
+    vehicles: [
+      { name: 'Cargo Tempo', price: 'NPR 400-500', best: '1-2 rooms, narrow lanes, valley moves' },
+      { name: 'Tata Ace (Small Truck)', price: 'NPR 800-1200', best: '2 BHK, semi-urban routes' },
+      { name: 'Mini Truck (407)', price: 'NPR 1500-2000', best: '3 BHK, inter-city, full household' },
+      { name: 'Large Truck + Helper Team', price: 'NPR 2000+', best: 'Large house, province-to-province' },
+      { name: 'Let MeroGhar Recommend', price: 'Varies', best: 'Coordinator suggests best vehicle' }
+    ],
+    addons: [
+      { name: 'Packing Service', desc: 'Bubble wrap, rope, and boxes provided' },
+      { name: 'Furniture Disassembly', desc: 'Taken apart and reassembled at new home' },
+      { name: 'Porter / Labor Help', desc: 'Extra manual labor for stairs or narrow access' },
+      { name: 'Item Insurance', desc: 'Full-value coverage on all moved items' }
+    ],
+    payments: ['eSewa', 'Khalti', 'IME Pay', 'ConnectIPS', 'Bank Transfer', 'Cash on Move Day'],
+    provinces: [
+      'Koshi (14 districts, cities: Biratnagar, Dharan, Ilam)',
+      'Madhesh (8 districts, cities: Janakpur, Birgunj)',
+      'Bagmati (13 districts, cities: Kathmandu, Lalitpur, Bhaktapur) — Most Active',
+      'Gandaki (11 districts, cities: Pokhara, Gorkha)',
+      'Lumbini (12 districts, cities: Butwal, Rupandehi)',
+      'Karnali (10 districts, cities: Surkhet, Jumla)',
+      'Sudurpashchim (9 districts, cities: Dhangadhi, Mahendranagar)'
+    ],
+    faq: [
+      { q: 'covers all provinces nepal districts', a: 'Yes! MeroGhar covers all 77 districts across all 7 provinces of Nepal — from Kathmandu to Karnali and Sudurpashchim.' },
+      { q: 'how quickly quote after form', a: 'Our coordinator calls you on Viber or phone within 2 hours of form submission. For urgent moves, call +977 980-000-000.' },
+      { q: 'auspicious timing early morning', a: 'Absolutely! Mention your required time in Special Notes during Step 4. Even 4 or 5 AM starts — our crew arrives on the dot.' },
+      { q: 'narrow lane kathmandu small vehicle', a: 'Yes! Cargo tempos are our narrow-lane specialists. Select "Narrow lane" under Road Access in Step 1.' },
+      { q: 'accept esewa khalti imepay', a: 'Yes! We accept eSewa, Khalti, IME Pay, ConnectIPS, Bank Transfer, and Cash.' },
+      { q: 'religious items statues stone grinder fragile', a: 'Yes, select "Religious Statues" or "Stone Grinder" under Cultural Items in Step 2. We handle all items with exceptional care.' }
+    ]
+  };
+
   function getLocalFallback(msg) {
     var m = (msg || '').toLowerCase().trim();
     m = m.replace(/[^a-z0-9\s]/g, '').trim();
     if (!m) return 'Please type a message! I can help with bookings, tracking, pricing, and more.';
-    if (m.includes('hello') || m.startsWith('hi') || m === 'hey' || m.includes('namaste') || m.includes('hy') || m.includes('hlo')) return 'Namaste! 🙏 How can I help you with your move today?';
-    if (m.includes('price') || m.includes('cost') || m.includes('rate') || m.includes('quote') || m.includes('how much')) return 'Our pricing is based on distance, item volume, and special handling needs. Get an instant quote by filling out the booking form.';
-    if (m.includes('book') || m.includes('order') || m.includes('move') || m.includes('shift') || m.includes('schedule')) return 'To book: open the app, fill in pickup/drop locations, select items, and confirm. You\'ll get a distance-based quote.';
-    if (m.includes('track') || m.includes('status') || m.includes('where') || m.includes('delivery') || m.includes('location')) return 'Track your shipment in real-time via the app — go to "My Bookings" and tap the shipment.';
-    if (m.includes('payment') || m.includes('pay') || m.includes('khalti') || m.includes('esewa') || m.includes('cash')) return 'We accept Cash on Delivery, Bank Transfer, ConnectIPS, Khalti, and eSewa.';
-    if (m.includes('cancel') || m.includes('refund')) return 'To cancel a booking, please contact our support team. Refunds are case-by-case.';
-    if (m.includes('vehicle') || m.includes('truck')) return 'We have mini trucks to large trucks for full household shifting. The right vehicle is assigned based on your items.';
-    if (m.includes('fragile') || m.includes('glass') || m.includes('breakable')) return 'Yes! Mark items as fragile during booking — our team will handle them with extra care.';
-    if (m.includes('contact') || m.includes('support') || m.includes('phone') || m.includes('help')) return 'Reach support via the app\'s Help section or contact admin. We respond within 24 hours.';
-    if (m.includes('thank') || m.includes('thanks')) return 'You\'re welcome! 😊 Happy moving with MeroGhar!';
-    if (m.includes('yes') || m.includes('ok') || m.includes('okay') || m.includes('sure')) return 'Great! Let me know if you have any specific questions about booking, pricing, or tracking.';
-    if (m === 'help' || m.includes('commands') || m.includes('capabilities') || m.includes('what can you do') || m.includes('available') && (m.includes('option') || m.includes('command')) || m.includes('show options') || m.includes('menu') || m.includes('what can i ask')) {
-      return 'Here\'s what I can help you with:\n\n📦 BOOKING — "Book a move"\n' +
-        '   Redirects you to the booking form\n\n' +
-        '📍 TRACKING — "Track my shipment"\n' +
-        '   Shows your shipment status\n\n' +
-        '💰 PRICING — "What are the prices?"\n' +
-        '   Explains pricing (distance + items)\n\n' +
-        '💳 PAYMENTS — "Payment options"\n' +
-        '   Lists accepted payment methods\n\n' +
-        '🔐 ACCOUNT — "Login" / "Sign up"\n' +
-        '   Go to login or registration page\n\n' +
-        '🚚 VEHICLES — "What trucks do you have?"\n' +
-        '   Info about our fleet\n\n' +
-        '📞 SUPPORT — "Contact support"\n' +
-        '   Reach our help team\n\n' +
-        '❓ Just type any question naturally — I\'ll do my best to help!';
+
+    if (m.includes('hello') || m.startsWith('hi') || m === 'hey' || m.includes('namaste') || m.includes('hy') || m.includes('hlo')) {
+      return 'Namaste! 🙏 How can I help you with your move today? Ask me about booking, pricing, provinces, or vehicles.';
     }
-    if (m.includes('what') || m.includes('who') || m.includes('which') || m.includes('how')) return 'I can help with questions about bookings, pricing, tracking, payments, vehicles, and more. What would you like to know?';
-    return 'I\'m here to help with MeroGhar Logistics — bookings, tracking, pricing, and more. Try asking "How to book?" or "What are the prices?"';
+    if (m.includes('thank') || m.includes('thanks')) return 'You\'re welcome! 😊 Happy moving with MeroGhar!';
+    if (m.includes('yes') || m.includes('ok') || m.includes('okay') || m.includes('sure')) return 'Great! Let me know if you have any specific questions.';
+    if (m === 'help' || m.includes('commands') || m.includes('what can you do') || m.includes('menu') || m.includes('what can i ask')) {
+      return 'Here\'s what I can help with:\n\n📦 BOOKING — "Book a move" — opens form\n📍 TRACKING — "Track my shipment"\n💰 PRICING — "Prices?"\n💳 PAYMENTS — "Payment options"\n🚚 VEHICLES — "What trucks?"\n🏔 PROVINCES — "Coverage"\n📞 SUPPORT — "Contact"\n\nType your question!';
+    }
+
+    if (m.includes('price') || m.includes('cost') || m.includes('rate') || m.includes('how much')) {
+      var prices = [];
+      for (var pi = 0; pi < KNOWLEDGE.services.length; pi++) {
+        prices.push(KNOWLEDGE.services[pi].name + ': ' + KNOWLEDGE.services[pi].price);
+      }
+      return 'Our services:\n' + prices.join('\n') + '\n\nFinal quote depends on distance and items. Fill the booking form for an exact price.';
+    }
+
+    if (m.includes('what') || m.includes('who') || m.includes('which') || m.includes('how')) {
+      if (m.includes('book') || m.includes('move')) {
+        return 'To book a move: Fill the form with pickup/drop locations, select items and vehicle, choose a mover, pick a date, and confirm. You\'ll get a quote within 2 hours.';
+      }
+      if (m.includes('pric') || m.includes('cost') || m.includes('rate')) {
+        return 'Pricing is based on distance, item volume, vehicle type, and add-on services. Use the booking form to get an instant quote.';
+      }
+      if (m.includes('long') || m.includes('time') || m.includes('duration')) {
+        return 'Delivery time depends on distance and route conditions. Our coordinator will give you an estimated window after booking.';
+      }
+    }
+
+    if (m.includes('book') || m.includes('order') || m.includes('shift') || m.includes('schedule')) {
+      return 'To book: fill in pickup/drop locations, select items and vehicle, choose a mover, pick a date, and confirm. Get a quote within 2 hours.';
+    }
+    if (m.includes('track') || m.includes('status') || m.includes('where is') || m.includes('delivery')) {
+      return 'Track your shipment in real-time via "My Bookings" in the app. Tap on the shipment to see your driver\'s location.';
+    }
+    if (m.includes('payment') || m.includes('pay') || m.includes('khalti') || m.includes('esewa') || m.includes('cash')) {
+      return 'We accept: ' + KNOWLEDGE.payments.join(', ') + '. Choose your preferred method during checkout.';
+    }
+    if (m.includes('cancel') || m.includes('refund')) {
+      return 'To cancel a booking, contact our support team. Refunds are processed on a case-by-case basis.';
+    }
+    if (m.includes('vehicle') || m.includes('truck') || m.includes('tempo') || m.includes('transport')) {
+      var vLines = [];
+      for (var vi = 0; vi < KNOWLEDGE.vehicles.length; vi++) {
+        vLines.push(KNOWLEDGE.vehicles[vi].name + ' (' + KNOWLEDGE.vehicles[vi].price + ') — ' + KNOWLEDGE.vehicles[vi].best);
+      }
+      return 'Available vehicles:\n' + vLines.join('\n') + '\n\nNeed help choosing? Use "Let MeroGhar Recommend" in the form.';
+    }
+    if (m.includes('fragile') || m.includes('glass') || m.includes('breakable') || m.includes('religious') || m.includes('statue') || m.includes('stone grinder')) {
+      return 'Yes! Mark fragile items during booking (Step 2). Select "Religious Statues" or "Stone Grinder" under Cultural Items. Our team handles everything with special care.';
+    }
+    if (m.includes('contact') || m.includes('support') || m.includes('phone') || m.includes('viber') || m.includes('email')) {
+      return 'Contact MeroGhar:\n📞 ' + KNOWLEDGE.site.phone + '\n💬 Viber: ' + KNOWLEDGE.site.phone + '\n📧 ' + KNOWLEDGE.site.email + '\n\nOr use the Help section in the app.';
+    }
+    if (m.includes('province') || m.includes('district') || m.includes('cover') || m.includes('area') || m.includes('nepal') || m.includes('location')) {
+      return 'MeroGhar covers all 7 provinces of Nepal:\n' + KNOWLEDGE.provinces.join('\n') + '\n\nAll 77 districts covered!';
+    }
+    if (m.includes('insur') || m.includes('protect') || m.includes('damage')) {
+      return 'Item Insurance is available from NPR 1,200. Full-replacement coverage on all items moved. Select it as an add-on in Step 3.';
+    }
+    if (m.includes('addon') || m.includes('packing') || m.includes('disassembly') || m.includes('porter') || m.includes('labor') || m.includes('helper')) {
+      var addonLines = [];
+      for (var ai = 0; ai < KNOWLEDGE.addons.length; ai++) {
+        addonLines.push(KNOWLEDGE.addons[ai].name + ' — ' + KNOWLEDGE.addons[ai].desc);
+      }
+      return 'Add-on services:\n' + addonLines.join('\n');
+    }
+    if (m.includes('service') || m.includes('offer') || m.includes('provide')) {
+      var sLines = [];
+      for (var si = 0; si < KNOWLEDGE.services.length; si++) {
+        sLines.push(KNOWLEDGE.services[si].name + ' — ' + KNOWLEDGE.services[si].price);
+      }
+      return 'MeroGhar services:\n' + sLines.join('\n');
+    }
+    if (m.includes('step') || m.includes('form') || m.includes('process')) {
+      return KNOWLEDGE.howItWorks.join('\n');
+    }
+    if (m.includes('rating') || m.includes('review') || m.includes('trust') || m.includes('reliable')) {
+      return 'MeroGhar has 4.8 stars from 6,000+ verified reviews. 97% on-time rate with 250+ verified providers across Nepal.';
+    }
+
+    for (var fi = 0; fi < KNOWLEDGE.faq.length; fi++) {
+      var tokens = KNOWLEDGE.faq[fi].q.split(' ');
+      var matched = 0;
+      for (var tj = 0; tj < tokens.length; tj++) {
+        if (tokens[tj].length > 2 && m.includes(tokens[tj])) matched++;
+      }
+      if (matched >= 2) return KNOWLEDGE.faq[fi].a + '\n\nLet me know if you have more questions!';
+    }
+
+    return 'I\'m here to help with MeroGhar Logistics — bookings, pricing, tracking, vehicles, provinces, and more. Ask "How to book?" or "What are the prices?" or type "help" for options.';
   }
 
   var ACTIONS = [

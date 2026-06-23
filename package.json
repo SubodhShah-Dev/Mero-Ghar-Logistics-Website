@@ -1,11 +1,13 @@
 {
 	"name": "mero-ghar",
 	"private": true,
-	"version": "2.4.0",
+	"version": "2.5.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build && node copy-pages.mjs",
+		"build:knowledge": "node scripts/build-knowledge.mjs",
+		"build:all": "node scripts/build-knowledge.mjs && vite build && node copy-pages.mjs",
 		"preview": "vite preview"
 	},
 	"devDependencies": {
