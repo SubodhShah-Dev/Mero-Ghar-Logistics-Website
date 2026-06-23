@@ -216,7 +216,11 @@
       return helpText;
     }
 
-    if (m.includes('price') || m.includes('cost') || m.includes('rate') || m.includes('how much')) {
+    if (m.includes('purpose') || m.includes('what is this') || m.includes('what is mero') || m.includes('describe') || m.includes('about this') || m.includes('what does this') || m.includes('tell me about') || m.includes('what kind of service')) {
+      return 'MeroGhar Logistics is Nepal\'s trusted household moving service. We connect you with verified movers across all 7 provinces and 77 districts of Nepal. Book a truck, track your shipment, and pay via eSewa, Khalti, or cash. We handle everything from narrow Kathmandu lanes to inter-province moves, including furniture disassembly, packing, and auspicious timing. Ask me "How to book?" to get started!';
+    }
+
+    if (m.includes('price') || m.includes('cost') || m.includes('rate') || m.includes('how much') || m.includes('quote')) {
       var prices = [];
       for (var pi = 0; pi < KNOWLEDGE.services.length; pi++) {
         prices.push(KNOWLEDGE.services[pi].name + ': ' + KNOWLEDGE.services[pi].price);
@@ -225,14 +229,8 @@
     }
 
     if (m.includes('what') || m.includes('who') || m.includes('which') || m.includes('how')) {
-      if (m.includes('purpose') || m.includes('what is this') || m.includes('what is mero') || m.includes('describe') || m.includes('about this') || m.includes('what does this site')) {
-        return 'MeroGhar Logistics is Nepal\'s trusted household moving service. We connect you with verified movers across all 7 provinces and 77 districts of Nepal. Book a truck, track your shipment, and pay via eSewa, Khalti, or cash. We handle everything from narrow Kathmandu lanes to inter-province moves, including furniture disassembly, packing, and auspicious timing. Ask me "How to book?" to get started!';
-      }
       if (m.includes('book') || m.includes('move')) {
         return 'To book a move: Fill the form with pickup/drop locations, select items and vehicle, choose a mover, pick a date, and confirm. You\'ll get a quote within 2 hours.';
-      }
-      if (m.includes('pric') || m.includes('cost') || m.includes('rate')) {
-        return 'Pricing is based on distance, item volume, vehicle type, and add-on services. Use the booking form to get an instant quote.';
       }
       if (m.includes('long') || m.includes('time') || m.includes('duration')) {
         return 'Delivery time depends on distance and route conditions. Our coordinator will give you an estimated window after booking.';
@@ -258,7 +256,7 @@
       }
       return 'Available vehicles:\n' + vLines.join('\n') + '\n\nNeed help choosing? Use "Let MeroGhar Recommend" in the form.';
     }
-    if (m.includes('fragile') || m.includes('glass') || m.includes('breakable') || m.includes('religious') || m.includes('statue') || m.includes('stone grinder')) {
+    if (m.includes('fragile') || m.includes('glass') || m.includes('breakable') || m.includes('religious') || m.includes('statue') || m.includes('stone') || m.includes('special item') || m.includes('cultural') || m.includes('prayer') || m.includes('grinder')) {
       return 'Yes! Mark fragile items during booking (Step 2). Select "Religious Statues" or "Stone Grinder" under Cultural Items. Our team handles everything with special care.';
     }
     if (m.includes('contact') || m.includes('support') || m.includes('phone') || m.includes('viber') || m.includes('email')) {
@@ -270,14 +268,14 @@
     if (m.includes('insur') || m.includes('protect') || m.includes('damage')) {
       return 'Item Insurance is available from NPR 1,200. Full-replacement coverage on all items moved. Select it as an add-on in Step 3.';
     }
-    if (m.includes('addon') || m.includes('packing') || m.includes('disassembly') || m.includes('porter') || m.includes('labor') || m.includes('helper')) {
+    if (m.includes('addon') || m.includes('pack') || m.includes('disassembly') || m.includes('porter') || m.includes('labor') || m.includes('helper') || m.includes('extra')) {
       var addonLines = [];
       for (var ai = 0; ai < KNOWLEDGE.addons.length; ai++) {
         addonLines.push(KNOWLEDGE.addons[ai].name + ' — ' + KNOWLEDGE.addons[ai].desc);
       }
       return 'Add-on services:\n' + addonLines.join('\n');
     }
-    if (m.includes('service') || m.includes('offer') || m.includes('provide')) {
+    if (m.includes('service') || m.includes('offer') || m.includes('provide') || m.includes('storage') || m.includes('warehouse')) {
       var sLines = [];
       for (var si = 0; si < KNOWLEDGE.services.length; si++) {
         sLines.push(KNOWLEDGE.services[si].name + ' — ' + KNOWLEDGE.services[si].price);

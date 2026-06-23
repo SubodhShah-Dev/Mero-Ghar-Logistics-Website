@@ -180,7 +180,7 @@ function generateKnowledgeResponse(message, context, faq) {
     return helpText;
   }
 
-  if (msg.includes('purpose') || msg.includes('what is this site') || msg.includes('what is mero') || msg.includes('describe') || msg.includes('about this') || msg.includes('what does this site')) {
+  if (msg.includes('purpose') || msg.includes('what is this') || msg.includes('what is mero') || msg.includes('describe') || msg.includes('about this') || msg.includes('what does this') || msg.includes('tell me about') || msg.includes('what kind of')) {
     return 'MeroGhar Logistics is Nepal\'s trusted household moving service. We connect you with verified movers across all 7 provinces and 77 districts of Nepal. Book a truck, track your shipment, and pay via eSewa, Khalti, or cash. We handle everything from narrow Kathmandu lanes to inter-province moves, including furniture disassembly, packing, and auspicious timing. Ask me "How to book?" to get started!';
   }
 
@@ -208,7 +208,7 @@ function generateKnowledgeResponse(message, context, faq) {
     return 'You can track your shipment in real-time through the app. Go to "My Bookings" and tap on the shipment you want to track. The map shows your driver\'s current location.';
   }
 
-  if (msg.includes('fragile') || msg.includes('glass') || msg.includes('breakable') || msg.includes('religious') || msg.includes('statue') || msg.includes('stone grinder')) {
+  if (msg.includes('fragile') || msg.includes('glass') || msg.includes('breakable') || msg.includes('religious') || msg.includes('statue') || msg.includes('stone') || msg.includes('special item') || msg.includes('cultural') || msg.includes('prayer') || msg.includes('grinder')) {
     return 'Yes! Mark fragile items during booking (Step 2). For religious items, select "Religious Statues" or "Stone Grinder" under Cultural Items. Our team treats all items with exceptional care, using specialized wrapping and careful manual handling.';
   }
 
@@ -224,11 +224,11 @@ function generateKnowledgeResponse(message, context, faq) {
     return 'MeroGhar has excellent reviews!\n\n⭐ 4.8 Stars — Average Rating\n📝 6,000+ Verified Reviews\n✅ 97% On-Time Rate\n🚚 8,000+ Successful Moves\n👥 250+ Verified Providers\n\nOur customers love our service across all 7 provinces of Nepal!';
   }
 
-  if (msg.includes('addon') || msg.includes('packing') || msg.includes('disassembly') || msg.includes('porter') || msg.includes('insurance') || msg.includes('protect')) {
+  if (msg.includes('addon') || msg.includes('pack') || msg.includes('disassembly') || msg.includes('porter') || msg.includes('insurance') || msg.includes('protect') || msg.includes('extra')) {
     return 'Available add-on services:\n\n📦 Packing Service — Bubble wrap, rope, and boxes provided\n🔧 Furniture Disassembly — Taken apart and reassembled at new home\n👷 Porter / Labor Help — Extra manual labor for stairs or narrow access\n🛡️ Item Insurance — Full-value coverage on all moved items (from NPR 1,200)\n\nSelect these in Step 3 of the booking form!';
   }
 
-  if (msg.includes('service') || msg.includes('offer') || msg.includes('provide')) {
+  if (msg.includes('service') || msg.includes('offer') || msg.includes('provide') || msg.includes('storage') || msg.includes('warehouse')) {
     return 'MeroGhar offers these services:\n\n🚛 Full-Service Moving (From NPR 15,000)\n📦 Pack & Load Only (From NPR 7,500)\n🛺 Cargo Tempo / Valley Move (From NPR 2,500)\n🔧 Furniture Disassembly (From NPR 2,500)\n🏬 Storage / Warehouse (From NPR 3,000/month)\n🛡️ Item Insurance (From NPR 1,200)\n\nBook now and get a free quote within 2 hours!';
   }
 

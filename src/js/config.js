@@ -22,7 +22,7 @@ const API_BASE_URL = (() => {
 window.API_BASE_URL = API_BASE_URL;
 
 // ── In-App Update Check & Download ──
-const APP_VERSION = '2.6.1';
+const APP_VERSION = '2.6.2';
 const GITHUB_REPO = 'SubodhShah-Dev/Mero-Ghar-Logistic';
 
 function compareVersions(a, b) {
@@ -34,15 +34,6 @@ function compareVersions(a, b) {
   return 0;
 }
 
-function blobToBase64(blob) {
-  return new Promise(function (resolve, reject) {
-    var reader = new FileReader();
-    reader.onloadend = function () { resolve(reader.result.split(',')[1]); };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
 function updateDialogHtml(content) {
   return (
     '<div style="background:#111d16;border:1px solid rgba(248,192,106,0.18);border-radius:16px;padding:28px 24px 22px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.5);text-align:center">' +
@@ -52,107 +43,21 @@ function updateDialogHtml(content) {
 }
 
 async function downloadUpdate(downloadUrl, version) {
-  var isNative = typeof window.Capacitor !== 'undefined' && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
   var dialog = document.getElementById('update-dialog');
   if (!dialog) return;
   var inner = dialog.firstElementChild;
 
-  function openInBrowser() {
-    window.open(downloadUrl, '_system');
-    dialog.remove();
-  }
-
-  function showInstallPrompt(uri) {
-    inner.innerHTML = updateDialogHtml(
-      '<div style="width:52px;height:52px;border-radius:50%;background:rgba(76,175,125,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 14px">' +
-      '<svg width="26" height="26" fill="none" stroke="#4caf7d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">' +
-      '<path d="M5 13l4 4L19 7"/></svg></div>' +
-      '<p style="color:#eef2ee;font-size:15px;font-weight:600;margin:0 0 4px">Download Complete</p>' +
-      '<p style="color:rgba(238,242,238,0.55);font-size:13px;margin:0 0 4px">Version ' + version + '</p>' +
-      '<p style="color:rgba(238,242,238,0.35);font-size:11px;margin:0 0 18px">' + uri + '</p>' +
-      '<div style="display:flex;gap:10px;flex-direction:column">' +
-      '<button id="install-btn" style="width:100%;padding:13px 16px;border-radius:10px;background:#f8c06a;color:#0b1510;font-size:14px;font-weight:700;cursor:pointer">Install Now</button>' +
-      '<button id="update-later" style="width:100%;padding:11px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.07);background:transparent;color:rgba(238,242,238,0.55);font-size:13px;font-weight:500;cursor:pointer">Later</button>' +
-      '</div>'
-    );
-    document.getElementById('install-btn').onclick = function () {
-      window.open(uri, '_system');
-      dialog.remove();
-    };
-    document.getElementById('update-later').onclick = function () { dialog.remove(); };
-  }
-
-  function showError(msg) {
-    inner.innerHTML = updateDialogHtml(
-      '<div style="width:52px;height:52px;border-radius:50%;background:rgba(224,94,94,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 14px">' +
-      '<svg width="26" height="26" fill="none" stroke="#e05e5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">' +
-      '<path d="M6 18L18 6M6 6l12 12"/></svg></div>' +
-      '<p style="color:#eef2ee;font-size:15px;font-weight:600;margin:0 0 4px">Download Failed</p>' +
-      '<p style="color:rgba(238,242,238,0.55);font-size:12px;margin:0 0 18px">' + msg + '</p>' +
-      '<div style="display:flex;gap:10px">' +
-      '<button id="update-later" style="flex:1;padding:11px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.07);background:transparent;color:rgba(238,242,238,0.55);font-size:13px;font-weight:500;cursor:pointer">Close</button>' +
-      '<button id="browser-btn" style="flex:1;padding:11px 16px;border-radius:10px;background:#f8c06a;color:#0b1510;font-size:13px;font-weight:700;cursor:pointer">Download in Browser</button>' +
-      '</div>'
-    );
-    document.getElementById('update-later').onclick = function () { dialog.remove(); };
-    document.getElementById('browser-btn').onclick = openInBrowser;
-  }
-
-  if (!isNative) {
-    openInBrowser();
-    return;
-  }
-
-  // ── Inject spin animation once ──
-  if (!document.getElementById('spin-style')) {
-    var s = document.createElement('style');
-    s.id = 'spin-style';
-    s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
-    document.head.appendChild(s);
-  }
-
   inner.innerHTML = updateDialogHtml(
     '<div style="width:44px;height:44px;border:3px solid rgba(248,192,106,0.15);border-top-color:#f8c06a;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px"></div>' +
-    '<p style="color:#eef2ee;font-size:15px;font-weight:600;margin:0 0 4px">Downloading Update</p>' +
-    '<p id="dl-progress" style="color:rgba(238,242,238,0.5);font-size:13px;margin:0">Starting...</p>'
+    '<p style="color:#eef2ee;font-size:15px;font-weight:600;margin:0 0 4px">Opening Download</p>' +
+    '<p style="color:rgba(238,242,238,0.5);font-size:13px;margin:0">Please wait...</p>'
   );
 
-  try {
-    var controller = new AbortController();
-    var timeoutId = setTimeout(function () { controller.abort(); }, 45000);
+  // Use system browser to download — bypasses CORS/redirect issues with GitHub CDN
+  window.open(downloadUrl, '_system');
 
-    document.getElementById('dl-progress').textContent = 'Connecting...';
-    var response = await fetch(downloadUrl, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!response.ok) throw new Error('Server returned ' + response.status);
-
-    document.getElementById('dl-progress').textContent = 'Downloading (7.5 MB)...';
-    var blob = await response.blob();
-
-    document.getElementById('dl-progress').textContent = 'Processing...';
-    var base64 = await blobToBase64(blob);
-
-    document.getElementById('dl-progress').textContent = 'Saving...';
-    await window.Capacitor.Plugins.Filesystem.writeFile({
-      path: 'meroghar-update.apk',
-      data: base64,
-      directory: 'CACHE'
-    });
-
-    var uriResult = await window.Capacitor.Plugins.Filesystem.getUri({
-      path: 'meroghar-update.apk',
-      directory: 'CACHE'
-    });
-
-    showInstallPrompt(uriResult.uri);
-
-  } catch (e) {
-    if (e.name === 'AbortError') {
-      showError('Connection timed out. Try downloading in your browser.');
-    } else {
-      showError(e.message || 'Network error');
-    }
-  }
+  // Auto-close dialog after a moment
+  setTimeout(function () { dialog.remove(); }, 2000);
 }
 
 async function checkForUpdates() {
