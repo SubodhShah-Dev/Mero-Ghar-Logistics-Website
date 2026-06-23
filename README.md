@@ -4,9 +4,17 @@ Full-stack logistics platform (Vite + Tailwind + vanilla JS, Express + MySQL, An
 
 ## Download APK
 
-[**Download MeroGhar v2.5.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v2.5.0.apk)
+[**Download MeroGhar v2.6.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v2.6.0.apk)
 
 ## Changelog
+
+### v2.6.0 — All-Questions Chatbot + Bug Fixes
+- **📋 All Questions Button** — tap the new "📋 All Questions" chip in the chatbot to see ALL 70+ questions you can ask, organized into 14 categories (About, Booking, Pricing, Vehicles, Coverage, Payment, Tracking, Services, Items & Care, Cancellation, Support, Reviews, How It Works, Insurance). Each question is a tappable chip
+- **Comprehensive Help** — typing "help" now shows every category with example questions (frontend + backend)
+- **Bug Fix: Hero login persistence** — login button in the hero CTA section now also gets replaced with Dashboard link after login
+- **Bug Fix: Chatbot ignorance** — asking "What is the purpose of this site?" returns proper site description
+- **Bug Fix: Payment processing** — `initiateDummyPayment()` now returns all required fields (amount, transaction_uuid, order_id, customer info) so the payment overlay hidden inputs are populated correctly
+- **Bug Fix: My Bookings cramped** — topbar button padding increased (4×8 → 8×12), font-size 12→13, added `white-space:nowrap`
 
 ### v2.5.0 — Knowledge-Backed MeroBot Chatbot
 - **Knowledge-Backed Answers** — MeroBot now searches the entire site content (all 7 HTML pages) to answer questions instead of using hardcoded replies. Extracts 161 searchable knowledge chunks covering FAQ, services, provinces, vehicle types, booking steps, reviews, and more
