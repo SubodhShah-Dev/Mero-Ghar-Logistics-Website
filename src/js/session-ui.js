@@ -65,6 +65,16 @@
       loginBtn.parentNode.replaceChild(a, loginBtn);
     }
 
+    // ── Enhance hero CTA login button ──
+    var heroLoginBtn = document.getElementById('hero-login-btn');
+    if (heroLoginBtn && session) {
+      var b = document.createElement('a');
+      b.href = getDashUrl(session);
+      b.className = 'bg-saffron-400 hover:bg-saffron-300 text-forest-900 font-bold text-lg px-5 py-2.5 min-h-[44px] rounded-sm transition-all hover:-translate-y-0.5 shadow-md shadow-saffron-600/20';
+      b.textContent = 'Dashboard \u2192';
+      heroLoginBtn.parentNode.replaceChild(b, heroLoginBtn);
+    }
+
     // ── Enhance index.html mobile menu ──
     var mobileMenu = document.getElementById('mobileMenu');
     if (mobileMenu && session) {
@@ -106,7 +116,7 @@
         '<div style="display:flex;align-items:center;gap:6px">' +
           (session
             ? (session.role === 'user'
-              ? '<a href="/src/pages/my-bookings.html" style="color:rgba(238,242,238,0.5);font-size:12px;text-decoration:none;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,0.04)">My Bookings</a>'
+              ? '<a href="/src/pages/my-bookings.html" style="color:rgba(238,242,238,0.5);font-size:13px;text-decoration:none;padding:8px 12px;border-radius:6px;background:rgba(255,255,255,0.04);white-space:nowrap">My Bookings</a>'
               : '') +
               '<span style="color:rgba(238,242,238,0.5);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px">' +
               escapeHtml(session.name) + '</span>' +
