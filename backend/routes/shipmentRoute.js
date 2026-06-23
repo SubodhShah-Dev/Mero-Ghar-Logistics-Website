@@ -7,17 +7,15 @@ import {
 	getShipmentsByEmail,
 	updateShipmentStatus,
 } from '../controllers/shipmentController.js';
+import { authenticate, requireRole, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// ✅ Specific routes first
-router.post('/create', createShipment);
-router.get('/all', getAllShipments);
-router.get('/user/:userId', getUserShipments);
+router.post('/create', optionalAuth, createShipment);
+router.get('/all', authenticate, requireRole('admin'), getAllShipments);
+router.get('/my', authenticate, getUserShipments);
 router.get('/email/:email', getShipmentsByEmail);
-
-// ✅ Dynamic routes last
-router.get('/:id', getShipment);
-router.put('/:id/status', updateShipmentStatus);
+router.get('/:id', authenticate, getShipment);
+router.put('/:id/status', authenticate, updateShipmentStatus);
 
 export default router;

@@ -5,7 +5,7 @@ window.addEventListener('scroll', () => {
 		navbar.style.boxShadow =
 			window.scrollY > 20 ? '0 4px 30px rgba(0,0,0,0.4)' : 'none';
 	}
-});
+}, { passive: true });
 
 // ── MOBILE MENU ───────────────────────────────────────
 window.toggleMenu = function () {

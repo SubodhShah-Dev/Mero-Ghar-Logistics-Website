@@ -59,7 +59,7 @@ def generate_combined_icon(foreground, bg_color, size):
     return bg.convert('RGB')
 
 
-base_dir = '/home/subodh/workspace/Mero-Ghar-Logistics-Website/android/app/src/main/res'
+base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'android', 'app', 'src', 'main', 'res')
 
 # Background color XML
 bg_color_xml = '''<?xml version="1.0" encoding="utf-8"?>

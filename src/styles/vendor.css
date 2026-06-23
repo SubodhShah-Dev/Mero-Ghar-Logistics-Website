@@ -614,11 +614,12 @@ a {
 .btn:hover {
 	opacity: 0.85;
 }
-.btn-sm {
-	padding: 5px 12px;
-	font-size: 12px;
-	border-radius: 7px;
-}
+ .btn-sm {
+ 	padding: 5px 12px;
+ 	font-size: 12px;
+ 	border-radius: 7px;
+ 	min-height: 44px;
+ }
 .btn-ghost {
 	padding: 7px 14px;
 	border-radius: 9px;

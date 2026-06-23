@@ -1,10 +1,9 @@
 import pool from '../config/db.js';
 import { initiateDummyPayment } from '../services/dummyPaymentService.js';
+import { getAllShipments as getAllShipmentsModel, getShipmentById, getShipmentsByUserId, updateShipmentStatus as updateShipmentStatusModel } from '../models/shipmentModel.js';
 
 export const createShipment = async (req, res) => {
 	try {
-		console.log('=== CREATE SHIPMENT CALLED ===');
-		console.log('Request body:', req.body);
 
 		const {
 			first_name,
@@ -154,55 +153,37 @@ export const createShipment = async (req, res) => {
 	}
 };
 
-// Keep your other functions (getAllShipments, getShipment, getUserShipments, updateShipmentStatus) unchanged
 export const getAllShipments = async (req, res) => {
 	try {
-		const [rows] = await pool.execute(
-			'SELECT * FROM shipments ORDER BY created_at DESC',
-		);
-		res.json({ success: true, shipments: rows });
+		const shipments = await getAllShipmentsModel();
+		res.json({ success: true, shipments });
 	} catch (error) {
 		console.error('Error fetching shipments:', error);
-		res.status(500).json({
-			success: false,
-			message: 'Failed to fetch shipments',
-		});
+		res.status(500).json({ success: false, message: 'Failed to fetch shipments' });
 	}
 };
 
 export const getShipment = async (req, res) => {
 	try {
-		const [rows] = await pool.execute(
-			'SELECT * FROM shipments WHERE id = ?',
-			[req.params.id],
-		);
-		if (rows.length === 0)
-			return res
-				.status(404)
-				.json({ success: false, message: 'Shipment not found' });
-		res.json({ success: true, shipment: rows[0] });
+		const shipment = await getShipmentById(req.params.id);
+		if (!shipment) {
+			return res.status(404).json({ success: false, message: 'Shipment not found' });
+		}
+		res.json({ success: true, shipment });
 	} catch (error) {
 		console.error('Error fetching shipment:', error);
-		res.status(500).json({
-			success: false,
-			message: 'Failed to fetch shipment',
-		});
+		res.status(500).json({ success: false, message: 'Failed to fetch shipment' });
 	}
 };
 
 export const getUserShipments = async (req, res) => {
 	try {
-		const [rows] = await pool.execute(
-			'SELECT * FROM shipments WHERE user_id = ? ORDER BY created_at DESC',
-			[req.params.userId],
-		);
-		res.json({ success: true, shipments: rows });
+		const userId = req.user.id;
+		const shipments = await getShipmentsByUserId(userId);
+		res.json({ success: true, shipments });
 	} catch (error) {
 		console.error('Error fetching user shipments:', error);
-		res.status(500).json({
-			success: false,
-			message: 'Failed to fetch user shipments',
-		});
+		res.status(500).json({ success: false, message: 'Failed to fetch user shipments' });
 	}
 };
 
@@ -231,34 +212,16 @@ export const updateShipmentStatus = async (req, res) => {
 		const { id } = req.params;
 		const { status, final_quote } = req.body;
 		const shipmentId = parseInt(id);
-		if (isNaN(shipmentId))
-			return res
-				.status(400)
-				.json({ success: false, message: 'Invalid shipment ID' });
-
-		let query = 'UPDATE shipments SET status = ?';
-		const params = [status];
-		if (final_quote !== null && final_quote !== undefined) {
-			query += ', final_quote = ?';
-			params.push(final_quote);
+		if (isNaN(shipmentId)) {
+			return res.status(400).json({ success: false, message: 'Invalid shipment ID' });
 		}
-		query += ' WHERE id = ?';
-		params.push(shipmentId);
-
-		const [result] = await pool.execute(query, params);
-		if (result.affectedRows === 0)
-			return res
-				.status(404)
-				.json({ success: false, message: 'Shipment not found' });
-		res.json({
-			success: true,
-			message: 'Shipment status updated successfully',
-		});
+		const updated = await updateShipmentStatusModel(shipmentId, status, final_quote);
+		if (!updated) {
+			return res.status(404).json({ success: false, message: 'Shipment not found' });
+		}
+		res.json({ success: true, message: 'Shipment status updated successfully' });
 	} catch (error) {
 		console.error('Error updating shipment:', error);
-		res.status(500).json({
-			success: false,
-			message: 'Failed to update shipment status',
-		});
+		res.status(500).json({ success: false, message: 'Failed to update shipment status' });
 	}
 };

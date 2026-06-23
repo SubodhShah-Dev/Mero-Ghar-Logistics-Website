@@ -10,7 +10,9 @@ CREATE TABLE IF NOT EXISTS vendor_vehicles (
   status VARCHAR(50) DEFAULT 'available',
   is_active TINYINT(1) DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
+  FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE,
+  INDEX idx_vendor_vehicles_vendor (vendor_id),
+  INDEX idx_vendor_vehicles_type (vehicle_type)
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -36,13 +38,15 @@ CREATE TABLE IF NOT EXISTS vendors (
   rating DECIMAL(3,2) DEFAULT 0.00,
   total_jobs INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_vendors_user (user_id),
+  INDEX idx_vendors_status (status)
 );
 
 CREATE TABLE IF NOT EXISTS shipments (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT,
-  booking_id VARCHAR(50),
+  booking_id VARCHAR(50) UNIQUE,
   first_name VARCHAR(100),
   last_name VARCHAR(100),
   mobile_number VARCHAR(20),
@@ -85,6 +89,33 @@ CREATE TABLE IF NOT EXISTS shipments (
   approved_by INT,
   approved_at DATETIME,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (assigned_vendor_id) REFERENCES vendors(id)
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (assigned_vendor_id) REFERENCES vendors(id) ON DELETE SET NULL,
+  INDEX idx_shipments_user (user_id),
+  INDEX idx_shipments_email (email),
+  INDEX idx_shipments_vendor (assigned_vendor_id),
+  INDEX idx_shipments_approval (approval_status),
+  INDEX idx_shipments_transaction (transaction_id),
+  INDEX idx_shipments_booking (booking_id)
+);
+
+CREATE TABLE IF NOT EXISTS support_tickets (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  vendor_id INT NOT NULL,
+  subject VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  status ENUM('open', 'resolved', 'closed') DEFAULT 'open',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE,
+  INDEX idx_tickets_vendor (vendor_id),
+  INDEX idx_tickets_status (status)
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  setting_key VARCHAR(100) NOT NULL UNIQUE,
+  setting_value TEXT NOT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_settings_key (setting_key)
 );

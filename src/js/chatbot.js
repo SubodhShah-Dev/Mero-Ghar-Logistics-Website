@@ -138,7 +138,7 @@
       description: 'Household moving service covering all 7 provinces of Nepal with verified movers.',
       phone: '+977 980-000-000',
       email: 'info@meroghar.com.np',
-      stats: '8,000+ moves, 77 districts, 4.8 stars, 250+ providers'
+      stats: '77 districts across 7 provinces, 250+ providers'
     },
     howItWorks: [
       'Step 1: Fill the Form — Province, district, items, vehicle type, and preferred date in under 3 minutes.',
@@ -151,7 +151,6 @@
       { name: 'Pack & Load Only', desc: 'We pack and load your vehicle efficiently.', price: 'From NPR 7,500' },
       { name: 'Cargo Tempo / Valley Move', desc: 'Narrow lane-friendly tempo for Kathmandu Valley intra-city moves.', price: 'From NPR 2,500' },
       { name: 'Furniture Disassembly', desc: 'Furniture taken apart and reassembled at new home.', price: 'From NPR 2,500' },
-      { name: 'Storage / Warehouse', desc: 'Secure short or long-term storage facilities.', price: 'From NPR 3,000/month' },
       { name: 'Item Insurance', desc: 'Full-replacement coverage on all items moved.', price: 'From NPR 1,200' }
     ],
     vehicles: [
@@ -208,7 +207,7 @@
       helpText += '📍 TRACKING: "Track my shipment"\n';
       helpText += '📋 SERVICES: "What services?"\n';
       helpText += '🛡️ INSURANCE: "Item insurance"\n';
-      helpText += '📦 ADD-ONS: "Add-on services"\n';
+      helpText += '📦 ADD-ONS: "Packing service"\n';
       helpText += '❌ CANCEL: "Cancel booking"\n';
       helpText += '⭐ REVIEWS: "What do customers say?"\n';
       helpText += '📞 SUPPORT: "Contact support"\n\n';
@@ -241,7 +240,7 @@
       return 'To book: fill in pickup/drop locations, select items and vehicle, choose a mover, pick a date, and confirm. Get a quote within 2 hours.';
     }
     if (m.includes('track') || m.includes('status') || m.includes('where is') || m.includes('delivery')) {
-      return 'Track your shipment in real-time via "My Bookings" in the app. Tap on the shipment to see your driver\'s location.';
+      return 'Check your shipment status under "My Bookings" in the app. You can see whether your move is pending, confirmed, in transit, or delivered.';
     }
     if (m.includes('payment') || m.includes('pay') || m.includes('khalti') || m.includes('esewa') || m.includes('cash')) {
       return 'We accept: ' + KNOWLEDGE.payments.join(', ') + '. Choose your preferred method during checkout.';
@@ -273,12 +272,12 @@
       return 'Add-on services:\n' + addonLines.join('\n');
     }
     if (m.includes('rating') || m.includes('review') || m.includes('trust') || m.includes('reliable') || m.includes('say') || m.includes('customer')) {
-      return 'MeroGhar has 4.8 stars from 6,000+ verified reviews. 97% on-time rate with 250+ verified providers across Nepal.';
+      return 'MeroGhar has 250+ verified providers across Nepal. Vendors are rated after each job so you can pick a trusted mover. Check vendor ratings when choosing in the booking form.';
     }
     if (m.includes('province') || m.includes('district') || m.includes('cover') || m.includes('area') || m.includes('nepal') || m.includes('location')) {
       return 'MeroGhar covers all 7 provinces of Nepal:\n' + KNOWLEDGE.provinces.join('\n') + '\n\nAll 77 districts covered!';
     }
-    if (m.includes('service') || m.includes('offer') || m.includes('provide') || m.includes('storage') || m.includes('warehouse')) {
+    if (m.includes('service') || m.includes('offer') || m.includes('provide')) {
       var sLines = [];
       for (var si = 0; si < KNOWLEDGE.services.length; si++) {
         sLines.push(KNOWLEDGE.services[si].name + ' — ' + KNOWLEDGE.services[si].price);
@@ -342,7 +341,7 @@
     try {
       var userData = localStorage.getItem('meroGharUser');
       if (!userData) return { valid: false, message: 'Please log in first. Type "Login" to go to the login page.' };
-      var user = JSON.parse(userData);
+      var user = safeParse(userData, null);
       if (!user || !user.role) return { valid: false, message: 'Session expired. Please log in again.' };
       if (action.role && user.role !== action.role) return { valid: false, message: 'This feature requires a ' + action.role + ' account. Your current role is ' + user.role + '.' };
       return { valid: true };
@@ -365,6 +364,11 @@
   function renderAllQuestions() {
     var msgs = document.getElementById('mg-chat-msgs');
     if (!msgs) return;
+    if (document.getElementById('mg-questions-flag')) return;
+    var flag = document.createElement('div');
+    flag.id = 'mg-questions-flag';
+    flag.style.display = 'none';
+    msgs.appendChild(flag);
     var botMsg = document.createElement('div');
     botMsg.style.cssText = 'align-self:flex-start;max-width:100%;background:rgba(255,255,255,0.06);border-radius:12px 12px 12px 4px;padding:12px 14px;font-size:12px;line-height:1.5;color:rgba(238,242,238,0.9);margin-bottom:6px';
     botMsg.textContent = 'Here are all the questions I can answer — tap any to ask!';
@@ -482,16 +486,20 @@
     showTyping();
 
     var url = getBaseUrl() + '/api/chatbot/message';
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function () { controller.abort(); }, 15000);
     fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text }),
+      signal: controller.signal,
     })
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
       })
       .then(function (data) {
+        clearTimeout(timeoutId);
         hideTyping();
         isSending = false;
         var reply = data.response || data.reply || data.message || getLocalFallback(text);
@@ -499,9 +507,9 @@
         chatHistory.push({ role: 'model', text: reply });
       })
       .catch(function (err) {
+        clearTimeout(timeoutId);
         hideTyping();
         isSending = false;
-        console.warn('[MeroBot] Fetch failed, using local fallback:', err);
         var fallback = getLocalFallback(text);
         addMessage(fallback, 'bot');
         chatHistory.push({ role: 'model', text: fallback });

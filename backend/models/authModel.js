@@ -4,15 +4,18 @@ import bcrypt from 'bcryptjs';
 export const createUser = async (userData) => {
 	const { name, email, password, role, phone } = userData;
 
+	const allowedRoles = ['user', 'vendor'];
+	const safeRole = allowedRoles.includes(role) ? role : 'user';
+
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
 
 	const [result] = await pool.execute(
 		'INSERT INTO users (name, email, password, role, phone) VALUES (?, ?, ?, ?, ?)',
-		[name, email, hashedPassword, role || 'user', phone || null],
+		[name, email, hashedPassword, safeRole, phone || null],
 	);
 
-	return { id: result.insertId, name, email, role };
+	return { id: result.insertId, name, email, role: safeRole };
 };
 
 export const findUserByEmail = async (email) => {

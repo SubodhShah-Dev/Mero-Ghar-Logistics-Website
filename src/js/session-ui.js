@@ -1,7 +1,6 @@
 (function () {
   function getSession() {
-    try { var s = JSON.parse(localStorage.getItem('meroGharUser')); return s && s.loggedIn ? s : null; }
-    catch (e) { return null; }
+    return safeParse(localStorage.getItem('meroGharUser'), null);
   }
 
   var ROLE_DASHBOARD = {

@@ -72,7 +72,7 @@
 				<nav class="sb-nav">
 					<div class="nav-grp">
 						<div class="nav-grp-lbl">Overview</div>
-						<a class="nav-a on" data-page="dash" href="#">
+						<a class="nav-a on" data-page="dash" href="javascript:void(0)" role="button">
 							<svg
 								class="nav-ic"
 								viewBox="0 0 24 24"
@@ -88,7 +88,7 @@
 							</svg>
 							Dashboard
 						</a>
-						<a class="nav-a" data-page="bookings" href="#">
+						<a class="nav-a" data-page="bookings" href="javascript:void(0)" role="button">
 							<svg
 								class="nav-ic"
 								viewBox="0 0 24 24"
@@ -105,7 +105,7 @@
 							Bookings
 							<span class="nav-badge" id="pending-count">0</span>
 						</a>
-						<a class="nav-a" data-page="pending" href="#">
+						<a class="nav-a" data-page="pending" href="javascript:void(0)" role="button">
 							<svg
 								class="nav-ic"
 								viewBox="0 0 24 24"
@@ -120,7 +120,7 @@
 								>0</span
 							>
 						</a>
-						<a class="nav-a" data-page="customers" href="#">
+						<a class="nav-a" data-page="customers" href="javascript:void(0)" role="button">
 							<svg
 								class="nav-ic"
 								viewBox="0 0 24 24"
@@ -141,7 +141,7 @@
 
 					<div class="nav-grp">
 						<div class="nav-grp-lbl">Management</div>
-						<a class="nav-a" data-page="vendors" href="#">
+						<a class="nav-a" data-page="vendors" href="javascript:void(0)" role="button">
 							<svg
 								class="nav-ic"
 								viewBox="0 0 24 24"
@@ -161,7 +161,7 @@
 							</svg>
 							Vendors
 						</a>
-						<a class="nav-a" data-page="revenue" href="#">
+						<a class="nav-a" data-page="revenue" href="javascript:void(0)" role="button">
 							<svg
 								class="nav-ic"
 								viewBox="0 0 24 24"
@@ -180,7 +180,7 @@
 
 					<div class="nav-grp">
 						<div class="nav-grp-lbl">System</div>
-						<a class="nav-a" data-page="settings" href="#">
+						<a class="nav-a" data-page="settings" href="javascript:void(0)" role="button">
 							<svg
 								class="nav-ic"
 								viewBox="0 0 24 24"
@@ -904,6 +904,7 @@
 									"
 									>Company Name</label
 								><input
+									id="setting-company-name"
 									style="
 										width: 100%;
 										background: var(--dark3);
@@ -930,6 +931,7 @@
 									"
 									>Support Email</label
 								><input
+									id="setting-support-email"
 									style="
 										width: 100%;
 										background: var(--dark3);
@@ -956,6 +958,7 @@
 									"
 									>Default Currency</label
 								><select
+									id="setting-currency"
 									style="
 										width: 100%;
 										background: var(--dark3);
@@ -967,14 +970,14 @@
 										font-family: var(--sans);
 										outline: none;
 									">
-									<option>NPR — Nepali Rupee</option>
-									<option>USD — US Dollar</option>
+									<option value="NPR">NPR — Nepali Rupee</option>
+									<option value="USD">USD — US Dollar</option>
 								</select>
 							</div>
 							<button
 								class="btn"
 								style="align-self: flex-start"
-								onclick="toast('Settings saved', 'green')">
+								onclick="saveSettings()">
 								Save Changes
 							</button>
 						</div>
@@ -1187,7 +1190,27 @@
 			</div>
 		</div>
 
-		<!-- TOAST CONTAINER -->
+		<!-- Rejection reason modal -->
+		<div id="modal-reject" class="overlay">
+			<div class="modal" style="max-width: 420px">
+				<div class="mh">
+					<div class="mh-title">Reject Shipment</div>
+					<button type="button" class="m-close" onclick="closeModal('modal-reject')" aria-label="Close">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+					</button>
+				</div>
+				<div class="mb">
+					<div class="mf">
+						<label>Reason for rejection</label>
+						<textarea id="reject-reason" rows="3" style="width:100%;background:var(--dark3);border:1px solid var(--border-dim);border-radius:8px;padding:11px 14px;color:var(--text);font-size:14px;font-family:var(--sans);outline:none;resize:vertical"></textarea>
+					</div>
+				</div>
+				<div class="mfoot">
+					<button class="btn-ghost" onclick="closeModal('modal-reject')">Cancel</button>
+					<button class="btn" onclick="confirmReject()">Reject</button>
+				</div>
+			</div>
+		</div>
 		<div class="toast-wrap" id="toast-wrap"></div>
 
 		<script>
@@ -1200,6 +1223,7 @@
 		</script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 		<script src="/src/js/config.js"></script>
+<script src="/src/js/guard.js" data-role="admin"></script>
 <script src="/src/js/admin.js"></script>
 <script src="/src/js/chatbot.js"></script>
 	</body>

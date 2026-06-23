@@ -1,6 +1,6 @@
 const API_BASE_URL = (() => {
-  // ── Production (deployed backend on Railway) ──
-  const PROD_URL = 'https://backend-production-d51a3.up.railway.app';
+  var envUrl = (typeof import !== 'undefined' && import.meta && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : null;
+  const PROD_URL = envUrl || 'https://backend-production-d51a3.up.railway.app';
 
   // ── Android auto-detect ──
   if (typeof window.Capacitor !== 'undefined') {
@@ -22,7 +22,7 @@ const API_BASE_URL = (() => {
 window.API_BASE_URL = API_BASE_URL;
 
 // ── In-App Update Check & Download ──
-const APP_VERSION = '2.8.0';
+const APP_VERSION = '3.0.0';
 const GITHUB_REPO = 'SubodhShah-Dev/Mero-Ghar-Logistic';
 
 function compareVersions(a, b) {
@@ -76,7 +76,7 @@ async function checkForUpdates() {
 
   // ── Cache: only hit GitHub API every 2 hours ──
   try {
-    var cached = JSON.parse(localStorage.getItem(CACHE_KEY));
+    var cached = safeParse(localStorage.getItem(CACHE_KEY), null);
     if (cached && cached.timestamp && (now - cached.timestamp) < 7200000) {
       if (compareVersions(cached.latestVersion, APP_VERSION) > 0) {
         promptUpdate(cached.latestVersion, cached.downloadUrl);
@@ -196,7 +196,24 @@ function showToast(msg, color) {
 if (typeof document !== 'undefined') {
   if (document.readyState === 'complete') {
     setTimeout(checkForUpdates, 3000);
+    initKeyboardAccessibility();
   } else {
-    window.addEventListener('load', function () { setTimeout(checkForUpdates, 3000); });
+    window.addEventListener('load', function () { setTimeout(checkForUpdates, 3000); initKeyboardAccessibility(); });
   }
+}
+
+function initKeyboardAccessibility() {
+  document.querySelectorAll('.item-chip, .pay-card, .province-tag').forEach(function(el) {
+    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+    if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      var target = e.target.closest('.item-chip, .pay-card, .province-tag, [onclick]');
+      if (target && target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && target.tagName !== 'SELECT' && target.tagName !== 'BUTTON' && target.tagName !== 'A') {
+        e.preventDefault();
+        target.click();
+      }
+    }
+  });
 }

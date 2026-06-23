@@ -32,7 +32,7 @@ export const approveShipmentRequest = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const { vendor_id } = req.body;
-		const adminId = req.user?.id || 1;
+		const adminId = req.user.id;
 
 		const vendor = await getVendorById(vendor_id);
 		if (!vendor) {
@@ -70,7 +70,7 @@ export const rejectShipmentRequest = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const { reason } = req.body;
-		const adminId = req.user?.id || 1;
+		const adminId = req.user.id;
 
 		const rejected = await rejectShipment(id, adminId, reason);
 		if (!rejected) {

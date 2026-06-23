@@ -11,24 +11,19 @@ const ROLE_ROUTES = {
 	vendor: '/src/pages/vendor.html',
 };
 
-//==================
-// For Fetching Data
-//==================
 async function fetchData(url, req, httpMethod, contentType) {
 	try {
-		const response = await fetch(`${BASEURL}${url}`, {
+		const options = {
 			method: httpMethod,
-			headers: {
-				'Content-Type': contentType,
-			},
-			body: JSON.stringify(req),
-		});
-
+			headers: { 'Content-Type': contentType },
+		};
+		if (req && httpMethod !== 'GET') {
+			options.body = JSON.stringify(req);
+		}
+		const response = await fetch(`${BASEURL}${url}`, options);
 		const data = await response.json();
-
 		return { ok: response.ok, ...data };
 	} catch (error) {
-		console.error('Fetch error:', error);
 		return { ok: false, message: error.message };
 	}
 }
@@ -78,7 +73,6 @@ document.addEventListener('DOMContentLoaded', function () {
 					return;
 				}
 
-				// Store user data (backend sends: id, name, email, role)
 				const userData = {
 					id: res.user.id,
 					name: res.user.name,
@@ -88,10 +82,11 @@ document.addEventListener('DOMContentLoaded', function () {
 				};
 
 				localStorage.setItem('meroGharUser', JSON.stringify(userData));
+				if (res.token) {
+					localStorage.setItem('meroGharToken', res.token);
+				}
 
-				// Redirect based on role
-				const redirectPath =
-					ROLE_ROUTES[res.user.role] || '/src/pages/user.html';
+				const redirectPath = ROLE_ROUTES[res.user.role] || '/src/pages/user.html';
 				window.location.href = redirectPath;
 			} catch (err) {
 				console.error('Login error:', err);
@@ -171,11 +166,9 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 });
 
-// ==================================================
-// LOGOUT FUNCTION
-// ==================================================
 window.logout = function () {
 	localStorage.removeItem('meroGharUser');
+	localStorage.removeItem('meroGharToken');
 	window.location.href = '/src/pages/login.html';
 };
 
@@ -195,9 +188,9 @@ window.checkAuth = function () {
 // GET AUTH HEADERS FOR API CALLS
 // ==================================================
 window.getAuthHeaders = function () {
-	const user = safeParse(localStorage.getItem('meroGharUser'), {});
+	const token = localStorage.getItem('meroGharToken');
 	return {
 		'Content-Type': 'application/json',
-		Authorization: user.loggedIn ? `Bearer ${user.id}` : '',
+		Authorization: token ? `Bearer ${token}` : '',
 	};
 };

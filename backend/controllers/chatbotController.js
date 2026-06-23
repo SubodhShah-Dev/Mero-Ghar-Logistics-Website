@@ -90,8 +90,9 @@ function generateKnowledgeResponse(message, context, faq) {
     helpText += "💳 PAYMENTS: \"Payment options?\", \"How to pay via eSewa?\"\n";
     helpText += "📍 TRACKING: \"Track my shipment\", \"Where is my order?\"\n";
     helpText += "📋 SERVICES: \"What services?\", \"Add-on services\"\n";
-    helpText += "🛡️ INSURANCE: \"Item insurance\", \"Damage coverage\"\n";
-    helpText += "❌ CANCEL: \"Cancel booking\", \"Refund policy\"\n";
+      helpText += "🛡️ INSURANCE: \"Item insurance\", \"Damage coverage\"\n";
+      helpText += "📦 ADD-ONS: \"Packing service\"\n";
+      helpText += "❌ CANCEL: \"Cancel booking\", \"Refund policy\"\n";
     helpText += "⭐ REVIEWS: \"Customer reviews\", \"Ratings\"\n";
     helpText += "📞 SUPPORT: \"Contact support\", \"Phone number\"\n\n";
     helpText += "Just type your question!";
@@ -107,7 +108,7 @@ function generateKnowledgeResponse(message, context, faq) {
   }
 
   if (msg.includes('price') || msg.includes('cost') || msg.includes('rate') || msg.includes('how much') || msg.includes('quote')) {
-    return 'Our pricing is based on distance, item volume, vehicle type, and add-on services.\n\nService price ranges:\n- Full-Service Moving: From NPR 15,000\n- Pack & Load Only: From NPR 7,500\n- Cargo Tempo / Valley Move: From NPR 2,500\n- Furniture Disassembly: From NPR 2,500\n- Storage / Warehouse: From NPR 3,000/month\n- Item Insurance: From NPR 1,200\n\nUse the booking form to get an exact quote for your move!';
+    return 'Our pricing is based on distance, item volume, vehicle type, and add-on services.\n\nService price ranges:\n- Full-Service Moving: From NPR 15,000\n- Pack & Load Only: From NPR 7,500\n- Cargo Tempo / Valley Move: From NPR 2,500\n- Furniture Disassembly: From NPR 2,500\n- Item Insurance: From NPR 1,200\n\nUse the booking form to get an exact quote for your move!';
   }
 
   if (msg.includes('vehicle') || msg.includes('truck') || msg.includes('tempo') || msg.includes('transport')) {
@@ -118,8 +119,8 @@ function generateKnowledgeResponse(message, context, faq) {
     return 'Available add-on services:\n\n📦 Packing Service — Bubble wrap, rope, and boxes provided\n🔧 Furniture Disassembly — Taken apart and reassembled at new home\n👷 Porter / Labor Help — Extra manual labor for stairs or narrow access\n🛡️ Item Insurance — Full-value coverage on all moved items (from NPR 1,200)\n\nSelect these in Step 3 of the booking form!';
   }
 
-  if (msg.includes('service') || msg.includes('offer') || msg.includes('provide') || msg.includes('storage') || msg.includes('warehouse')) {
-    return 'MeroGhar offers these services:\n\n🚛 Full-Service Moving (From NPR 15,000)\n📦 Pack & Load Only (From NPR 7,500)\n🛺 Cargo Tempo / Valley Move (From NPR 2,500)\n🔧 Furniture Disassembly (From NPR 2,500)\n🏬 Storage / Warehouse (From NPR 3,000/month)\n🛡️ Item Insurance (From NPR 1,200)\n\nBook now and get a free quote within 2 hours!';
+  if (msg.includes('service') || msg.includes('offer') || msg.includes('provide')) {
+    return 'MeroGhar offers these services:\n\n🚛 Full-Service Moving (From NPR 15,000)\n📦 Pack & Load Only (From NPR 7,500)\n🛺 Cargo Tempo / Valley Move (From NPR 2,500)\n🔧 Furniture Disassembly (From NPR 2,500)\n🛡️ Item Insurance (From NPR 1,200)\n\nBook now and get a free quote within 2 hours!';
   }
 
   if (msg.includes('province') || msg.includes('district') || msg.includes('cover') || msg.includes('area') || msg.includes('nepal') || msg.includes('location')) {
@@ -131,7 +132,7 @@ function generateKnowledgeResponse(message, context, faq) {
   }
 
   if (msg.includes('track') || msg.includes('status') || msg.includes('where is') || msg.includes('delivery')) {
-    return 'You can track your shipment in real-time through the app. Go to "My Bookings" and tap on the shipment you want to track. The map shows your driver\'s current location.';
+    return 'You can check your shipment status under "My Bookings" in the app. The status shows whether your move is pending, confirmed, in transit, or delivered.';
   }
 
   if (msg.includes('fragile') || msg.includes('glass') || msg.includes('breakable') || msg.includes('religious') || msg.includes('statue') || msg.includes('stone') || msg.includes('special') || msg.includes('cultural') || msg.includes('prayer') || msg.includes('grinder')) {
@@ -147,7 +148,7 @@ function generateKnowledgeResponse(message, context, faq) {
   }
 
   if (msg.includes('review') || msg.includes('rating') || msg.includes('trust') || msg.includes('reliable') || msg.includes('say') || msg.includes('customer')) {
-    return 'MeroGhar has excellent reviews!\n\n⭐ 4.8 Stars — Average Rating\n📝 6,000+ Verified Reviews\n✅ 97% On-Time Rate\n🚚 8,000+ Successful Moves\n👥 250+ Verified Providers\n\nOur customers love our service across all 7 provinces of Nepal!';
+    return 'MeroGhar has 250+ verified providers across Nepal. Each vendor is rated after every job, so you can pick a trusted mover. Check vendor ratings when choosing in the booking form.';
   }
 
   if (msg.includes('step') || msg.includes('how it works') || msg.includes('process')) {

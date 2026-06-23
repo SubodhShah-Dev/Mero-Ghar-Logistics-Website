@@ -21,6 +21,7 @@ function escapeHtml(str) {
 function logout() {
 	if (confirm('Are you sure you want to logout?')) {
 		localStorage.removeItem('meroGharUser');
+		localStorage.removeItem('meroGharToken');
 		window.location.href = '/src/pages/login.html';
 	}
 }
@@ -314,9 +315,7 @@ window.onMunicipalityChange = function (prefix) {
 	updatePriceDisplay();
 };
 
-// ========== OPENROUTESERVICE CONFIG ==========
-const ORS_API_KEY =
-	'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjUxMDBmZmI4Y2U2NTQ4ZjliZDcyOWM2YmFkMzk2MGVjIiwiaCI6Im11cm11cjY0In0=';
+// ========== PRICING ==========
 const PRICE_PER_KM = 10;
 
 let cachedDistanceData = null;
@@ -347,25 +346,27 @@ function formatDuration(seconds) {
 
 // ========== GEOCODING ==========
 const geocodeCache = new Map();
+const GEOCODE_CACHE_MAX = 100;
 
 async function tryGeocode(address) {
 	if (geocodeCache.has(address)) {
-		console.log('📍 Using cached geocode for:', address);
 		return geocodeCache.get(address);
 	}
-	const url = `https://api.openrouteservice.org/geocode/search?api_key=${ORS_API_KEY}&text=${encodeURIComponent(address)}&boundary.country=NP`;
+	const url = `${API_BASE_URL}/api/geocode/search?text=${encodeURIComponent(address)}`;
 	try {
 		const response = await fetch(url);
 		const data = await response.json();
 		if (data.features && data.features.length > 0) {
 			const [lon, lat] = data.features[0].geometry.coordinates;
 			const coords = [lon, lat];
+			if (geocodeCache.size >= GEOCODE_CACHE_MAX) {
+				const firstKey = geocodeCache.keys().next().value;
+				geocodeCache.delete(firstKey);
+			}
 			geocodeCache.set(address, coords);
 			return coords;
 		}
-	} catch (e) {
-		console.warn('ORS geocoding error:', e);
-	}
+	} catch (e) {}
 	return null;
 }
 
@@ -381,7 +382,6 @@ async function geocodeAddress(address, provinceId) {
 		if (coords) return coords;
 	}
 	if (provinceId && PROVINCE_CENTROIDS[provinceId]) {
-		console.log(`Using fallback centroid for province ${provinceId}`);
 		return PROVINCE_CENTROIDS[provinceId];
 	}
 	return null;
@@ -410,17 +410,14 @@ async function getDistance(originCoords, destinationCoords) {
 	const latDiff = Math.abs(originCoords[1] - destinationCoords[1]);
 	const lonDiff = Math.abs(originCoords[0] - destinationCoords[0]);
 	if (latDiff < 0.01 && lonDiff < 0.01) return null;
-	const url = 'https://api.openrouteservice.org/v2/matrix/driving-car';
+	const url = `${API_BASE_URL}/api/geocode/matrix`;
 	const body = {
 		locations: [originCoords, destinationCoords],
-		metrics: ['distance', 'duration'],
-		units: 'km',
 	};
 	try {
 		const response = await fetch(url, {
 			method: 'POST',
 			headers: {
-				Authorization: ORS_API_KEY,
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify(body),
@@ -461,9 +458,7 @@ async function getDistanceCost() {
 			};
 			return distData.distanceKm * PRICE_PER_KM;
 		}
-	} catch (e) {
-		console.warn('Distance calculation error, using fallback:', e);
-	}
+	} catch (e) {}
 	var puVal = parseInt(puProv) || 0;
 	var drVal = parseInt(drProv) || 0;
 	var diff = Math.abs(puVal - drVal);
@@ -477,7 +472,6 @@ async function getDistanceCost() {
 		pickupAddress: pickupAddr,
 		dropAddress: dropAddr,
 	};
-	console.log('📦 Fallback distance used:', fallbackKm, 'km');
 	return fallbackKm * PRICE_PER_KM;
 }
 
@@ -525,15 +519,13 @@ async function calculateTotalPrice() {
 		distanceKm = cachedDistanceData.distanceKm;
 		distanceCost = distanceKm * PRICE_PER_KM;
 		durationText = cachedDistanceData.durationText || '';
-		console.log('📦 Using cached distance:', distanceKm, 'km');
+
 	} else {
-		console.log('🔄 Recalculating distance...');
 		distanceCost = await getDistanceCost();
 		distanceKm = cachedDistanceData?.distanceKm || 0;
 		durationText = cachedDistanceData?.durationText || '';
 	}
 	const total = vehicleBase + distanceCost + addOns;
-	console.log('💰 Price calc:', { vehicleBase, distanceCost, addOns, total });
 	return {
 		total: Math.max(total, 200) || 200,
 		vehicleBase,
@@ -983,14 +975,7 @@ const stepValidations = {
 		const allCheckboxes = document.querySelectorAll(
 			'#fp6 input[type="checkbox"]',
 		);
-		let termsAccepted = false;
-		for (let cb of allCheckboxes) {
-			const label = cb.closest('label');
-			if (label && label.innerText.includes('Terms of Service')) {
-				termsAccepted = cb.checked;
-				break;
-			}
-		}
+		let termsAccepted = document.getElementById('termsCheckbox')?.checked || false;
 		if (!firstName) {
 			showToast('Please enter your first name', 'red');
 			return false;
@@ -999,8 +984,8 @@ const stepValidations = {
 			showToast('Please enter your last name', 'red');
 			return false;
 		}
-		if (!mobile || mobile.length < 10) {
-			showToast('Please enter a valid mobile number (at least 10 digits)', 'red');
+		if (!mobile || mobile.length !== 10) {
+			showToast('Please enter a valid 10-digit mobile number', 'red');
 			return false;
 		}
 		if (!termsAccepted) {
@@ -1082,7 +1067,6 @@ async function submitForm() {
 		shipmentData.estimated_duration = durationText;
 		const user = safeParse(localStorage.getItem('meroGharUser'), {});
 		if (user.id) shipmentData.user_id = user.id;
-		console.log('Submitting:', shipmentData);
 		const response = await fetch(
 			API_BASE_URL + '/api/shipment/create',
 			{
@@ -1156,6 +1140,8 @@ function showSuccessMessage(bookingId) {
 	localStorage.setItem('myBookings', JSON.stringify(bookings));
 }
 
+var leafletMapInstance = null;
+
 function showLeafletMap(container, distData) {
 	if (typeof L === 'undefined') {
 		container.innerHTML = '<p class="text-sm text-gray-500">Map unavailable — Leaflet library not loaded</p>';
@@ -1166,7 +1152,12 @@ function showLeafletMap(container, distData) {
 		var mapDiv = document.createElement('div');
 		mapDiv.style.height = '250px';
 		container.appendChild(mapDiv);
+		if (leafletMapInstance) {
+			leafletMapInstance.remove();
+			leafletMapInstance = null;
+		}
 		var map = L.map(mapDiv).setView([27.7172, 85.324], 7);
+		leafletMapInstance = map;
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; OpenStreetMap contributors',
 		}).addTo(map);

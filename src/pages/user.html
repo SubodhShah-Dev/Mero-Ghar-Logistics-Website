@@ -6,6 +6,7 @@
 		<title>MeroGhar - Booking Form</title>
 		<link rel="icon" type="image/png" href="/favicon.png" />
 		<link rel="stylesheet" href="/src/style.css" />
+		<script src="/src/js/config.js"></script>
 		<script src="/src/js/guard.js" data-role="user"></script>
 		<!-- Leaflet CSS + Routing Machine -->
 		<link
@@ -1627,7 +1628,7 @@
 			</div>
 		</section>
 		<!-- Payment overlay -->
-		<div id="payOverlay" class="fixed inset-0 z-50 hidden">
+		<div id="payOverlay" class="fixed inset-0 z-[9999] hidden">
 			<div class="absolute inset-0 bg-black/70"></div>
 			<div class="relative z-10 min-h-screen flex items-center justify-center p-4">
 				<div
@@ -1664,7 +1665,7 @@
 									MeroGhar
 								</div>
 								<div
-									class="text-saffron-400 text-[10px] uppercase tracking-widest font-semibold">
+									class="text-saffron-400 text-xs uppercase tracking-widest font-semibold">
 									Secure Payment
 								</div>
 							</div>
@@ -1697,9 +1698,9 @@
 									maxlength="10"
 									autocomplete="off"
 									required />
-								<p class="text-[10px] text-gray-400 mt-1">
+								<p class="text-xs text-gray-400 mt-1">
 									<span
-										class="inline-block bg-saffron-100 text-saffron-700 text-[9px] font-bold px-1.5 py-0.5 rounded-sm mr-1"
+										class="inline-block bg-saffron-100 text-saffron-700 text-xs font-bold px-1.5 py-0.5 rounded-sm mr-1"
 										>Demo</span
 									>
 									Any 10-digit number works

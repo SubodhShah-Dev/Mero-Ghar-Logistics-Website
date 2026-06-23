@@ -51,20 +51,14 @@ export const getVendorById = async (id) => {
 
 export const getVendorByUserId = async (userId) => {
 	try {
-		console.log('getVendorByUserId called with userId:', userId);
-
-		// Convert to number if it's a string
 		const numericUserId = parseInt(userId);
 		if (isNaN(numericUserId)) {
-			console.log('Invalid user ID - not a number:', userId);
 			return null;
 		}
-
 		const [rows] = await pool.execute(
 			'SELECT * FROM vendors WHERE user_id = ?',
 			[numericUserId],
 		);
-		console.log('Query result:', rows);
 		return rows[0];
 	} catch (error) {
 		console.error('Error in getVendorByUserId:', error);
@@ -185,7 +179,7 @@ export const removeVendorVehicle = async (vehicleId, vendorId) => {
 	}
 };
 
-export const findMatchingVendors = async (vehicleType, pickupProvince, dropProvince) => {
+export const findMatchingVendors = async (vehicleType) => {
 	try {
 		const [rows] = await pool.execute(
 			`SELECT DISTINCT v.id, v.business_name, v.owner_name, v.phone, v.email,

@@ -15,28 +15,26 @@ import {
 	deleteVehicle,
 	matchingVendors,
 } from '../controllers/vendorController.js';
+import { authenticate, requireRole, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
 router.get('/test', testVendorRoute);
 
-// Make sure these routes are correctly defined
-router.get('/profile', getMyVendorProfile);
-router.put('/profile', updateMyVendorProfile);
-router.post('/register', registerVendor);
-router.get('/shipments', getVendorShipments);
-router.put('/shipments/:id/accept', acceptShipment);
-router.put('/shipments/:id/start', startDelivery);
-router.put('/shipments/:id/complete', completeDelivery);
-router.put('/shipments/:id/reject', rejectShipment);
+router.get('/profile', authenticate, requireRole('vendor', 'admin'), getMyVendorProfile);
+router.put('/profile', authenticate, requireRole('vendor', 'admin'), updateMyVendorProfile);
+router.post('/register', authenticate, registerVendor);
+router.get('/shipments', authenticate, requireRole('vendor', 'admin'), getVendorShipments);
+router.put('/shipments/:id/accept', authenticate, requireRole('vendor'), acceptShipment);
+router.put('/shipments/:id/start', authenticate, requireRole('vendor'), startDelivery);
+router.put('/shipments/:id/complete', authenticate, requireRole('vendor'), completeDelivery);
+router.put('/shipments/:id/reject', authenticate, requireRole('vendor'), rejectShipment);
 
-// Vehicle CRUD
-router.get('/vehicles', getMyVehicles);
-router.post('/vehicles', addVehicle);
-router.put('/vehicles/:id/status', updateVehicleStatusCtrl);
-router.delete('/vehicles/:id', deleteVehicle);
+router.get('/vehicles', authenticate, requireRole('vendor'), getMyVehicles);
+router.post('/vehicles', authenticate, requireRole('vendor'), addVehicle);
+router.put('/vehicles/:id/status', authenticate, requireRole('vendor', 'admin'), updateVehicleStatusCtrl);
+router.delete('/vehicles/:id', authenticate, requireRole('vendor'), deleteVehicle);
 
-// Public matching endpoint
 router.get('/matching', matchingVendors);
 
 export default router;

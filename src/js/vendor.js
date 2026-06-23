@@ -51,6 +51,7 @@ function checkAuth() {
 function logout() {
 	if (confirm('Are you sure you want to logout?')) {
 		localStorage.removeItem('meroGharUser');
+		localStorage.removeItem('meroGharToken');
 		toast('Logged out successfully', 'green');
 		setTimeout(() => {
 			window.location.href = '/src/pages/login.html';
@@ -63,13 +64,13 @@ function logout() {
 // ==================================================
 
 async function fetchAPI(url, options = {}) {
-	const user = safeParse(localStorage.getItem('meroGharUser'), {});
+	const token = localStorage.getItem('meroGharToken');
 	const headers = {
 		'Content-Type': 'application/json',
 		...options.headers,
 	};
-	if (user.id) {
-		headers['X-User-Id'] = user.id.toString();
+	if (token) {
+		headers['Authorization'] = `Bearer ${token}`;
 	}
 	try {
 		const response = await fetch(`${BASEURL}${url}`, {
@@ -79,7 +80,6 @@ async function fetchAPI(url, options = {}) {
 		const data = await response.json();
 		return { ok: response.ok, ...data };
 	} catch (error) {
-		console.error('FetchAPI Error:', error);
 		return { ok: false, message: error.message };
 	}
 }
@@ -901,36 +901,29 @@ function submitSupportTicket() {
 		toast('Please fill subject and message', 'red');
 		return;
 	}
-	toast('Ticket submitted!', 'green');
-	const subEl = document.getElementById('support-subject');
-	const msgEl = document.getElementById('support-message');
-	if (subEl) subEl.value = '';
-	if (msgEl) msgEl.value = '';
+	const token = localStorage.getItem('meroGharToken');
+	fetch(`${API_BASE_URL}/api/tickets/submit`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+		body: JSON.stringify({ subject, message }),
+	})
+		.then(r => r.json())
+		.then(data => {
+			if (data.success) {
+				toast('Ticket submitted!', 'green');
+				const subEl = document.getElementById('support-subject');
+				const msgEl = document.getElementById('support-message');
+				if (subEl) subEl.value = '';
+				if (msgEl) msgEl.value = '';
+			} else {
+				toast(data.message || 'Failed to submit ticket', 'red');
+			}
+		})
+		.catch(() => toast('Network error submitting ticket', 'red'));
 }
 
-function toast(msg, color = 'gold') {
-	const colors = {
-		gold: '#f8c06a',
-		green: '#4caf7d',
-		red: '#e05e5e',
-		blue: '#5e9fe0',
-	};
-	const container = document.getElementById('toast-container');
-	if (!container) return;
-	const el = document.createElement('div');
-	el.className =
-		'bg-[#16261d] border border-[rgba(248,192,106,0.3)] rounded-lg px-4 py-3 text-sm flex items-center gap-2 mb-2';
-	var dot = document.createElement('span');
-	dot.className = 'w-1.5 h-1.5 rounded-full';
-	dot.style.background = colors[color] || colors.gold;
-	el.appendChild(dot);
-	el.appendChild(document.createTextNode(msg));
-	container.appendChild(el);
-	setTimeout(() => {
-		el.style.opacity = '0';
-		el.style.transform = 'translateX(10px)';
-		setTimeout(() => el.remove(), 200);
-	}, 2800);
+function toast(msg, color) {
+	showToast(msg, color || 'gold');
 }
 
 // ==================================================
@@ -943,6 +936,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 	await checkVendorProfile();
 	initializeToggleState();
 	setupJobFilters();
+});
+
+window.addEventListener('beforeunload', function () {
+	if (statusCheckInterval) {
+		clearInterval(statusCheckInterval);
+		statusCheckInterval = null;
+	}
 });
 
 // Expose global functions

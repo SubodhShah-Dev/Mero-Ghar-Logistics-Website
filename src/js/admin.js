@@ -46,6 +46,7 @@ function checkAuth() {
 function logout() {
 	if (confirm('Are you sure you want to logout?')) {
 		localStorage.removeItem('meroGharUser');
+		localStorage.removeItem('meroGharToken');
 		toast('Logged out successfully', 'green');
 		setTimeout(() => {
 			window.location.href = '/src/pages/login.html';
@@ -58,15 +59,14 @@ function logout() {
 // ==================================================
 
 async function fetchAPI(url, options = {}) {
-	const token = localStorage.getItem('meroGharUser');
+	const token = localStorage.getItem('meroGharToken');
 	const headers = {
 		'Content-Type': 'application/json',
 		...options.headers,
 	};
 
 	if (token) {
-		const user = safeParse(token, {});
-		headers['Authorization'] = `Bearer ${user.id}`;
+		headers['Authorization'] = `Bearer ${token}`;
 	}
 
 	try {
@@ -77,7 +77,6 @@ async function fetchAPI(url, options = {}) {
 		const data = await response.json();
 		return { ok: response.ok, ...data };
 	} catch (error) {
-		console.error('API Error:', error);
 		return { ok: false, message: error.message };
 	}
 }
@@ -419,7 +418,7 @@ function renderVendorsTable() {
             <td>${v.total_jobs || 0}</td>
             <td>⭐ ${v.rating || 0}</td>
             <td>
-                <select onchange="updateVendorStatus(${v.id}, this.value)" class="vendor-status-select" style="padding: 5px 10px; border-radius: 6px; background: var(--dark3); color: var(--text); border: 1px solid var(--bdim);">
+                <select onchange="updateVendorStatus(${v.id}, this.value)" class="vendor-status-select" style="padding: 5px 10px; border-radius: 6px; background: var(--dark3); color: var(--text); border: 1px solid var(--border-dim);">
                     <option value="${v.status}" selected disabled>${v.status}</option>
                     ${statusOptions}
                 </select>
@@ -530,9 +529,27 @@ async function submitStatusChange() {
 // OTHER ACTION FUNCTIONS
 // ==================================================
 
-async function rejectShipment(shipmentId) {
-	const reason = prompt('Enter rejection reason:');
-	if (!reason) return;
+let pendingRejectId = null;
+
+function rejectShipment(shipmentId) {
+	pendingRejectId = shipmentId;
+	document.getElementById('reject-reason').value = '';
+	document.getElementById('modal-reject').classList.add('open');
+}
+
+function confirmReject() {
+	const reason = document.getElementById('reject-reason').value.trim();
+	if (!reason) {
+		toast('Please enter a rejection reason', 'red');
+		return;
+	}
+	const id = pendingRejectId;
+	pendingRejectId = null;
+	closeModal('modal-reject');
+	rejectShipmentConfirmed(id, reason);
+}
+
+async function rejectShipmentConfirmed(shipmentId, reason) {
 	const result = await fetchAPI(`/api/admin/shipments/${shipmentId}/reject`, {
 		method: 'PUT',
 		body: JSON.stringify({ reason }),
@@ -835,27 +852,8 @@ function showNotifications() {
 // TOAST FUNCTION
 // ==================================================
 
-function toast(msg, color = 'gold') {
-	const colors = {
-		gold: '#f8c06a',
-		green: '#4caf7d',
-		red: '#e05e5e',
-		blue: '#5e9fe0',
-	};
-	const wrap = document.getElementById('toast-wrap');
-	if (!wrap) return;
-	const el = document.createElement('div');
-	el.className = 'toast';
-	var dot = document.createElement('span');
-	dot.className = 'toast-dot';
-	dot.style.background = colors[color] || colors.gold;
-	el.appendChild(dot);
-	el.appendChild(document.createTextNode(msg));
-	wrap.appendChild(el);
-	setTimeout(() => {
-		el.classList.add('out');
-		setTimeout(() => el.remove(), 220);
-	}, 2800);
+function toast(msg, color) {
+	showToast(msg, color || 'gold');
 }
 
 // ==================================================
@@ -867,14 +865,20 @@ let sparkChart, revChart;
 function drawSparkChart(days) {
 	const labels = [],
 		data = [];
-	const base = [12, 18, 9, 22, 15, 27, 19, 14, 25, 11, 20, 17, 23, 8, 16];
+	const now = new Date();
 	for (let i = days - 1; i >= 0; i--) {
-		const d = new Date();
+		const d = new Date(now);
 		d.setDate(d.getDate() - i);
 		labels.push(
 			d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
 		);
-		data.push(base[i % base.length] + Math.floor(Math.random() * 5));
+		const dayStr = d.toISOString().split('T')[0];
+		const dayBookings = BOOKINGS.filter(b => {
+			if (!b.move_date) return false;
+			const bd = new Date(b.move_date);
+			return bd.toISOString().split('T')[0] === dayStr;
+		});
+		data.push(dayBookings.length);
 	}
 	const ctx = document.getElementById('spark-chart')?.getContext('2d');
 	if (!ctx) return;
@@ -930,8 +934,21 @@ function drawRevChart() {
 	const ctx = document.getElementById('rev-chart')?.getContext('2d');
 	if (!ctx) return;
 	if (revChart) revChart.destroy();
-	const months = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
-	const vals = [280000, 310000, 295000, 340000, 380000, 420000];
+	const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+	const now = new Date();
+	const months = [];
+	const vals = [];
+	for (let i = 5; i >= 0; i--) {
+		const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+		months.push(monthNames[d.getMonth()]);
+		const monthBookings = BOOKINGS.filter(b => {
+			if (!b.move_date) return false;
+			const bd = new Date(b.move_date);
+			return bd.getMonth() === d.getMonth() && bd.getFullYear() === d.getFullYear();
+		});
+		const revenue = monthBookings.reduce((sum, b) => sum + (b.amount || 0), 0);
+		vals.push(revenue || 0);
+	}
 	revChart = new Chart(ctx, {
 		type: 'bar',
 		data: {
@@ -1081,6 +1098,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 			if (el.dataset.w) el.style.width = el.dataset.w + '%';
 		});
 	}, 400);
+	loadSettings();
 	goPage('dash');
 });
 
@@ -1100,3 +1118,43 @@ window.rejectShipment = rejectShipment;
 window.updateVendorStatus = updateVendorStatus;
 window.openAddVendor = openAddVendor;
 window.submitAddVendor = submitAddVendor;
+window.saveSettings = saveSettings;
+window.confirmReject = confirmReject;
+
+// ==================================================
+// SETTINGS
+// ==================================================
+
+async function loadSettings() {
+	try {
+		const r = await fetch(`${API_BASE_URL}/api/settings`);
+		const data = await r.json();
+		if (data.success && data.settings) {
+			if (data.settings.company_name) document.getElementById('setting-company-name').value = data.settings.company_name;
+			if (data.settings.support_email) document.getElementById('setting-support-email').value = data.settings.support_email;
+			if (data.settings.currency) document.getElementById('setting-currency').value = data.settings.currency;
+		}
+	} catch (e) {}
+}
+
+async function saveSettings() {
+	const companyName = document.getElementById('setting-company-name')?.value || '';
+	const supportEmail = document.getElementById('setting-support-email')?.value || '';
+	const currency = document.getElementById('setting-currency')?.value || 'NPR';
+	const token = localStorage.getItem('meroGharToken');
+	try {
+		const r = await fetch(`${API_BASE_URL}/api/settings`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+			body: JSON.stringify({ company_name: companyName, support_email: supportEmail, currency }),
+		});
+		const data = await r.json();
+		if (data.success) {
+			toast('Settings saved', 'green');
+		} else {
+			toast(data.message || 'Failed to save settings', 'red');
+		}
+	} catch (e) {
+		toast('Network error saving settings', 'red');
+	}
+}

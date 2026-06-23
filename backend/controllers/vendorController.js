@@ -43,42 +43,7 @@ export const getActiveVendorsList = async (req, res) => {
 
 export const getMyVendorProfile = async (req, res) => {
 	try {
-		console.log('=== getMyVendorProfile called ===');
-		console.log('Headers:', req.headers);
-		console.log('Query:', req.query);
-		console.log('Body:', req.body);
-
-		let userId = null;
-
-		// Try multiple sources for user ID
-		if (req.headers['x-user-id']) {
-			userId = req.headers['x-user-id'];
-			console.log('Found userId in x-user-id header:', userId);
-		} else if (
-			req.headers.authorization &&
-			req.headers.authorization.startsWith('Bearer ')
-		) {
-			userId = req.headers.authorization.split(' ')[1];
-			console.log('Found userId in Bearer token:', userId);
-		} else if (req.query.userId) {
-			userId = req.query.userId;
-			console.log('Found userId in query params:', userId);
-		} else if (req.body.userId) {
-			userId = req.body.userId;
-			console.log('Found userId in body:', userId);
-		}
-
-		if (!userId) {
-			console.log('No userId found in any source');
-			return res.status(401).json({
-				success: false,
-				message: 'User not authenticated - no user ID provided',
-				debug: { headers: req.headers, query: req.query },
-			});
-		}
-
-		const vendor = await getVendorByUserId(userId);
-		console.log('Vendor found:', vendor);
+		const userId = req.user.id;
 
 		if (!vendor) {
 			return res
@@ -115,14 +80,7 @@ export const getMyVendorProfile = async (req, res) => {
 
 export const updateMyVendorProfile = async (req, res) => {
 	try {
-		let userId = req.headers['x-user-id'] || req.body.userId;
-
-		if (!userId && req.headers.authorization) {
-			const authHeader = req.headers.authorization;
-			if (authHeader.startsWith('Bearer ')) {
-				userId = authHeader.split(' ')[1];
-			}
-		}
+		const userId = req.user.id;
 
 		const vendor = await getVendorByUserId(userId);
 		if (!vendor) {
@@ -249,31 +207,7 @@ export const updateVendorStatusCtrl = async (req, res) => {
 
 export const getVendorShipments = async (req, res) => {
 	try {
-		let userId = null;
-
-		// Check headers
-		if (req.headers['x-user-id']) {
-			userId = req.headers['x-user-id'];
-		}
-		// Check authorization header
-		else if (
-			req.headers.authorization &&
-			req.headers.authorization.startsWith('Bearer ')
-		) {
-			userId = req.headers.authorization.split(' ')[1];
-		}
-		// Check query parameters
-		else if (req.query.userId) {
-			userId = req.query.userId;
-		}
-
-		console.log('Getting shipments for user ID:', userId);
-
-		if (!userId) {
-			return res
-				.status(401)
-				.json({ success: false, message: 'User not authenticated' });
-		}
+		const userId = req.user.id;
 
 		const vendor = await getVendorByUserId(userId);
 		if (!vendor) {
@@ -327,32 +261,6 @@ export const completeDelivery = async (req, res) => {
 	}
 };
 
-// Add this temporary debug endpoint
-export const debugVendor = async (req, res) => {
-	try {
-		// Test database connection
-		const [result] = await pool.execute('SELECT 1 as test');
-
-		// Get all vendors
-		const [vendors] = await pool.execute('SELECT * FROM vendors');
-
-		res.json({
-			success: true,
-			dbConnection: 'ok',
-			vendorsCount: vendors.length,
-			vendors: vendors,
-			message: 'Debug endpoint working',
-		});
-	} catch (error) {
-		console.error('Debug error:', error);
-		res.status(500).json({
-			success: false,
-			error: error.message,
-			stack: error.stack,
-		});
-	}
-};
-
 // Simple test endpoint to verify route is working
 export const testVendorRoute = async (req, res) => {
 	console.log('Test vendor route hit!');
@@ -366,12 +274,7 @@ export const testVendorRoute = async (req, res) => {
 export const rejectShipment = async (req, res) => {
 	try {
 		const { id } = req.params;
-		let userId = req.headers['x-user-id'];
-		if (!userId) {
-			return res
-				.status(401)
-				.json({ success: false, message: 'User not authenticated' });
-		}
+		const userId = req.user.id;
 
 		const vendor = await getVendorByUserId(userId);
 		if (!vendor) {
@@ -410,10 +313,7 @@ export const rejectShipment = async (req, res) => {
 
 export const getMyVehicles = async (req, res) => {
 	try {
-		let userId = req.headers['x-user-id'];
-		if (!userId) {
-			return res.status(401).json({ success: false, message: 'Not authenticated' });
-		}
+		const userId = req.user.id;
 		const vendor = await getVendorByUserId(userId);
 		if (!vendor) {
 			return res.status(404).json({ success: false, message: 'Vendor not found' });
@@ -428,10 +328,7 @@ export const getMyVehicles = async (req, res) => {
 
 export const addVehicle = async (req, res) => {
 	try {
-		let userId = req.headers['x-user-id'];
-		if (!userId) {
-			return res.status(401).json({ success: false, message: 'Not authenticated' });
-		}
+		const userId = req.user.id;
 		const vendor = await getVendorByUserId(userId);
 		if (!vendor) {
 			return res.status(404).json({ success: false, message: 'Vendor not found' });
@@ -452,6 +349,10 @@ export const updateVehicleStatusCtrl = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const { status } = req.body;
+		const allowedStatuses = ['available', 'in_use', 'maintenance', 'retired'];
+		if (!allowedStatuses.includes(status)) {
+			return res.status(400).json({ success: false, message: 'Invalid vehicle status' });
+		}
 		const updated = await updateVehicleStatus(id, status);
 		if (updated) {
 			res.json({ success: true, message: 'Vehicle status updated' });
@@ -466,10 +367,7 @@ export const updateVehicleStatusCtrl = async (req, res) => {
 
 export const deleteVehicle = async (req, res) => {
 	try {
-		let userId = req.headers['x-user-id'];
-		if (!userId) {
-			return res.status(401).json({ success: false, message: 'Not authenticated' });
-		}
+		const userId = req.user.id;
 		const vendor = await getVendorByUserId(userId);
 		if (!vendor) {
 			return res.status(404).json({ success: false, message: 'Vendor not found' });
@@ -495,7 +393,7 @@ export const matchingVendors = async (req, res) => {
 		if (!vehicle_type) {
 			return res.status(400).json({ success: false, message: 'vehicle_type is required' });
 		}
-		const vendors = await findMatchingVendors(vehicle_type, pickup_province || '', drop_province || '');
+		const vendors = await findMatchingVendors(vehicle_type);
 		res.json({ success: true, vendors });
 	} catch (error) {
 		console.error('Error finding matching vendors:', error);
