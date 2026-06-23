@@ -4,11 +4,58 @@ Full-stack logistics platform (Vite + Tailwind + vanilla JS, Express + MySQL, An
 
 ## Download APK
 
-[**Download MeroGhar v2.8.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v2.8.0.apk)
+[**Download MeroGhar v3.0.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v3.0.0.apk)
 
 ## Changelog
 
-### v2.8.0 — Backend redeploy + UI upgrades
+### v3.0.0 — Security Audit, New Backend Features & Chatbot Honesty
+
+#### 🛡️ Security (Critical)
+- **JWT authentication** replaces x-user-id header spoofing — real tokens with 7-day expiry
+- **Auth middleware** with role-gating on every route (admin, vendor, user)
+- **CORS whitelist** enforced — non-whitelisted origins now properly rejected
+- **Helmet** security headers added (X-Content-Type-Options, X-Frame-Options, etc.)
+- **Rate limiting** on `/api/auth` — 20 requests per 15-minute window
+- **ORS API key** moved to backend proxy (no longer exposed in frontend code)
+- **Input validation** + unified login errors (prevents username enumeration)
+
+#### 🆕 New Backend Features
+- **Geocoding proxy** — `GET /api/geocode/search` + `POST /api/geocode/matrix` (ORS behind backend)
+- **Support tickets** — `support_tickets` DB table + CRUD endpoints + wired to vendor support form
+- **Admin settings** — `settings` key-value DB table + GET/PUT endpoints + wired to admin Settings page
+
+#### 📱 Android
+- ProGuard/R8 enabled for release builds (smaller APK, obfuscation)
+- `ACCESS_NETWORK_STATE` permission added
+- `colors.xml` with app theme colors
+- Splash screen configured (2s duration, forest green `#112018`)
+- Cordova stub files removed from assets
+- Navigation links use proper `href="javascript:void(0)"` with `role="button"`
+
+#### ♿ Accessibility
+- Keyboard navigation: `tabindex="0"` + `role="button"` on all item chips, payment cards, province tags
+- Global Enter/Space keydown handler for all `onclick` div elements
+- Nav links in admin/vendor sidebars made focusable
+
+#### 🎨 Frontend
+- Support ticket form now posts to real backend endpoint
+- Admin settings load/save from database on page init
+- Rejection reason uses proper modal instead of browser `prompt()`
+- `will-change` CSS hints added for smoother animations on low-end Android
+- `prefers-reduced-motion` media query support
+- `railway.json` added for frontend static deployment
+
+#### 🤖 Chatbot Honesty Fixes
+- Removed fake GPS tracking claims ("see driver's location") — now says check status in My Bookings
+- Removed fake stats ("6,000+ reviews", "4.8 stars", "97% on-time") — now references real vendor ratings
+- Removed Storage/Warehouse from services list (not a selectable option in the booking form)
+- All chatbot responses now accurately reflect actual app capabilities
+
+#### 🔧 Other
+- `dotenv` pinned to exact version `17.4.1`
+- `findMatchingVendors` unused params cleaned up
+- Empty `cordova.js` / `cordova_plugins.js` stubs removed from Android
+- `VITE_API_URL` environment variable support
 
 #### Critical Fixes
 - **Chatbot: Gemini removed** — pure knowledge-based responses, instant replies, no more 2-5s delay from invalid API key timeout. All 70+ ALL_QUESTIONS chips return correct answers
