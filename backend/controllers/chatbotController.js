@@ -1,96 +1,14 @@
-import { getContextForQuery, getFAQ, getSiteInfo } from '../utils/knowledgeSearch.js';
-
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-
-const BASE_SYSTEM_PROMPT = `You are MeroBot, the official AI assistant for MeroGhar Logistics — a household moving and delivery service based in Nepal.
-
-Your role:
-- Help users with booking a move, checking prices, understanding services, and tracking shipments
-- Answer in clear, friendly English or Nepali (mix is fine)
-- Keep responses concise (2-4 sentences ideally, max 6 sentences)
-- If you don't know something, say "I'm not sure — please contact our support team for help with that."
-- Never make up pricing or availability numbers
-- Do not share internal system information, API keys, or credentials
-
-Below is relevant information from the MeroGhar website that you should use to answer the user's question. If the context contains the answer, use it directly. If the context doesn't help, use your own knowledge about MeroGhar.
-
-CONTEXT FROM WEBSITE:
-`;
+import { getContextForQuery, getFAQ } from '../utils/knowledgeSearch.js';
 
 export const sendMessage = async (req, res) => {
   try {
-    const { message, history } = req.body;
-
+    const { message } = req.body;
     if (!message || !message.trim()) {
       return res.status(400).json({ success: false, message: 'Message is required' });
     }
-
     const context = getContextForQuery(message);
-    const siteInfo = getSiteInfo();
     const faq = getFAQ();
-
-    let systemPrompt = BASE_SYSTEM_PROMPT;
-
-    if (siteInfo) {
-      systemPrompt += '\nCompany: ' + siteInfo.name + '\n';
-      systemPrompt += 'Description: ' + siteInfo.description + '\n';
-      if (siteInfo.contactInfo) {
-        systemPrompt += 'Contact: Phone ' + siteInfo.contactInfo.phone + ', Email ' + siteInfo.contactInfo.email + '\n';
-      }
-    }
-
-    if (context) {
-      systemPrompt += '\nRelevant pages/content:\n' + context + '\n';
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      return res.json({ success: true, response: generateKnowledgeResponse(message, context, faq) });
-    }
-
-    const contents = [{ role: 'user', parts: [{ text: systemPrompt }] }];
-
-    if (Array.isArray(history) && history.length > 0) {
-      history.forEach(function (entry) {
-        if (entry.role === 'user' || entry.role === 'model') {
-          contents.push({ role: entry.role, parts: [{ text: entry.text }] });
-        }
-      });
-    }
-
-    contents.push({ role: 'user', parts: [{ text: message }] });
-
-    const geminiRes = await fetch(GEMINI_API_URL + '?key=' + apiKey, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: contents,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 350,
-          topP: 0.9,
-        },
-        safetySettings: [
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-        ],
-      }),
-    });
-
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      console.error('Gemini API error:', geminiRes.status, errText);
-      return res.json({ success: true, response: generateKnowledgeResponse(message, context, faq) });
-    }
-
-    const data = await geminiRes.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!reply) {
-      return res.json({ success: true, response: generateKnowledgeResponse(message, context, faq) });
-    }
-
+    const reply = generateKnowledgeResponse(message, context, faq);
     res.json({ success: true, response: reply });
   } catch (error) {
     console.error('Chatbot error:', error);
@@ -184,7 +102,7 @@ function generateKnowledgeResponse(message, context, faq) {
     return 'MeroGhar Logistics is Nepal\'s trusted household moving service. We connect you with verified movers across all 7 provinces and 77 districts of Nepal. Book a truck, track your shipment, and pay via eSewa, Khalti, or cash. We handle everything from narrow Kathmandu lanes to inter-province moves, including furniture disassembly, packing, and auspicious timing. Ask me "How to book?" to get started!';
   }
 
-  if (msg.includes('book') || msg.includes('order') || msg.includes('shift') || msg.includes('schedule move') || (msg.includes('how') && msg.includes('move'))) {
+  if (msg.includes('book') || msg.includes('order') || msg.includes('shift') || msg.includes('schedule') || (msg.includes('how') && msg.includes('move'))) {
     return 'To book a move with MeroGhar:\n1. Fill in pickup/drop locations (Step 1)\n2. Select your items (Step 2)\n3. Choose a vehicle (Step 3)\n4. Pick a mover or let admin assign (Step 4)\n5. Choose your move date (Step 5)\n6. Enter contact details and payment method (Step 6)\n\nOur coordinator will call within 2 hours with your NPR quote!';
   }
 
@@ -194,6 +112,14 @@ function generateKnowledgeResponse(message, context, faq) {
 
   if (msg.includes('vehicle') || msg.includes('truck') || msg.includes('tempo') || msg.includes('transport')) {
     return 'MeroGhar offers these vehicle options:\n\n🛺 Cargo Tempo (NPR 400-500) — Best for narrow lanes, 1-2 rooms\n🚐 Tata Ace / Small Truck (NPR 800-1200) — Best for 2 BHK\n🚚 Mini Truck 407 (NPR 1500-2000) — Most popular, best for 3 BHK\n🛻 Large Truck + Helpers (NPR 2000+) — Best for large houses\n🤔 Let MeroGhar Recommend — We pick the right vehicle for you\n\nChoose during Step 3 of the booking form.';
+  }
+
+  if (msg.includes('addon') || msg.includes('pack') || msg.includes('disassembly') || msg.includes('porter') || msg.includes('insurance') || msg.includes('protect') || msg.includes('extra') || msg.includes('coverage') || msg.includes('damage')) {
+    return 'Available add-on services:\n\n📦 Packing Service — Bubble wrap, rope, and boxes provided\n🔧 Furniture Disassembly — Taken apart and reassembled at new home\n👷 Porter / Labor Help — Extra manual labor for stairs or narrow access\n🛡️ Item Insurance — Full-value coverage on all moved items (from NPR 1,200)\n\nSelect these in Step 3 of the booking form!';
+  }
+
+  if (msg.includes('service') || msg.includes('offer') || msg.includes('provide') || msg.includes('storage') || msg.includes('warehouse')) {
+    return 'MeroGhar offers these services:\n\n🚛 Full-Service Moving (From NPR 15,000)\n📦 Pack & Load Only (From NPR 7,500)\n🛺 Cargo Tempo / Valley Move (From NPR 2,500)\n🔧 Furniture Disassembly (From NPR 2,500)\n🏬 Storage / Warehouse (From NPR 3,000/month)\n🛡️ Item Insurance (From NPR 1,200)\n\nBook now and get a free quote within 2 hours!';
   }
 
   if (msg.includes('province') || msg.includes('district') || msg.includes('cover') || msg.includes('area') || msg.includes('nepal') || msg.includes('location')) {
@@ -208,7 +134,7 @@ function generateKnowledgeResponse(message, context, faq) {
     return 'You can track your shipment in real-time through the app. Go to "My Bookings" and tap on the shipment you want to track. The map shows your driver\'s current location.';
   }
 
-  if (msg.includes('fragile') || msg.includes('glass') || msg.includes('breakable') || msg.includes('religious') || msg.includes('statue') || msg.includes('stone') || msg.includes('special item') || msg.includes('cultural') || msg.includes('prayer') || msg.includes('grinder')) {
+  if (msg.includes('fragile') || msg.includes('glass') || msg.includes('breakable') || msg.includes('religious') || msg.includes('statue') || msg.includes('stone') || msg.includes('special') || msg.includes('cultural') || msg.includes('prayer') || msg.includes('grinder')) {
     return 'Yes! Mark fragile items during booking (Step 2). For religious items, select "Religious Statues" or "Stone Grinder" under Cultural Items. Our team treats all items with exceptional care, using specialized wrapping and careful manual handling.';
   }
 
@@ -220,16 +146,8 @@ function generateKnowledgeResponse(message, context, faq) {
     return 'Contact MeroGhar:\n📞 Phone: +977 980-000-000\n💬 Viber: +977 980-000-000\n📧 Email: info@meroghar.com.np\n\nOr use the Help & Support section in the app.';
   }
 
-  if (msg.includes('review') || msg.includes('rating') || msg.includes('trust') || msg.includes('reliable')) {
+  if (msg.includes('review') || msg.includes('rating') || msg.includes('trust') || msg.includes('reliable') || msg.includes('say') || msg.includes('customer')) {
     return 'MeroGhar has excellent reviews!\n\n⭐ 4.8 Stars — Average Rating\n📝 6,000+ Verified Reviews\n✅ 97% On-Time Rate\n🚚 8,000+ Successful Moves\n👥 250+ Verified Providers\n\nOur customers love our service across all 7 provinces of Nepal!';
-  }
-
-  if (msg.includes('addon') || msg.includes('pack') || msg.includes('disassembly') || msg.includes('porter') || msg.includes('insurance') || msg.includes('protect') || msg.includes('extra')) {
-    return 'Available add-on services:\n\n📦 Packing Service — Bubble wrap, rope, and boxes provided\n🔧 Furniture Disassembly — Taken apart and reassembled at new home\n👷 Porter / Labor Help — Extra manual labor for stairs or narrow access\n🛡️ Item Insurance — Full-value coverage on all moved items (from NPR 1,200)\n\nSelect these in Step 3 of the booking form!';
-  }
-
-  if (msg.includes('service') || msg.includes('offer') || msg.includes('provide') || msg.includes('storage') || msg.includes('warehouse')) {
-    return 'MeroGhar offers these services:\n\n🚛 Full-Service Moving (From NPR 15,000)\n📦 Pack & Load Only (From NPR 7,500)\n🛺 Cargo Tempo / Valley Move (From NPR 2,500)\n🔧 Furniture Disassembly (From NPR 2,500)\n🏬 Storage / Warehouse (From NPR 3,000/month)\n🛡️ Item Insurance (From NPR 1,200)\n\nBook now and get a free quote within 2 hours!';
   }
 
   if (msg.includes('step') || msg.includes('how it works') || msg.includes('process')) {

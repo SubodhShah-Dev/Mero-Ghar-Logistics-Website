@@ -256,16 +256,13 @@
       }
       return 'Available vehicles:\n' + vLines.join('\n') + '\n\nNeed help choosing? Use "Let MeroGhar Recommend" in the form.';
     }
-    if (m.includes('fragile') || m.includes('glass') || m.includes('breakable') || m.includes('religious') || m.includes('statue') || m.includes('stone') || m.includes('special item') || m.includes('cultural') || m.includes('prayer') || m.includes('grinder')) {
+    if (m.includes('fragile') || m.includes('glass') || m.includes('breakable') || m.includes('religious') || m.includes('statue') || m.includes('stone') || m.includes('special') || m.includes('cultural') || m.includes('prayer') || m.includes('grinder')) {
       return 'Yes! Mark fragile items during booking (Step 2). Select "Religious Statues" or "Stone Grinder" under Cultural Items. Our team handles everything with special care.';
     }
     if (m.includes('contact') || m.includes('support') || m.includes('phone') || m.includes('viber') || m.includes('email')) {
       return 'Contact MeroGhar:\n📞 ' + KNOWLEDGE.site.phone + '\n💬 Viber: ' + KNOWLEDGE.site.phone + '\n📧 ' + KNOWLEDGE.site.email + '\n\nOr use the Help section in the app.';
     }
-    if (m.includes('province') || m.includes('district') || m.includes('cover') || m.includes('area') || m.includes('nepal') || m.includes('location')) {
-      return 'MeroGhar covers all 7 provinces of Nepal:\n' + KNOWLEDGE.provinces.join('\n') + '\n\nAll 77 districts covered!';
-    }
-    if (m.includes('insur') || m.includes('protect') || m.includes('damage')) {
+    if (m.includes('insur') || m.includes('protect') || m.includes('damage') || m.includes('coverage')) {
       return 'Item Insurance is available from NPR 1,200. Full-replacement coverage on all items moved. Select it as an add-on in Step 3.';
     }
     if (m.includes('addon') || m.includes('pack') || m.includes('disassembly') || m.includes('porter') || m.includes('labor') || m.includes('helper') || m.includes('extra')) {
@@ -274,6 +271,12 @@
         addonLines.push(KNOWLEDGE.addons[ai].name + ' — ' + KNOWLEDGE.addons[ai].desc);
       }
       return 'Add-on services:\n' + addonLines.join('\n');
+    }
+    if (m.includes('rating') || m.includes('review') || m.includes('trust') || m.includes('reliable') || m.includes('say') || m.includes('customer')) {
+      return 'MeroGhar has 4.8 stars from 6,000+ verified reviews. 97% on-time rate with 250+ verified providers across Nepal.';
+    }
+    if (m.includes('province') || m.includes('district') || m.includes('cover') || m.includes('area') || m.includes('nepal') || m.includes('location')) {
+      return 'MeroGhar covers all 7 provinces of Nepal:\n' + KNOWLEDGE.provinces.join('\n') + '\n\nAll 77 districts covered!';
     }
     if (m.includes('service') || m.includes('offer') || m.includes('provide') || m.includes('storage') || m.includes('warehouse')) {
       var sLines = [];
@@ -284,9 +287,6 @@
     }
     if (m.includes('step') || m.includes('form') || m.includes('process')) {
       return KNOWLEDGE.howItWorks.join('\n');
-    }
-    if (m.includes('rating') || m.includes('review') || m.includes('trust') || m.includes('reliable')) {
-      return 'MeroGhar has 4.8 stars from 6,000+ verified reviews. 97% on-time rate with 250+ verified providers across Nepal.';
     }
 
     for (var fi = 0; fi < KNOWLEDGE.faq.length; fi++) {
@@ -481,12 +481,11 @@
     isSending = true;
     showTyping();
 
-    console.log('[MeroBot] Sending:', text);
     var url = getBaseUrl() + '/api/chatbot/message';
     fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, history: chatHistory.slice(-10) }),
+      body: JSON.stringify({ message: text }),
     })
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -495,7 +494,6 @@
       .then(function (data) {
         hideTyping();
         isSending = false;
-        console.log('[MeroBot] Response:', data);
         var reply = data.response || data.reply || data.message || getLocalFallback(text);
         addMessage(reply, 'bot');
         chatHistory.push({ role: 'model', text: reply });
@@ -553,12 +551,90 @@
     }
   }
 
+  function createGoTopBtn() {
+    if (document.getElementById('mg-gotop-btn')) return;
+    var btn = document.createElement('div');
+    btn.id = 'mg-gotop-btn';
+    btn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0b1510" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>';
+    btn.style.cssText = 'position:fixed;bottom:90px;right:20px;z-index:9996;width:44px;height:44px;border-radius:50%;background:#f8c06a;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s ease,transform 0.2s ease';
+    btn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    document.body.appendChild(btn);
+    var ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(function () {
+        var show = window.scrollY > 300;
+        btn.style.opacity = show ? '1' : '0';
+        btn.style.pointerEvents = show ? 'auto' : 'none';
+        btn.style.transform = show ? 'scale(1)' : 'scale(0.8)';
+        ticking = false;
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
+  function makeDraggable() {
+    var btn = document.getElementById('mg-chat-btn');
+    var panel = document.getElementById('mg-chat-panel');
+    if (!btn) return;
+    var startX, startY, origX, origY, dragging = false;
+    function onStart(e) {
+      var touch = e.touches ? e.touches[0] : e;
+      var rect = btn.getBoundingClientRect();
+      startX = touch.clientX;
+      startY = touch.clientY;
+      origX = rect.left;
+      origY = rect.top;
+      btn.style.transition = 'none';
+      dragging = false;
+    }
+    function onMove(e) {
+      if (!startX) return;
+      var touch = e.touches ? e.touches[0] : e;
+      var dx = touch.clientX - startX;
+      var dy = touch.clientY - startY;
+      if (!dragging && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) dragging = true;
+      if (!dragging) return;
+      e.preventDefault();
+      var newLeft = Math.max(0, Math.min(window.innerWidth - 56, origX + dx));
+      var newTop = Math.max(0, Math.min(window.innerHeight - 56, origY + dy));
+      btn.style.left = newLeft + 'px';
+      btn.style.top = newTop + 'px';
+      btn.style.bottom = 'auto';
+      btn.style.right = 'auto';
+      if (panel) {
+        panel.style.left = Math.max(0, Math.min(window.innerWidth - 380, newLeft + 56 - 360 + ((360 - 56) / 2))) + 'px';
+        panel.style.top = (newTop - 488) + 'px';
+        if (parseInt(panel.style.top) < 0) panel.style.top = (newTop + 64) + 'px';
+        panel.style.bottom = 'auto';
+        panel.style.right = 'auto';
+      }
+    }
+    function onEnd() {
+      if (dragging) {
+        btn.style.transition = 'transform 0.2s ease';
+      }
+      startX = startY = origX = origY = null;
+      dragging = false;
+    }
+    btn.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
+    btn.addEventListener('mousedown', onStart);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+  }
+
   function init() {
     if (typeof document === 'undefined') return;
     var ready = function () {
       injectStyles();
       createWidget();
       bindEvents();
+      createGoTopBtn();
+      setTimeout(makeDraggable, 500);
     };
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
       setTimeout(ready, 2000);

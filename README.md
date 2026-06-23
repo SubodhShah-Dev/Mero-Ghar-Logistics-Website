@@ -4,9 +4,21 @@ Full-stack logistics platform (Vite + Tailwind + vanilla JS, Express + MySQL, An
 
 ## Download APK
 
-[**Download MeroGhar v2.7.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v2.7.0.apk)
+[**Download MeroGhar v2.8.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v2.8.0.apk)
 
 ## Changelog
+
+### v2.8.0 — Backend redeploy + UI upgrades
+
+#### Critical Fixes
+- **Chatbot: Gemini removed** — pure knowledge-based responses, instant replies, no more 2-5s delay from invalid API key timeout. All 70+ ALL_QUESTIONS chips return correct answers
+- **Payment: "Failed to create shipment" fixed** — Railway was running old code with 40 columns vs 39 VALUES mismatch in INSERT query. Redeployed with fixed 41-column INSERT matching the database
+- **My Bookings: Network error fixed** — Railway backend was missing the `GET /api/shipment/email/:email` route. Frontend now gets proper shipment data instead of 404 → "Network error"
+
+#### UI Improvements
+- **Login button removed** from homepage CTA banner (bottom of page)
+- **Go-to-Top button** — floating saffron arrow at bottom-right (above chatbot), appears after scrolling 300px
+- **Chatbot button is draggable** — long-press and drag to reposition anywhere on screen; panel follows
 
 ### v2.7.0 — Update dismiss fix + Chatbot fallback fixes
 
