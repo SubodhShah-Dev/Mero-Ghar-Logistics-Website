@@ -4,9 +4,17 @@ Full-stack logistics platform (Vite + Tailwind + vanilla JS, Express + MySQL, An
 
 ## Download APK
 
-[**Download MeroGhar v2.4.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v2.4.0.apk)
+[**Download MeroGhar v2.5.0 APK**](https://github.com/SubodhShah-Dev/Mero-Ghar-Logistic/releases/latest/download/MeroGhar-v2.5.0.apk)
 
 ## Changelog
+
+### v2.5.0 — Knowledge-Backed MeroBot Chatbot
+- **Knowledge-Backed Answers** — MeroBot now searches the entire site content (all 7 HTML pages) to answer questions instead of using hardcoded replies. Extracts 161 searchable knowledge chunks covering FAQ, services, provinces, vehicle types, booking steps, reviews, and more
+- **Topic-Specific Direct Responses** — instant answers for 15+ topics: booking instructions, pricing ranges, vehicle types, province coverage, payment methods, fragile/religious item handling, auspicious timing, add-on services, customer reviews, contact info
+- **Offline Fallback** — `src/js/chatbot.js` embeds a compressed knowledge base so the bot answers site questions even without network connectivity
+- **Gemini Integration Enhanced** — backend injects relevant site context into Gemini 1.5 Flash prompts for more accurate AI answers
+- **Build Tooling** — `npm run build:knowledge` regenerates the knowledge base from HTML; `npm run build:all` runs knowledge + Vite + pages in one command
+- **New files:** `scripts/build-knowledge.mjs`, `backend/utils/knowledgeSearch.js`, `backend/knowledge-base.json`
 
 ### v2.4.0 — Marketplace model: customers pick vendors directly
 - **Marketplace flow** — booking form now includes a **Mover Selection** step (fp4) after vehicle type: matching vendors (by vehicle type + province) are fetched from the API and displayed as radio cards; customer picks their mover directly
@@ -89,7 +97,8 @@ npm install
 ## Build APK
 
 ```bash
-npm run build && npx cap sync android
+npm run build:all   # regenerates knowledge base + builds Vite + copies pages
+npx cap sync android
 JAVA_HOME=/path/to/jdk21 ./gradlew assembleDebug   # from android/
 ```
 
